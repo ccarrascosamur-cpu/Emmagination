@@ -1,0 +1,2 @@
+build_command: npm run build
+deploy_command: npx wrangler pages deploy dist --project-name=emmagination
