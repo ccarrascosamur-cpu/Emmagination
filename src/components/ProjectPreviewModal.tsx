@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
-import { X, ExternalLink, Loader2 } from 'lucide-react';
+import { X, ExternalLink, Monitor } from 'lucide-react';
 
 interface Project {
   id: number;
@@ -30,34 +30,31 @@ export default function ProjectPreviewModal({
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [iframeError, setIframeError] = useState(false);
-  const tlRef = useRef<gsap.core.Timeline | null>(null);
 
   useEffect(() => {
     if (isOpen && project) {
       setIsLoading(true);
       setIframeError(false);
 
-      // Opening animation
       const tl = gsap.timeline();
-      tlRef.current = tl;
 
       tl.fromTo(
         overlayRef.current,
         { opacity: 0 },
-        { opacity: 1, duration: 0.3, ease: 'power2.out' }
+        { opacity: 1, duration: 0.35, ease: 'power2.out' }
       );
 
       tl.fromTo(
         containerRef.current,
-        { opacity: 0, scale: 0.9, y: 30 },
+        { opacity: 0, scale: 0.92, y: 40 },
         {
           opacity: 1,
           scale: 1,
           y: 0,
-          duration: 0.5,
+          duration: 0.55,
           ease: 'power3.out',
         },
-        '-=0.15'
+        '-=0.2'
       );
     }
   }, [isOpen, project]);
@@ -69,9 +66,9 @@ export default function ProjectPreviewModal({
 
     tl.to(containerRef.current, {
       opacity: 0,
-      scale: 0.95,
+      scale: 0.96,
       y: 20,
-      duration: 0.2,
+      duration: 0.25,
       ease: 'power2.in',
     });
 
@@ -82,17 +79,12 @@ export default function ProjectPreviewModal({
         duration: 0.2,
         ease: 'power2.in',
       },
-      '-=0.1'
+      '-=0.15'
     );
   };
 
   const handleIframeLoad = () => {
     setIsLoading(false);
-  };
-
-  const handleIframeError = () => {
-    setIsLoading(false);
-    setIframeError(true);
   };
 
   // Close on escape key
@@ -121,95 +113,116 @@ export default function ProjectPreviewModal({
   if (!isOpen || !project) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center">
+    <div className="fixed inset-0 z-[200] flex items-start justify-center pt-8 pb-8 px-4">
       {/* Overlay */}
       <div
         ref={overlayRef}
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/85 backdrop-blur-md"
         onClick={handleClose}
         style={{ opacity: 0 }}
       />
 
-      {/* Modal Container */}
+      {/* Modal Container - Full width like a browser window */}
       <div
         ref={containerRef}
-        className="relative z-10 w-full mx-4 flex flex-col bg-[#0F172A] rounded-2xl overflow-hidden shadow-2xl"
+        className="relative z-10 w-full flex flex-col bg-[#0B0F19] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
         style={{
           opacity: 0,
-          maxWidth: '1200px',
-          maxHeight: '90vh',
-          height: '85vh',
+          maxWidth: '1400px',
+          height: 'calc(100vh - 64px)',
         }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-white/10 bg-[#0F172A]">
-          <div className="flex items-center gap-4">
+        {/* Browser-style Header */}
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08] bg-[#0F1623]">
+          <div className="flex items-center gap-3">
+            {/* Window dots */}
+            <div className="flex gap-1.5 mr-3">
+              <div className="w-3 h-3 rounded-full bg-[#FF5F57]" />
+              <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
+              <div className="w-3 h-3 rounded-full bg-[#28C840]" />
+            </div>
+            <Monitor size={16} className="text-white/40" />
             <h3
-              className="text-white text-lg font-semibold"
+              className="text-white/90 text-sm font-medium"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
               {project.title}
             </h3>
             <span
-              className="px-3 py-1 bg-white/10 rounded-full text-white/60 text-xs"
+              className="px-2.5 py-0.5 bg-white/[0.06] rounded-full text-white/40 text-[10px]"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
               {project.category}
             </span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <a
               href={project.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2 bg-[#7C3AED] hover:bg-[#CC26D3] text-white text-sm rounded-full transition-colors duration-300"
+              className="flex items-center gap-2 px-4 py-2 bg-[#7C3AED] hover:bg-[#6D28D9] text-white text-xs rounded-lg transition-colors duration-200"
               style={{ fontFamily: 'var(--font-body)' }}
             >
-              <ExternalLink size={14} />
+              <ExternalLink size={13} />
               Visitar sitio
             </a>
             <button
               onClick={handleClose}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors duration-300"
+              className="p-2 rounded-lg hover:bg-white/10 text-white/60 hover:text-white transition-colors duration-200"
             >
-              <X size={20} />
+              <X size={18} />
             </button>
+          </div>
+        </div>
+
+        {/* URL Bar */}
+        <div className="px-5 py-2 border-b border-white/[0.06] bg-[#0F1623] flex items-center gap-3">
+          <div className="flex-1 flex items-center gap-2 px-3 py-1.5 bg-black/30 rounded-lg border border-white/[0.06]">
+            <div className="w-3 h-3 rounded-full bg-green-500/60" />
+            <span
+              className="text-white/40 text-xs truncate"
+              style={{ fontFamily: 'var(--font-mono)' }}
+            >
+              {project.url}
+            </span>
           </div>
         </div>
 
         {/* Iframe Container */}
         <div className="flex-1 relative bg-black overflow-hidden">
           {isLoading && !iframeError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F172A]">
-              <Loader2 size={40} className="text-[#7C3AED] animate-spin mb-4" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0B0F19]">
+              <div className="relative">
+                <div className="w-12 h-12 border-2 border-[#7C3AED]/20 border-t-[#7C3AED] rounded-full animate-spin" />
+              </div>
               <p
-                className="text-white/60 text-sm"
+                className="text-white/40 text-sm mt-5"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
-                Cargando {project.title}...
+                Cargando preview...
               </p>
             </div>
           )}
 
           {iframeError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0F172A] px-8">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0B0F19] px-8">
               <img
                 src={project.image}
                 alt={project.title}
-                className="w-full max-w-2xl h-auto rounded-lg mb-6 object-cover"
-                style={{ maxHeight: '50vh' }}
+                className="w-full max-w-3xl rounded-xl mb-6 object-cover shadow-2xl"
+                style={{ maxHeight: '55vh' }}
               />
               <p
-                className="text-white/60 text-center mb-4"
+                className="text-white/50 text-center mb-5"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
-                Este sitio no permite previsualización en iframe.
+                Este sitio no permite previsualización directa.
               </p>
               <a
                 href={project.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 bg-[#7C3AED] hover:bg-[#CC26D3] text-white rounded-full transition-colors duration-300"
+                className="flex items-center gap-2 px-6 py-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-full transition-colors duration-200"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
                 <ExternalLink size={16} />
@@ -224,28 +237,27 @@ export default function ProjectPreviewModal({
               className="w-full h-full border-0"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
               onLoad={handleIframeLoad}
-              onError={handleIframeError}
               style={{
                 opacity: isLoading ? 0 : 1,
-                transition: 'opacity 0.3s ease',
+                transition: 'opacity 0.4s ease',
               }}
             />
           )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-white/10 bg-[#0F172A]">
+        <div className="px-5 py-3 border-t border-white/[0.06] bg-[#0F1623]">
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className="text-white/40 text-xs mr-2"
+              className="text-white/30 text-[10px] uppercase tracking-wider mr-1"
               style={{ fontFamily: 'var(--font-mono)' }}
             >
-              SERVICIOS:
+              Servicios
             </span>
             {project.services.map((service, i) => (
               <span
                 key={i}
-                className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-white/70 text-xs"
+                className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.06] rounded-md text-white/50 text-[11px]"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
                 {service}
