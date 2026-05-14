@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Palette, Code2, Box, Zap } from 'lucide-react';
+import { Palette, Code2, Box, Zap, ArrowUpRight } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -36,23 +36,7 @@ const services = [
   },
 ];
 
-// Component for the illusion text effect
-function IllusionText({ word }: { word: string }) {
-  const letters = word.split('');
 
-  return (
-    <span className="illusion-word" style={{ '--t': letters.length } as React.CSSProperties}>
-      {letters.map((letter, i) => (
-        <span
-          key={i}
-          className={`illusion-letter ${i > 0 ? `l-${i + 1}` : ''}`}
-        >
-          {letter}
-        </span>
-      ))}
-    </span>
-  );
-}
 
 export default function Approach() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -109,7 +93,7 @@ export default function Approach() {
       id="approach"
       className="relative w-full"
       style={{
-        backgroundColor: '#f2efe6',
+        backgroundColor: '#ffffff',
         padding: '120px 0',
       }}
     >
@@ -131,7 +115,16 @@ export default function Approach() {
           >
             Diseño,{' '}
             <span style={{ color: '#7C3AED' }}>Branding</span>,{' '}
-            <IllusionText word="CODE" /> y{' '}
+            <span
+              className="inline-block relative"
+              style={{
+                color: 'transparent',
+                WebkitTextStroke: '2px #382B8F',
+              }}
+            >
+              Code
+            </span>{' '}
+            y{' '}
             <span style={{ color: '#CC26D3' }}>Motion</span>
           </h2>
           <p
@@ -198,8 +191,16 @@ export default function Approach() {
                   ))}
                 </div>
 
-                {/* Hover accent line */}
-                <div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-[#382B8F] via-[#7C3AED] to-[#CC26D3] transform scaleX-0 group-hover:scale-x-100 transition-transform duration-500 origin-left" />
+                {/* Arrow link */}
+                <div className="mt-6 flex items-center gap-2 text-[#7C3AED] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                  <span
+                    className="text-sm font-medium"
+                    style={{ fontFamily: 'var(--font-body)' }}
+                  >
+                    Ver más
+                  </span>
+                  <ArrowUpRight size={16} />
+                </div>
               </div>
             );
           })}
