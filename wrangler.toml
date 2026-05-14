@@ -1,10 +1,3 @@
 name = "emmagination"
 compatibility_date = "2024-01-01"
-
-# Cloudflare Pages configuration
-[site]
-bucket = "./dist"
-
-# Build settings
-[build]
-command = "npm run build"
+pages_build_output_dir = "./dist"
