@@ -1,8 +1,11 @@
+export interface Env {
+  ASSETS: {
+    fetch: (request: Request) => Promise<Response>;
+  };
+}
+
 export default {
-  async fetch(request: Request): Promise<Response> {
-    const url = new URL(request.url);
-    
-    // Serve static assets from the dist directory
-    return fetch(new Request(url.toString(), request));
+  async fetch(request: Request, env: Env): Promise<Response> {
+    return env.ASSETS.fetch(request);
   },
 };
