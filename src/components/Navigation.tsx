@@ -32,21 +32,13 @@ export default function Navigation({ lenisRef }: NavigationProps) {
       }`}
       style={{ zIndex: 100 }}
     >
-      {/* Logo */}
-      <div className="flex items-center gap-3">
+      {/* Isotipo */}
+      <div className="flex items-center">
         <img
-          src="/images/emmagination-logo-blue.png"
+          src="/images/isotipo.png"
           alt="EMMAGINATION"
           className="h-10 w-auto object-contain"
         />
-        <div className="hidden sm:block">
-          <span
-            className="text-white text-lg font-semibold tracking-tight"
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            EMMAGINATION
-          </span>
-        </div>
       </div>
 
       {/* Navigation Links */}
