@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { X, ExternalLink, Monitor } from 'lucide-react';
 
@@ -27,15 +27,8 @@ export default function ProjectPreviewModal({
 }: ProjectPreviewModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [iframeError, setIframeError] = useState(false);
-
   useEffect(() => {
     if (isOpen && project) {
-      setIsLoading(true);
-      setIframeError(false);
-
       const tl = gsap.timeline();
 
       tl.fromTo(
@@ -83,10 +76,6 @@ export default function ProjectPreviewModal({
     );
   };
 
-  const handleIframeLoad = () => {
-    setIsLoading(false);
-  };
-
   // Close on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -113,7 +102,7 @@ export default function ProjectPreviewModal({
   if (!isOpen || !project) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-start justify-center pt-8 pb-8 px-4">
+    <div className="fixed inset-0 z-[200] flex items-start justify-center pt-6 pb-6 px-4">
       {/* Overlay */}
       <div
         ref={overlayRef}
@@ -122,18 +111,18 @@ export default function ProjectPreviewModal({
         style={{ opacity: 0 }}
       />
 
-      {/* Modal Container - Full width like a browser window */}
+      {/* Modal Container */}
       <div
         ref={containerRef}
         className="relative z-10 w-full flex flex-col bg-[#0B0F19] rounded-2xl overflow-hidden shadow-2xl border border-white/10"
         style={{
           opacity: 0,
-          maxWidth: '1400px',
-          height: 'calc(100vh - 64px)',
+          maxWidth: '1200px',
+          maxHeight: 'calc(100vh - 48px)',
         }}
       >
         {/* Browser-style Header */}
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08] bg-[#0F1623]">
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.08] bg-[#0F1623] shrink-0">
           <div className="flex items-center gap-3">
             {/* Window dots */}
             <div className="flex gap-1.5 mr-3">
@@ -175,94 +164,50 @@ export default function ProjectPreviewModal({
           </div>
         </div>
 
-        {/* URL Bar */}
-        <div className="px-5 py-2 border-b border-white/[0.06] bg-[#0F1623] flex items-center gap-3">
-          <div className="flex-1 flex items-center gap-2 px-3 py-1.5 bg-black/30 rounded-lg border border-white/[0.06]">
-            <div className="w-3 h-3 rounded-full bg-green-500/60" />
-            <span
-              className="text-white/40 text-xs truncate"
-              style={{ fontFamily: 'var(--font-mono)' }}
-            >
-              {project.url}
-            </span>
-          </div>
+        {/* Screenshot Viewer */}
+        <div className="flex-1 relative bg-black overflow-hidden" style={{ minHeight: '400px' }}>
+          <img
+            src={project.image}
+            alt={project.title}
+            className="w-full h-full object-contain"
+            style={{ maxHeight: '60vh' }}
+          />
         </div>
 
-        {/* Iframe Container */}
-        <div className="flex-1 relative bg-black overflow-hidden">
-          {isLoading && !iframeError && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0B0F19]">
-              <div className="relative">
-                <div className="w-12 h-12 border-2 border-[#7C3AED]/20 border-t-[#7C3AED] rounded-full animate-spin" />
-              </div>
-              <p
-                className="text-white/40 text-sm mt-5"
-                style={{ fontFamily: 'var(--font-body)' }}
+        {/* Project Details */}
+        <div className="px-6 py-5 border-t border-white/[0.06] bg-[#0F1623] shrink-0">
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex-1">
+              <h4
+                className="text-white text-lg font-medium mb-1"
+                style={{ fontFamily: 'var(--font-heading)' }}
               >
-                Cargando preview...
+                {project.title}
+              </h4>
+              <p
+                className="text-white/50 text-sm"
+                style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}
+              >
+                {project.description}
               </p>
             </div>
-          )}
-
-          {iframeError ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0B0F19] px-8">
-              <img
-                src={project.image}
-                alt={project.title}
-                className="w-full max-w-3xl rounded-xl mb-6 object-cover shadow-2xl"
-                style={{ maxHeight: '55vh' }}
-              />
-              <p
-                className="text-white/50 text-center mb-5"
-                style={{ fontFamily: 'var(--font-body)' }}
-              >
-                Este sitio no permite previsualización directa.
-              </p>
-              <a
-                href={project.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-6 py-3 bg-[#7C3AED] hover:bg-[#6D28D9] text-white rounded-full transition-colors duration-200"
-                style={{ fontFamily: 'var(--font-body)' }}
-              >
-                <ExternalLink size={16} />
-                Visitar sitio web
-              </a>
-            </div>
-          ) : (
-            <iframe
-              ref={iframeRef}
-              src={project.url}
-              title={project.title}
-              className="w-full h-full border-0"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-              onLoad={handleIframeLoad}
-              style={{
-                opacity: isLoading ? 0 : 1,
-                transition: 'opacity 0.4s ease',
-              }}
-            />
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="px-5 py-3 border-t border-white/[0.06] bg-[#0F1623]">
-          <div className="flex flex-wrap items-center gap-2">
-            <span
-              className="text-white/30 text-[10px] uppercase tracking-wider mr-1"
-              style={{ fontFamily: 'var(--font-mono)' }}
-            >
-              Servicios
-            </span>
-            {project.services.map((service, i) => (
+            <div className="flex flex-wrap items-center gap-2 md:justify-end">
               <span
-                key={i}
-                className="px-2.5 py-1 bg-white/[0.04] border border-white/[0.06] rounded-md text-white/50 text-[11px]"
-                style={{ fontFamily: 'var(--font-body)' }}
+                className="text-white/30 text-[10px] uppercase tracking-wider mr-1"
+                style={{ fontFamily: 'var(--font-mono)' }}
               >
-                {service}
+                Servicios
               </span>
-            ))}
+              {project.services.map((service, i) => (
+                <span
+                  key={i}
+                  className="px-3 py-1.5 bg-white/[0.04] border border-white/[0.06] rounded-md text-white/60 text-xs"
+                  style={{ fontFamily: 'var(--font-body)' }}
+                >
+                  {service}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>
