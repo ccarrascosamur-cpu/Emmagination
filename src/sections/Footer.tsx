@@ -17,7 +17,7 @@ export default function Footer() {
           <div className="max-w-md">
             <div className="flex items-center gap-3 mb-6">
               <img
-                src="/images/emmagination-logo.jpg"
+                src="/images/emmagination-logo-blue.png"
                 alt="EMMAGINATION"
                 className="h-12 w-auto object-contain"
               />

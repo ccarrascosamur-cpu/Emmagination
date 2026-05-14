@@ -35,7 +35,7 @@ export default function Navigation({ lenisRef }: NavigationProps) {
       {/* Logo */}
       <div className="flex items-center gap-3">
         <img
-          src="/images/emmagination-logo.jpg"
+          src="/images/emmagination-logo-blue.png"
           alt="EMMAGINATION"
           className="h-10 w-auto object-contain"
         />
