@@ -32,13 +32,21 @@ export default function Navigation({ lenisRef }: NavigationProps) {
       }`}
       style={{ zIndex: 100 }}
     >
-      {/* Isotipo */}
-      <div className="flex items-center">
+      {/* Isotipo + Tipografía */}
+      <div className="flex items-center gap-3">
         <img
           src="/images/isotipo.png"
           alt="EMMAGINATION"
           className="h-10 w-auto object-contain"
         />
+        <div className="hidden sm:block">
+          <span
+            className="text-white text-lg font-semibold tracking-tight"
+            style={{ fontFamily: 'var(--font-heading)' }}
+          >
+            <strong>EMMA</strong>GINATION
+          </span>
+        </div>
       </div>
 
       {/* Navigation Links */}
