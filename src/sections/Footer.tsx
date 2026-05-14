@@ -1,4 +1,4 @@
-import { Instagram, Linkedin, Twitter, Mail } from 'lucide-react';
+import { Instagram, Linkedin, Twitter, Mail, Phone, MessageCircle } from 'lucide-react';
 
 export default function Footer() {
   return (
@@ -45,14 +45,34 @@ export default function Footer() {
               Transformamos ideas en experiencias digitales memorables.
               Hablemos de tu próximo proyecto.
             </p>
-            <a
-              href="mailto:hola@emmagination.com"
-              className="inline-flex items-center gap-2 px-8 py-3 bg-[#7C3AED] rounded-full text-white text-sm hover:bg-[#CC26D3] transition-all duration-300"
-              style={{ fontFamily: 'var(--font-body)' }}
-            >
-              <Mail size={16} />
-              Contactar
-            </a>
+            <div className="flex flex-col gap-3">
+              <a
+                href="mailto:hola@emmagination.com"
+                className="inline-flex items-center gap-2 px-8 py-3 bg-[#7C3AED] rounded-full text-white text-sm hover:bg-[#CC26D3] transition-all duration-300 w-fit"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                <Mail size={16} />
+                Contactar
+              </a>
+              <a
+                href="https://wa.me/56988290618"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-8 py-3 bg-[#25D366] rounded-full text-white text-sm hover:bg-[#128C7E] transition-all duration-300 w-fit"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                <MessageCircle size={16} />
+                WhatsApp
+              </a>
+              <a
+                href="tel:+56988290618"
+                className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm"
+                style={{ fontFamily: 'var(--font-body)' }}
+              >
+                <Phone size={16} />
+                +56 9 8829 0618
+              </a>
+            </div>
           </div>
 
           {/* Right - Links */}

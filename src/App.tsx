@@ -3,6 +3,7 @@ import Lenis from '@studio-freight/lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navigation from './components/Navigation';
+import WhatsAppButton from './components/WhatsAppButton';
 import Hero from './sections/Hero';
 import SelectedWork from './sections/SelectedWork';
 import Approach from './sections/Approach';
@@ -53,6 +54,7 @@ export default function App() {
         <Approach />
         <Footer />
       </main>
+      <WhatsAppButton />
     </div>
   );
 }
