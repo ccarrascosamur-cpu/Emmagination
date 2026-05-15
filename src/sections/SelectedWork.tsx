@@ -55,17 +55,7 @@ const projects = [
     services: ['Web institucional', 'Panel admin', 'Noticias'],
     offset: 60,
   },
-  {
-    id: 5,
-    title: 'Jaime Ávila',
-    category: 'Landing Page',
-    year: '2024',
-    image: '/images/project-fegar.jpg',
-    description: 'Landing page personal para coach y conferencista con diseño profesional y sección de testimonios.',
-    url: 'https://www.jaimeavila.cl',
-    services: ['Landing page', 'Branding', 'Coaching'],
-    offset: 0,
-  },
+
 ];
 
 const categories = ['Todos', 'E-commerce', 'Landing Page'];

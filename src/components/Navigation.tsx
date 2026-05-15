@@ -56,7 +56,7 @@ export default function Navigation({ lenisRef }: NavigationProps) {
           className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
           style={{ fontFamily: 'var(--font-body)' }}
         >
-          Proyectos
+          Portafolio
         </button>
         <button
           onClick={() => scrollTo('#approach')}

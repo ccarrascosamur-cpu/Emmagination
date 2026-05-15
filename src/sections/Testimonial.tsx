@@ -8,11 +8,11 @@ gsap.registerPlugin(ScrollTrigger);
 const testimonials = [
   {
     id: 1,
-    quote: "El equipo de EMMAGINATION capturó perfectamente la esencia de mi marca personal. Mi landing page no solo se ve profesional, sino que también me ha ayudado a convertir visitantes en clientes de coaching. El proceso fue fluido y el resultado superó mis expectativas.",
+    quote: "El equipo de EMMAGINATION transformó completamente nuestra presencia digital. Como empresa de ingeniería y servicios operacionales, necesitábamos transmitir confianza y profesionalismo. El resultado superó todas nuestras expectativas y hemos recibido excelentes comentarios de nuestros clientes.",
     initials: "JA",
     name: "Jaime Ávila",
-    role: "Coach & Conferencista",
-    company: "jaimeavila.cl",
+    role: "Gerente General",
+    company: "Fegar",
   },
   {
     id: 2,
