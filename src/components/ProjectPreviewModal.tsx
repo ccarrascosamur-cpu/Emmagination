@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { X, ExternalLink, Monitor } from 'lucide-react';
+import { X, ExternalLink, FileText } from 'lucide-react';
 
 interface Project {
   id: number;
@@ -8,6 +8,7 @@ interface Project {
   category: string;
   year: string;
   image: string;
+  pdf?: string;
   description: string;
   url: string;
   services: string[];
@@ -27,6 +28,7 @@ export default function ProjectPreviewModal({
 }: ProjectPreviewModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (isOpen && project) {
       const tl = gsap.timeline();
@@ -130,7 +132,7 @@ export default function ProjectPreviewModal({
               <div className="w-3 h-3 rounded-full bg-[#FEBC2E]" />
               <div className="w-3 h-3 rounded-full bg-[#28C840]" />
             </div>
-            <Monitor size={16} className="text-white/40" />
+            <FileText size={16} className="text-white/40" />
             <h3
               className="text-white/90 text-sm font-medium"
               style={{ fontFamily: 'var(--font-heading)' }}
@@ -164,14 +166,31 @@ export default function ProjectPreviewModal({
           </div>
         </div>
 
-        {/* Screenshot Viewer */}
-        <div className="flex-1 relative bg-black overflow-hidden" style={{ minHeight: '400px' }}>
-          <img
-            src={project.image}
-            alt={project.title}
-            className="w-full h-full object-contain"
-            style={{ maxHeight: '60vh' }}
-          />
+        {/* PDF Viewer with scroll */}
+        <div 
+          className="flex-1 relative bg-[#1a1a2e] overflow-auto"
+          style={{ minHeight: '400px', maxHeight: '65vh' }}
+        >
+          {project.pdf ? (
+            <iframe
+              src={`${project.pdf}#toolbar=1&navpanes=1`}
+              title={`${project.title} - PDF`}
+              className="w-full"
+              style={{ 
+                minHeight: '65vh',
+                height: '100%',
+                border: 'none',
+              }}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-full min-h-[400px]">
+              <img
+                src={project.image}
+                alt={project.title}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+          )}
         </div>
 
         {/* Project Details */}

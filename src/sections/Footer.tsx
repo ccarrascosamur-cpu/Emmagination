@@ -16,19 +16,11 @@ export default function Footer() {
           {/* Left - Brand */}
           <div className="max-w-md">
             <div className="flex items-center gap-3 mb-6">
-              <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center"
-                style={{
-                  background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)',
-                }}
-              >
-                <span
-                  className="text-white text-base font-bold"
-                  style={{ fontFamily: 'var(--font-heading)' }}
-                >
-                  E
-                </span>
-              </div>
+              <img
+                src="/images/isotipo.png"
+                alt="EMMAGINATION"
+                className="h-10 w-auto object-contain"
+              />
               <span
                 className="text-white text-xl font-semibold tracking-tight"
                 style={{ fontFamily: 'var(--font-heading)' }}

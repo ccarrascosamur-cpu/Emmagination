@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
 import { Sparkles, ArrowRight, ChevronDown } from 'lucide-react';
 
@@ -16,8 +16,44 @@ export default function Hero({ lenisRef }: HeroProps) {
   const orb1Ref = useRef<HTMLDivElement>(null);
   const orb2Ref = useRef<HTMLDivElement>(null);
   const orb3Ref = useRef<HTMLDivElement>(null);
+  const meshRef = useRef<HTMLDivElement>(null);
+  const mouseRef = useRef({ x: 0, y: 0 });
+
+  // Mouse move handler for interactive gradient
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!heroRef.current) return;
+    const rect = heroRef.current.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width;
+    const y = (e.clientY - rect.top) / rect.height;
+    mouseRef.current = { x, y };
+
+    // Move orbs based on mouse position
+    if (orb1Ref.current) {
+      orb1Ref.current.style.transform = `translate(${(x - 0.5) * 80}px, ${(y - 0.5) * 60}px) scale(1.1)`;
+    }
+    if (orb2Ref.current) {
+      orb2Ref.current.style.transform = `translate(${(0.5 - x) * 60}px, ${(y - 0.5) * 80}px) scale(1.05)`;
+    }
+    if (orb3Ref.current) {
+      orb3Ref.current.style.transform = `translate(${(x - 0.5) * 40}px, ${(0.5 - y) * 50}px) scale(1.15)`;
+    }
+
+    // Shift mesh gradient position
+    if (meshRef.current) {
+      meshRef.current.style.background = `
+        radial-gradient(ellipse 600px 400px at ${20 + x * 20}% ${30 + y * 20}%, rgba(124,58,237,0.3) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 350px at ${80 - x * 15}% ${70 - y * 15}%, rgba(204,38,211,0.2) 0%, transparent 70%),
+        radial-gradient(ellipse 400px 300px at ${50 + x * 10}% ${50 + y * 10}%, rgba(147,51,234,0.15) 0%, transparent 70%)
+      `;
+    }
+  }, []);
 
   useEffect(() => {
+    const hero = heroRef.current;
+    if (hero) {
+      hero.addEventListener('mousemove', handleMouseMove);
+    }
+
     const tl = gsap.timeline({ delay: 0.3 });
 
     tl.fromTo(
@@ -50,35 +86,35 @@ export default function Hero({ lenisRef }: HeroProps) {
         '-=0.2'
       );
 
-    // Animate orbs with GSAP for smoother, continuous movement
-    const orbTl = gsap.timeline({ repeat: -1, yoyo: true });
-    orbTl.to(orb1Ref.current, {
-      x: 60,
-      y: -40,
-      scale: 1.15,
-      duration: 6,
+    // Continuous ambient animation for orbs
+    const ambientTl = gsap.timeline({ repeat: -1, yoyo: true });
+    ambientTl.to(orb1Ref.current, {
+      x: '+=30',
+      y: '-=20',
+      duration: 5,
       ease: 'sine.inOut',
     }, 0);
-    orbTl.to(orb2Ref.current, {
-      x: -50,
-      y: 30,
-      scale: 1.1,
-      duration: 8,
-      ease: 'sine.inOut',
-    }, 0);
-    orbTl.to(orb3Ref.current, {
-      x: 40,
-      y: 50,
-      scale: 1.2,
+    ambientTl.to(orb2Ref.current, {
+      x: '-=25',
+      y: '+=25',
       duration: 7,
+      ease: 'sine.inOut',
+    }, 0);
+    ambientTl.to(orb3Ref.current, {
+      x: '+=20',
+      y: '+=30',
+      duration: 6,
       ease: 'sine.inOut',
     }, 0);
 
     return () => {
       tl.kill();
-      orbTl.kill();
+      ambientTl.kill();
+      if (hero) {
+        hero.removeEventListener('mousemove', handleMouseMove);
+      }
     };
-  }, []);
+  }, [handleMouseMove]);
 
   const scrollToWork = () => {
     if (lenisRef.current) {
@@ -109,16 +145,16 @@ export default function Hero({ lenisRef }: HeroProps) {
         }}
       />
 
-      {/* Animated mesh gradient */}
+      {/* Animated mesh gradient - responds to mouse */}
       <div
-        className="absolute inset-0 opacity-60"
+        ref={meshRef}
+        className="absolute inset-0 opacity-60 transition-all duration-300 ease-out"
         style={{
           background: `
             radial-gradient(ellipse 600px 400px at 20% 30%, rgba(124,58,237,0.25) 0%, transparent 70%),
             radial-gradient(ellipse 500px 350px at 80% 70%, rgba(204,38,211,0.15) 0%, transparent 70%),
             radial-gradient(ellipse 400px 300px at 50% 50%, rgba(147,51,234,0.1) 0%, transparent 70%)
           `,
-          animation: 'meshMove 15s ease-in-out infinite',
         }}
       />
 
@@ -132,10 +168,10 @@ export default function Hero({ lenisRef }: HeroProps) {
         }}
       />
 
-      {/* Floating gradient orbs - animated with GSAP */}
+      {/* Floating gradient orbs - respond to mouse */}
       <div
         ref={orb1Ref}
-        className="absolute rounded-full"
+        className="absolute rounded-full transition-transform duration-500 ease-out"
         style={{
           width: '500px',
           height: '500px',
@@ -147,7 +183,7 @@ export default function Hero({ lenisRef }: HeroProps) {
       />
       <div
         ref={orb2Ref}
-        className="absolute rounded-full"
+        className="absolute rounded-full transition-transform duration-500 ease-out"
         style={{
           width: '400px',
           height: '400px',
@@ -159,7 +195,7 @@ export default function Hero({ lenisRef }: HeroProps) {
       />
       <div
         ref={orb3Ref}
-        className="absolute rounded-full"
+        className="absolute rounded-full transition-transform duration-500 ease-out"
         style={{
           width: '350px',
           height: '350px',
@@ -265,7 +301,7 @@ export default function Hero({ lenisRef }: HeroProps) {
         </div>
       </div>
 
-      {/* Scroll indicator - positioned at very bottom, outside content flow */}
+      {/* Scroll indicator */}
       <div
         ref={scrollRef}
         className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-0"
@@ -282,23 +318,6 @@ export default function Hero({ lenisRef }: HeroProps) {
           zIndex: 5,
         }}
       />
-
-      <style>{`
-        @keyframes meshMove {
-          0%, 100% {
-            transform: translate(0, 0) scale(1);
-          }
-          25% {
-            transform: translate(30px, -20px) scale(1.05);
-          }
-          50% {
-            transform: translate(-20px, 30px) scale(0.95);
-          }
-          75% {
-            transform: translate(20px, 20px) scale(1.02);
-          }
-        }
-      `}</style>
     </section>
   );
 }

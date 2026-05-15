@@ -13,6 +13,7 @@ const projects = [
     category: 'E-commerce',
     year: '2024',
     image: '/images/project-portalzen.jpg',
+    pdf: '/proyectos/portalzen.pdf',
     description: 'Tienda Shopify de productos zen y bienestar con diseño minimalista',
     url: 'https://www.portalzen.cl',
     services: ['Logo', 'Shopify', 'E-commerce'],
@@ -24,6 +25,7 @@ const projects = [
     category: 'E-commerce',
     year: '2024',
     image: '/images/project-sagradamadre.jpg',
+    pdf: '/proyectos/sagradamadre.pdf',
     description: 'E-commerce de productos naturales con identidad visual orgánica',
     url: 'https://www.sagradamadre.cl',
     services: ['Diseño web', 'Shopify', 'Branding'],
@@ -35,6 +37,7 @@ const projects = [
     category: 'Landing Page',
     year: '2024',
     image: '/images/project-fegar.jpg',
+    pdf: '/proyectos/fegar.pdf',
     description: 'Landing page corporativa con branding completo',
     url: 'https://www.fegar.cl',
     services: ['Landing page', 'Branding', 'Logo'],
@@ -46,6 +49,7 @@ const projects = [
     category: 'Landing Page',
     year: '2024',
     image: '/images/project-irc.jpg',
+    pdf: '/proyectos/irc.pdf',
     description: 'Landing page con panel autoadministrable de contenidos',
     url: 'https://www.inglesrugbyclub.cl',
     services: ['Landing page', 'Panel admin', 'Web'],
@@ -310,7 +314,7 @@ export default function SelectedWork() {
                       style={{ fontFamily: 'var(--font-body)', transitionDelay: '0ms' }}
                     >
                       <Eye size={16} />
-                      Preview
+                      Ver PDF
                     </button>
                     <a
                       href={project.url}
