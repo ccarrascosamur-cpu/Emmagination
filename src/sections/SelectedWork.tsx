@@ -121,8 +121,8 @@ export default function SelectedWork() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Show only the last 3 projects
-  const recentProjects = projects.slice(0, 3);
+  // Show only the last 4 projects
+  const recentProjects = projects.slice(0, 4);
 
   const openProject = (project: Project) => {
     setSelectedProject(project);

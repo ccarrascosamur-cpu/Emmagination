@@ -67,7 +67,7 @@ export default function Footer() {
             </p>
             <div className="flex flex-col gap-3">
               <a
-                href="mailto:hola@emmagination.com"
+                href="mailto:ccarrascosamur@gmail.com"
                 className="inline-flex items-center gap-2 px-8 py-3 bg-[#7C3AED] rounded-full text-white text-sm hover:bg-[#CC26D3] transition-all duration-300 w-fit"
                 style={{ fontFamily: 'var(--font-body)' }}
               >

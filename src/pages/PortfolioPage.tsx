@@ -181,80 +181,83 @@ export default function PortfolioPage() {
   }, [filteredProjects]);
 
   return (
-    <div ref={pageRef} className="relative bg-black min-h-screen">
-      {/* Back button */}
-      <div className="fixed top-24 left-8 lg:left-16 z-50">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm"
-          style={{ fontFamily: 'var(--font-body)' }}
-        >
-          <ArrowLeft size={16} />
-          Volver
-        </button>
-      </div>
-
-      {/* Hero Header */}
-      <section
-        className="relative w-full flex items-end overflow-hidden"
-        style={{
-          minHeight: '50vh',
-          padding: '160px 0 80px',
-        }}
-      >
-        <div className="mx-auto w-full" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
-          <h1
-            ref={titleRef}
-            className="text-white opacity-0"
-            style={{
-              fontFamily: 'var(--font-heading)',
-              fontSize: 'clamp(60px, 12vw, 180px)',
-              fontWeight: 700,
-              letterSpacing: '-4px',
-              lineHeight: 0.95,
-            }}
+    <div ref={pageRef} className="relative min-h-screen" style={{ backgroundColor: '#F8F7FB' }}>
+      {/* Top dark header bar */}
+      <div className="relative w-full" style={{ backgroundColor: '#000000' }}>
+        {/* Back button */}
+        <div className="absolute top-24 left-8 lg:left-16 z-50">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm"
+            style={{ fontFamily: 'var(--font-body)' }}
           >
-            Portafolio
-          </h1>
+            <ArrowLeft size={16} />
+            Volver
+          </button>
         </div>
-      </section>
 
-      {/* Filter Tabs */}
-      <div
-        ref={filtersRef}
-        className="relative w-full opacity-0"
-        style={{
-          borderTop: '1px solid rgba(255,255,255,0.08)',
-          borderBottom: '1px solid rgba(255,255,255,0.08)',
-          padding: '20px 0',
-        }}
-      >
-        <div className="mx-auto" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
-          <div className="flex flex-wrap gap-3">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveFilter(cat)}
-                className={`px-5 py-2.5 text-xs rounded-full transition-all duration-300 ${
-                  activeFilter === cat
-                    ? 'text-white'
-                    : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
-                }`}
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  background: activeFilter === cat
-                    ? 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)'
-                    : undefined,
-                }}
-              >
-                {cat}
-              </button>
-            ))}
+        {/* Hero Header */}
+        <section
+          className="relative w-full flex items-end overflow-hidden"
+          style={{
+            minHeight: '40vh',
+            padding: '140px 0 60px',
+          }}
+        >
+          <div className="mx-auto w-full" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
+            <h1
+              ref={titleRef}
+              className="text-white opacity-0"
+              style={{
+                fontFamily: 'var(--font-heading)',
+                fontSize: 'clamp(56px, 10vw, 140px)',
+                fontWeight: 700,
+                letterSpacing: '-3px',
+                lineHeight: 0.95,
+              }}
+            >
+              Portafolio
+            </h1>
+          </div>
+        </section>
+
+        {/* Filter Tabs */}
+        <div
+          ref={filtersRef}
+          className="relative w-full opacity-0"
+          style={{
+            borderTop: '1px solid rgba(255,255,255,0.08)',
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            padding: '20px 0',
+          }}
+        >
+          <div className="mx-auto" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
+            <div className="flex flex-wrap gap-3">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveFilter(cat)}
+                  className={`px-5 py-2.5 text-xs rounded-full transition-all duration-300 ${
+                    activeFilter === cat
+                      ? 'text-white'
+                      : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
+                  }`}
+                  style={{
+                    fontFamily: 'var(--font-mono)',
+                    background: activeFilter === cat
+                      ? 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)'
+                      : undefined,
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Projects Grid */}
+      {/* Projects Grid — light background */}
       <section className="relative w-full" style={{ padding: '80px 0 120px' }}>
         <div className="mx-auto" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-20">
@@ -299,7 +302,7 @@ export default function PortfolioPage() {
                 <div className="mt-10 px-2">
                   <div className="flex items-baseline justify-between mb-2">
                     <h3
-                      className="text-white text-xl group-hover:text-[#7C3AED] transition-colors duration-300"
+                      className="text-[#1a1a2e] text-xl group-hover:text-[#7C3AED] transition-colors duration-300"
                       style={{
                         fontFamily: 'var(--font-heading)',
                         fontWeight: 600,
@@ -308,7 +311,7 @@ export default function PortfolioPage() {
                       {project.title}
                     </h3>
                     <span
-                      className="text-white/30"
+                      className="text-black/30"
                       style={{
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.75rem',
@@ -318,7 +321,7 @@ export default function PortfolioPage() {
                     </span>
                   </div>
                   <p
-                    className="text-white/50 text-sm mb-3"
+                    className="text-black/50 text-sm mb-3"
                     style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}
                   >
                     {project.description}
@@ -330,7 +333,7 @@ export default function PortfolioPage() {
                         className="px-3 py-1 rounded-full text-xs"
                         style={{
                           fontFamily: 'var(--font-mono)',
-                          background: 'rgba(124, 58, 237, 0.15)',
+                          background: 'rgba(124, 58, 237, 0.08)',
                           color: '#7C3AED',
                         }}
                       >
