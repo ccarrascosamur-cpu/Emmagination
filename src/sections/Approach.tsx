@@ -38,8 +38,8 @@ const services = [
     icon: Camera,
     title: 'Generación de Contenido',
     description:
-      'Producción de fotografía y video profesional con Filmaker. Contenido visual de alto impacto para redes sociales, web y campañas publicitarias.',
-    tags: ['Fotografía', 'Video', 'Filmaker'],
+      'Producción de fotografía y video profesional con Film Maker. Contenido visual de alto impacto para redes sociales, web y campañas publicitarias.',
+    tags: ['Fotografía', 'Video', 'Film Maker'],
   },
 ];
 
