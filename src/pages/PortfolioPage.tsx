@@ -2,19 +2,18 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ExternalLink, Eye, ArrowRight } from 'lucide-react';
-import { projects, type Project } from '../data/projects';
+import { ExternalLink, Eye, ArrowLeft } from 'lucide-react';
+import { projects, categories, type Project } from '../data/projects';
 import ProjectPreviewModal from '../components/ProjectPreviewModal';
+import Footer from '../sections/Footer';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Laptop mockup component
+// Laptop mockup component (same as SelectedWork)
 function LaptopMockup({ image, alt }: { image: string; alt: string }) {
   return (
     <div className="relative w-full">
-      {/* Laptop body */}
       <div className="relative mx-auto" style={{ maxWidth: '92%' }}>
-        {/* Screen assembly */}
         <div
           className="relative rounded-t-2xl p-3 pb-0"
           style={{
@@ -26,15 +25,12 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
             `,
           }}
         >
-          {/* Camera notch */}
           <div className="flex justify-center mb-2">
             <div
               className="w-2 h-2 rounded-full"
               style={{ background: 'rgba(255,255,255,0.15)' }}
             />
           </div>
-
-          {/* Screen bezel */}
           <div
             className="relative rounded-lg overflow-hidden"
             style={{
@@ -42,7 +38,6 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
               border: '1px solid rgba(255,255,255,0.06)',
             }}
           >
-            {/* Browser chrome */}
             <div
               className="flex items-center gap-2 px-3 py-2.5"
               style={{ background: '#f0f0f0' }}
@@ -61,7 +56,6 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
                 </div>
               </div>
             </div>
-            {/* Screenshot */}
             <img
               src={image}
               alt={alt}
@@ -71,8 +65,6 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
             />
           </div>
         </div>
-
-        {/* Hinge */}
         <div
           className="h-2 mx-auto"
           style={{
@@ -81,8 +73,6 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
             borderRadius: '0 0 2px 2px',
           }}
         />
-
-        {/* Base / Keyboard deck */}
         <div
           className="relative mx-auto rounded-b-xl"
           style={{
@@ -95,11 +85,8 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
             `,
           }}
         >
-          {/* Trackpad notch */}
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-white/10" />
         </div>
-
-        {/* Reflection/shadow */}
         <div
           className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[95%] h-8 rounded-[50%]"
           style={{
@@ -111,18 +98,21 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
   );
 }
 
-export default function SelectedWork() {
+export default function PortfolioPage() {
   const navigate = useNavigate();
-  const sectionRef = useRef<HTMLElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const filtersRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const ctaRef = useRef<HTMLDivElement>(null);
 
+  const [activeFilter, setActiveFilter] = useState('Todos');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // Show only the last 3 projects
-  const recentProjects = projects.slice(0, 3);
+  const filteredProjects =
+    activeFilter === 'Todos'
+      ? projects
+      : projects.filter((p) => p.category === activeFilter);
 
   const openProject = (project: Project) => {
     setSelectedProject(project);
@@ -135,109 +125,140 @@ export default function SelectedWork() {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
+
     const ctx = gsap.context(() => {
+      // Title animation
       gsap.fromTo(
         titleRef.current,
-        { opacity: 0, y: 50 },
+        { opacity: 0, y: 60 },
         {
           opacity: 1,
           y: 0,
           duration: 1,
           ease: 'power3.out',
-          scrollTrigger: {
-            trigger: titleRef.current,
-            start: 'top 85%',
-            toggleActions: 'play none none none',
-          },
+          delay: 0.2,
         }
       );
 
-      cardsRef.current.forEach((card, i) => {
-        if (!card) return;
-        gsap.fromTo(
-          card,
-          { opacity: 0, y: 80 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: 'power3.out',
-            delay: i * 0.12,
-            scrollTrigger: {
-              trigger: card,
-              start: 'top 90%',
-              toggleActions: 'play none none none',
-            },
-          }
-        );
-      });
-
+      // Filters animation
       gsap.fromTo(
-        ctaRef.current,
-        { opacity: 0, y: 40 },
+        filtersRef.current,
+        { opacity: 0, y: 30 },
         {
           opacity: 1,
           y: 0,
           duration: 0.8,
           ease: 'power3.out',
-          scrollTrigger: {
-            trigger: ctaRef.current,
-            start: 'top 90%',
-            toggleActions: 'play none none none',
-          },
+          delay: 0.5,
         }
       );
-    }, sectionRef);
+    }, pageRef);
 
     return () => ctx.revert();
   }, []);
 
+  // Animate cards when filter changes
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      cardsRef.current.forEach((card, i) => {
+        if (!card) return;
+        gsap.fromTo(
+          card,
+          { opacity: 0, y: 60 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.7,
+            ease: 'power3.out',
+            delay: i * 0.1,
+          }
+        );
+      });
+    }, pageRef);
+
+    return () => ctx.revert();
+  }, [filteredProjects]);
+
   return (
-    <>
+    <div ref={pageRef} className="relative bg-black min-h-screen">
+      {/* Back button */}
+      <div className="fixed top-24 left-8 lg:left-16 z-50">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm"
+          style={{ fontFamily: 'var(--font-body)' }}
+        >
+          <ArrowLeft size={16} />
+          Volver
+        </button>
+      </div>
+
+      {/* Hero Header */}
       <section
-        ref={sectionRef}
-        id="work"
-        className="relative w-full bg-white"
-        style={{ padding: '120px 0' }}
+        className="relative w-full flex items-end overflow-hidden"
+        style={{
+          minHeight: '50vh',
+          padding: '160px 0 80px',
+        }}
+      >
+        <div className="mx-auto w-full" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
+          <h1
+            ref={titleRef}
+            className="text-white opacity-0"
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: 'clamp(60px, 12vw, 180px)',
+              fontWeight: 700,
+              letterSpacing: '-4px',
+              lineHeight: 0.95,
+            }}
+          >
+            Portafolio
+          </h1>
+        </div>
+      </section>
+
+      {/* Filter Tabs */}
+      <div
+        ref={filtersRef}
+        className="relative w-full opacity-0"
+        style={{
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          borderBottom: '1px solid rgba(255,255,255,0.08)',
+          padding: '20px 0',
+        }}
       >
         <div className="mx-auto" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
-          {/* Section Header */}
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between mb-16">
-            <div>
-              <span
-                className="block mb-4"
+          <div className="flex flex-wrap gap-3">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setActiveFilter(cat)}
+                className={`px-5 py-2.5 text-xs rounded-full transition-all duration-300 ${
+                  activeFilter === cat
+                    ? 'text-white'
+                    : 'bg-white/5 text-white/50 hover:bg-white/10 hover:text-white/80'
+                }`}
                 style={{
                   fontFamily: 'var(--font-mono)',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  fontWeight: 500,
-                  letterSpacing: '1px',
-                  color: '#7C3AED',
+                  background: activeFilter === cat
+                    ? 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)'
+                    : undefined,
                 }}
               >
-                PORTAFOLIO
-              </span>
-              <h2
-                ref={titleRef}
-                className="text-black opacity-0"
-                style={{
-                  fontFamily: 'var(--font-heading)',
-                  fontSize: 'clamp(36px, 5vw, 64px)',
-                  fontWeight: 700,
-                  letterSpacing: '-1.5px',
-                  lineHeight: 1.05,
-                }}
-              >
-                PROYECTOS
-                <br />
-                <span style={{ color: '#7C3AED' }}>DESTACADOS</span>
-              </h2>
-            </div>
+                {cat}
+              </button>
+            ))}
           </div>
+        </div>
+      </div>
 
-          {/* Projects Grid - 2 columns with laptop mockups - only 3 projects */}
+      {/* Projects Grid */}
+      <section className="relative w-full" style={{ padding: '80px 0 120px' }}>
+        <div className="mx-auto" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-20">
-            {recentProjects.map((project, index) => (
+            {filteredProjects.map((project, index) => (
               <div
                 key={project.id}
                 ref={(el) => { cardsRef.current[index] = el; }}
@@ -278,7 +299,7 @@ export default function SelectedWork() {
                 <div className="mt-10 px-2">
                   <div className="flex items-baseline justify-between mb-2">
                     <h3
-                      className="text-black text-xl group-hover:text-[#7C3AED] transition-colors duration-300"
+                      className="text-white text-xl group-hover:text-[#7C3AED] transition-colors duration-300"
                       style={{
                         fontFamily: 'var(--font-heading)',
                         fontWeight: 600,
@@ -287,7 +308,7 @@ export default function SelectedWork() {
                       {project.title}
                     </h3>
                     <span
-                      className="text-black/30"
+                      className="text-white/30"
                       style={{
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.75rem',
@@ -297,12 +318,11 @@ export default function SelectedWork() {
                     </span>
                   </div>
                   <p
-                    className="text-black/50 text-sm mb-3"
+                    className="text-white/50 text-sm mb-3"
                     style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}
                   >
                     {project.description}
                   </p>
-                  {/* Services tags */}
                   <div className="flex flex-wrap gap-2">
                     {project.services.map((service, i) => (
                       <span
@@ -310,7 +330,7 @@ export default function SelectedWork() {
                         className="px-3 py-1 rounded-full text-xs"
                         style={{
                           fontFamily: 'var(--font-mono)',
-                          background: 'rgba(124, 58, 237, 0.08)',
+                          background: 'rgba(124, 58, 237, 0.15)',
                           color: '#7C3AED',
                         }}
                       >
@@ -322,29 +342,16 @@ export default function SelectedWork() {
               </div>
             ))}
           </div>
-
-          {/* CTA to full portfolio */}
-          <div ref={ctaRef} className="flex justify-center mt-20 opacity-0">
-            <button
-              onClick={() => navigate('/portafolio')}
-              className="group inline-flex items-center gap-3 px-8 py-4 rounded-full text-white text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-[#7C3AED]/25"
-              style={{
-                fontFamily: 'var(--font-body)',
-                background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
-              }}
-            >
-              Ver todos los proyectos
-              <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </button>
-          </div>
         </div>
       </section>
+
+      <Footer />
 
       <ProjectPreviewModal
         project={selectedProject}
         isOpen={isModalOpen}
         onClose={closeModal}
       />
-    </>
+    </div>
   );
 }

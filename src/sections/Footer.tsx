@@ -1,6 +1,20 @@
 import { Instagram, Linkedin, Twitter, Mail, Phone, MessageCircle } from 'lucide-react';
+import { useNavigate } from 'react-router';
 
 export default function Footer() {
+  const navigate = useNavigate();
+
+  const handleNavClick = (href: string) => {
+    if (href.startsWith('#')) {
+      const el = document.querySelector(href);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    } else {
+      navigate(href);
+    }
+  };
+
   return (
     <footer
       id="contact"
@@ -92,18 +106,18 @@ export default function Footer() {
               </h4>
               <ul className="space-y-3">
                 {[
-                  { label: 'Proyectos', href: '#work' },
+                  { label: 'Proyectos', href: '/portafolio' },
                   { label: 'Servicios', href: '#approach' },
                   { label: 'Contacto', href: '#contact' },
                 ].map((item) => (
                   <li key={item.label}>
-                    <a
-                      href={item.href}
+                    <button
+                      onClick={() => handleNavClick(item.href)}
                       className="text-white/70 hover:text-white transition-colors text-sm"
                       style={{ fontFamily: 'var(--font-body)' }}
                     >
                       {item.label}
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>

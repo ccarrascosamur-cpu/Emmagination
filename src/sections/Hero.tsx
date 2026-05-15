@@ -10,6 +10,7 @@ export default function Hero({ lenisRef }: HeroProps) {
   const heroRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
+  const taglineRef = useRef<HTMLDivElement>(null);
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -66,6 +67,12 @@ export default function Hero({ lenisRef }: HeroProps) {
         { opacity: 0, y: 40 },
         { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' },
         '-=0.4'
+      )
+      .fromTo(
+        taglineRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power3.out' },
+        '-=0.6'
       )
       .fromTo(
         subtitleRef.current,
@@ -263,10 +270,38 @@ export default function Hero({ lenisRef }: HeroProps) {
           DIGITALES
         </h1>
 
+        {/* Tagline: Deja de ser logo. Para ser marca. */}
+        <div
+          ref={taglineRef}
+          className="mt-8 opacity-0"
+          style={{ maxWidth: '640px' }}
+        >
+          <p
+            className="text-white leading-tight"
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: 'clamp(28px, 4vw, 48px)',
+              fontWeight: 700,
+              letterSpacing: '-1.5px',
+              lineHeight: 1.1,
+            }}
+          >
+            <span className="text-white">Deja de ser logo.</span>
+            <br />
+            <span
+              style={{
+                color: 'rgba(255, 255, 255, 0.35)',
+              }}
+            >
+              Para ser marca.
+            </span>
+          </p>
+        </div>
+
         {/* Subtitle */}
         <p
           ref={subtitleRef}
-          className="text-white/50 mt-8 max-w-lg opacity-0"
+          className="text-white/50 mt-6 max-w-lg opacity-0"
           style={{
             fontFamily: 'var(--font-body)',
             fontSize: 'clamp(16px, 1.6vw, 18px)',
@@ -274,8 +309,8 @@ export default function Hero({ lenisRef }: HeroProps) {
             fontWeight: 300,
           }}
         >
-          Diseño web, branding y experiencias digitales inmersivas
-          para marcas con visión de futuro.
+          Diseñamos identidades, optimizamos tiendas Shopify y posicionamos
+          marcas en Google. Hacemos que tu negocio se vea, se entienda y se compre.
         </p>
 
         {/* CTAs */}
