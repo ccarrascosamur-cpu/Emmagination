@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight, ChevronDown } from 'lucide-react';
 
 interface HeroProps {
   lenisRef: React.MutableRefObject<any>;
@@ -13,6 +13,9 @@ export default function Hero({ lenisRef }: HeroProps) {
   const subtitleRef = useRef<HTMLParagraphElement>(null);
   const ctaRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const orb1Ref = useRef<HTMLDivElement>(null);
+  const orb2Ref = useRef<HTMLDivElement>(null);
+  const orb3Ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const tl = gsap.timeline({ delay: 0.3 });
@@ -47,8 +50,33 @@ export default function Hero({ lenisRef }: HeroProps) {
         '-=0.2'
       );
 
+    // Animate orbs with GSAP for smoother, continuous movement
+    const orbTl = gsap.timeline({ repeat: -1, yoyo: true });
+    orbTl.to(orb1Ref.current, {
+      x: 60,
+      y: -40,
+      scale: 1.15,
+      duration: 6,
+      ease: 'sine.inOut',
+    }, 0);
+    orbTl.to(orb2Ref.current, {
+      x: -50,
+      y: 30,
+      scale: 1.1,
+      duration: 8,
+      ease: 'sine.inOut',
+    }, 0);
+    orbTl.to(orb3Ref.current, {
+      x: 40,
+      y: 50,
+      scale: 1.2,
+      duration: 7,
+      ease: 'sine.inOut',
+    }, 0);
+
     return () => {
       tl.kill();
+      orbTl.kill();
     };
   }, []);
 
@@ -71,9 +99,29 @@ export default function Hero({ lenisRef }: HeroProps) {
       style={{
         height: '100vh',
         minHeight: '600px',
-        background: 'radial-gradient(ellipse at center, #1a0f2e 0%, #0a0612 50%, #000000 100%)',
       }}
     >
+      {/* Animated gradient background */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'radial-gradient(ellipse at 30% 40%, #1a0f2e 0%, #0d0618 30%, #000000 70%)',
+        }}
+      />
+
+      {/* Animated mesh gradient */}
+      <div
+        className="absolute inset-0 opacity-60"
+        style={{
+          background: `
+            radial-gradient(ellipse 600px 400px at 20% 30%, rgba(124,58,237,0.25) 0%, transparent 70%),
+            radial-gradient(ellipse 500px 350px at 80% 70%, rgba(204,38,211,0.15) 0%, transparent 70%),
+            radial-gradient(ellipse 400px 300px at 50% 50%, rgba(147,51,234,0.1) 0%, transparent 70%)
+          `,
+          animation: 'meshMove 15s ease-in-out infinite',
+        }}
+      />
+
       {/* Subtle grid pattern overlay */}
       <div
         className="absolute inset-0 opacity-[0.03]"
@@ -84,27 +132,51 @@ export default function Hero({ lenisRef }: HeroProps) {
         }}
       />
 
-      {/* Floating gradient orbs */}
+      {/* Floating gradient orbs - animated with GSAP */}
       <div
-        className="absolute rounded-full blur-[120px] opacity-30"
+        ref={orb1Ref}
+        className="absolute rounded-full"
         style={{
           width: '500px',
           height: '500px',
-          background: 'radial-gradient(circle, #7C3AED 0%, transparent 70%)',
-          top: '10%',
-          left: '20%',
-          animation: 'float 8s ease-in-out infinite',
+          background: 'radial-gradient(circle, rgba(124,58,237,0.4) 0%, transparent 70%)',
+          filter: 'blur(100px)',
+          top: '5%',
+          left: '15%',
         }}
       />
       <div
-        className="absolute rounded-full blur-[100px] opacity-20"
+        ref={orb2Ref}
+        className="absolute rounded-full"
         style={{
           width: '400px',
           height: '400px',
-          background: 'radial-gradient(circle, #CC26D3 0%, transparent 70%)',
-          bottom: '20%',
-          right: '15%',
-          animation: 'float 10s ease-in-out infinite reverse',
+          background: 'radial-gradient(circle, rgba(204,38,211,0.3) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+          bottom: '15%',
+          right: '10%',
+        }}
+      />
+      <div
+        ref={orb3Ref}
+        className="absolute rounded-full"
+        style={{
+          width: '350px',
+          height: '350px',
+          background: 'radial-gradient(circle, rgba(147,51,234,0.25) 0%, transparent 70%)',
+          filter: 'blur(90px)',
+          top: '40%',
+          right: '30%',
+        }}
+      />
+
+      {/* Noise texture overlay */}
+      <div
+        className="absolute inset-0 opacity-[0.015]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '128px 128px',
         }}
       />
 
@@ -191,25 +263,20 @@ export default function Hero({ lenisRef }: HeroProps) {
             Trabajemos juntos
           </button>
         </div>
+      </div>
 
-        {/* Scroll indicator */}
-        <div
-          ref={scrollRef}
-          className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 opacity-0"
-        >
-          <span
-            className="text-white/30 text-xs tracking-[3px] uppercase"
-            style={{ fontFamily: 'var(--font-mono)' }}
-          >
-            Scroll
-          </span>
-          <div className="w-[1px] h-8 bg-gradient-to-b from-white/30 to-transparent" />
-        </div>
+      {/* Scroll indicator - positioned at very bottom, outside content flow */}
+      <div
+        ref={scrollRef}
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-0"
+        style={{ zIndex: 10 }}
+      >
+        <ChevronDown size={20} className="text-white/30 animate-bounce" />
       </div>
 
       {/* Bottom gradient fade */}
       <div
-        className="absolute bottom-0 left-0 w-full h-32 pointer-events-none"
+        className="absolute bottom-0 left-0 w-full h-40 pointer-events-none"
         style={{
           background: 'linear-gradient(to top, #000000, transparent)',
           zIndex: 5,
@@ -217,9 +284,19 @@ export default function Hero({ lenisRef }: HeroProps) {
       />
 
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0) scale(1); }
-          50% { transform: translateY(-20px) scale(1.05); }
+        @keyframes meshMove {
+          0%, 100% {
+            transform: translate(0, 0) scale(1);
+          }
+          25% {
+            transform: translate(30px, -20px) scale(1.05);
+          }
+          50% {
+            transform: translate(-20px, 30px) scale(0.95);
+          }
+          75% {
+            transform: translate(20px, 20px) scale(1.02);
+          }
         }
       `}</style>
     </section>

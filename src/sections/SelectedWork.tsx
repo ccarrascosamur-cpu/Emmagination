@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger);
 const projects = [
   {
     id: 1,
-    title: 'PortalZen',
+    title: 'Portal Zen',
     category: 'E-commerce',
     year: '2024',
     image: '/images/project-portalzen.jpg',
@@ -58,33 +58,53 @@ const categories = ['Todos', 'E-commerce', 'Landing Page'];
 // Laptop mockup component
 function LaptopMockup({ image, alt }: { image: string; alt: string }) {
   return (
-    <div className="relative w-full" style={{ perspective: '1000px' }}>
-      {/* Laptop frame */}
-      <div
-        className="relative mx-auto"
-        style={{
-          maxWidth: '90%',
-          transform: 'rotateX(5deg)',
-          transformStyle: 'preserve-3d',
-        }}
-      >
-        {/* Screen bezel */}
+    <div className="relative w-full">
+      {/* Laptop body */}
+      <div className="relative mx-auto" style={{ maxWidth: '92%' }}>
+        {/* Screen assembly */}
         <div
-          className="relative rounded-t-xl overflow-hidden bg-[#2a2a2a] p-2 pb-0"
+          className="relative rounded-t-2xl p-3 pb-0"
           style={{
-            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255,255,255,0.1)',
+            background: 'linear-gradient(180deg, #3a3a3c 0%, #2c2c2e 100%)',
+            boxShadow: `
+              0 0 0 1px rgba(255,255,255,0.08),
+              0 20px 60px -10px rgba(0,0,0,0.5),
+              0 40px 80px -20px rgba(0,0,0,0.3)
+            `,
           }}
         >
-          {/* Screen */}
-          <div className="relative rounded-lg overflow-hidden bg-white">
+          {/* Camera notch */}
+          <div className="flex justify-center mb-2">
+            <div
+              className="w-2 h-2 rounded-full"
+              style={{ background: 'rgba(255,255,255,0.15)' }}
+            />
+          </div>
+
+          {/* Screen bezel */}
+          <div
+            className="relative rounded-lg overflow-hidden"
+            style={{
+              background: '#000',
+              border: '1px solid rgba(255,255,255,0.06)',
+            }}
+          >
             {/* Browser chrome */}
-            <div className="flex items-center gap-1.5 px-3 py-2 bg-[#f5f5f5] border-b border-gray-200">
-              <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
-              <div className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-              <div className="flex-1 mx-4">
-                <div className="h-5 bg-white rounded-md border border-gray-200 flex items-center px-2">
-                  <span className="text-[10px] text-gray-400">https://</span>
+            <div
+              className="flex items-center gap-2 px-3 py-2.5"
+              style={{ background: '#f0f0f0' }}
+            >
+              <div className="flex gap-1.5">
+                <div className="w-3 h-3 rounded-full bg-[#ff5f57] border border-black/5" />
+                <div className="w-3 h-3 rounded-full bg-[#febc2e] border border-black/5" />
+                <div className="w-3 h-3 rounded-full bg-[#28c840] border border-black/5" />
+              </div>
+              <div className="flex-1 mx-3">
+                <div
+                  className="h-6 rounded-md flex items-center px-3 text-[10px] text-gray-400"
+                  style={{ background: '#fff', border: '1px solid #e0e0e0' }}
+                >
+                  https://www.{alt.toLowerCase().replace(/\s/g, '')}.cl
                 </div>
               </div>
             </div>
@@ -98,20 +118,39 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
             />
           </div>
         </div>
-        {/* Laptop base */}
+
+        {/* Hinge */}
         <div
-          className="h-3 rounded-b-lg mx-auto"
+          className="h-2 mx-auto"
           style={{
-            maxWidth: '100%',
-            background: 'linear-gradient(to bottom, #3a3a3a, #1a1a1a)',
-            boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+            maxWidth: '98%',
+            background: 'linear-gradient(180deg, #1a1a1a, #0a0a0a)',
+            borderRadius: '0 0 2px 2px',
           }}
         />
-        {/* Laptop shadow */}
+
+        {/* Base / Keyboard deck */}
         <div
-          className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[110%] h-8 rounded-[50%]"
+          className="relative mx-auto rounded-b-xl"
           style={{
-            background: 'radial-gradient(ellipse, rgba(0,0,0,0.15) 0%, transparent 70%)',
+            maxWidth: '100%',
+            height: '14px',
+            background: 'linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%)',
+            boxShadow: `
+              0 4px 20px rgba(0,0,0,0.4),
+              0 0 0 1px rgba(255,255,255,0.05)
+            `,
+          }}
+        >
+          {/* Trackpad notch */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 h-[2px] rounded-full bg-white/10" />
+        </div>
+
+        {/* Reflection/shadow */}
+        <div
+          className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[95%] h-8 rounded-[50%]"
+          style={{
+            background: 'radial-gradient(ellipse, rgba(0,0,0,0.2) 0%, transparent 70%)',
           }}
         />
       </div>
@@ -251,7 +290,7 @@ export default function SelectedWork() {
           </div>
 
           {/* Projects Grid - 2 columns with laptop mockups */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-20">
             {filteredProjects.map((project, index) => (
               <div
                 key={project.id}
@@ -263,7 +302,7 @@ export default function SelectedWork() {
                 <div className="relative">
                   <LaptopMockup image={project.image} alt={project.title} />
 
-                  {/* Hover overlay on laptop */}
+                  {/* Hover overlay */}
                   <div className="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10">
                     <button
                       onClick={(e) => { e.stopPropagation(); openProject(project); }}
@@ -288,7 +327,7 @@ export default function SelectedWork() {
                 </div>
 
                 {/* Project Info */}
-                <div className="mt-8 px-2">
+                <div className="mt-10 px-2">
                   <div className="flex items-baseline justify-between mb-2">
                     <h3
                       className="text-black text-xl group-hover:text-[#7C3AED] transition-colors duration-300"

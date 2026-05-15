@@ -34,19 +34,11 @@ export default function Navigation({ lenisRef }: NavigationProps) {
     >
       {/* Isotipo + Tipografía */}
       <div className="flex items-center gap-3">
-        <div
-          className="w-9 h-9 rounded-lg flex items-center justify-center"
-          style={{
-            background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)',
-          }}
-        >
-          <span
-            className="text-white text-sm font-bold"
-            style={{ fontFamily: 'var(--font-heading)' }}
-          >
-            E
-          </span>
-        </div>
+        <img
+          src="/images/isotipo.png"
+          alt="EMMAGINATION"
+          className="h-10 w-auto object-contain"
+        />
         <div className="hidden sm:block">
           <span
             className="text-white text-lg font-semibold tracking-tight"
