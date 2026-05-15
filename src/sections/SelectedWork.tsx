@@ -14,9 +14,9 @@ const projects = [
     year: '2024',
     image: '/images/project-portalzen.jpg',
     pdf: '/proyectos/portalzen.pdf',
-    description: 'Tienda Shopify de productos zen y bienestar con diseño minimalista',
+    description: 'Tienda online de productos esotéricos, aromaterapia y bienestar. Diseño minimalista con experiencia de compra fluida.',
     url: 'https://www.portalzen.cl',
-    services: ['Logo', 'Shopify', 'E-commerce'],
+    services: ['Shopify', 'E-commerce', 'Branding'],
     offset: 0,
   },
   {
@@ -50,10 +50,21 @@ const projects = [
     year: '2024',
     image: '/images/project-irc.jpg',
     pdf: '/proyectos/irc.pdf',
-    description: 'Landing page con panel autoadministrable de contenidos',
+    description: 'Sitio web institucional para club de rugby con panel autoadministrable de contenidos y noticias.',
     url: 'https://www.inglesrugbyclub.cl',
-    services: ['Landing page', 'Panel admin', 'Web'],
+    services: ['Web institucional', 'Panel admin', 'Noticias'],
     offset: 60,
+  },
+  {
+    id: 5,
+    title: 'Jaime Ávila',
+    category: 'Landing Page',
+    year: '2024',
+    image: '/images/project-fegar.jpg',
+    description: 'Landing page personal para coach y conferencista con diseño profesional y sección de testimonios.',
+    url: 'https://www.jaimeavila.cl',
+    services: ['Landing page', 'Branding', 'Coaching'],
+    offset: 0,
   },
 ];
 
@@ -308,14 +319,16 @@ export default function SelectedWork() {
 
                   {/* Hover overlay */}
                   <div className="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10">
-                    <button
-                      onClick={(e) => { e.stopPropagation(); openProject(project); }}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
-                      style={{ fontFamily: 'var(--font-body)', transitionDelay: '0ms' }}
-                    >
-                      <Eye size={16} />
-                      Ver PDF
-                    </button>
+                    {project.pdf && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); openProject(project); }}
+                        className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
+                        style={{ fontFamily: 'var(--font-body)', transitionDelay: '0ms' }}
+                      >
+                        <Eye size={16} />
+                        Ver PDF
+                      </button>
+                    )}
                     <a
                       href={project.url}
                       target="_blank"

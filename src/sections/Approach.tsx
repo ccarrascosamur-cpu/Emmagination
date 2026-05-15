@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Monitor, Palette, Code2, Play } from 'lucide-react';
+import { Monitor, Palette, Code2, Play, Camera } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -33,6 +33,13 @@ const services = [
     description:
       'Animaciones cinematográficas con scroll y micro-interacciones que dan vida a las interfaces y cautivan a los usuarios.',
     tags: ['GSAP', 'Scroll', 'Micro-interactions'],
+  },
+  {
+    icon: Camera,
+    title: 'Generación de Contenido',
+    description:
+      'Producción de fotografía y video profesional con Filmaker. Contenido visual de alto impacto para redes sociales, web y campañas publicitarias.',
+    tags: ['Fotografía', 'Video', 'Filmaker'],
   },
 ];
 
@@ -140,8 +147,8 @@ export default function Approach() {
           </p>
         </div>
 
-        {/* Services Grid - 4 columns */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Services Grid - 5 columns on large screens */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {services.map((service, index) => {
             const Icon = service.icon;
             return (

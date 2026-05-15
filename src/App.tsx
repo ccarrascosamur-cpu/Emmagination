@@ -3,6 +3,7 @@ import Lenis from '@studio-freight/lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import Navigation from './components/Navigation';
+import SEO from './components/SEO';
 import WhatsAppButton from './components/WhatsAppButton';
 import Hero from './sections/Hero';
 import StatsBar from './sections/StatsBar';
@@ -50,6 +51,7 @@ export default function App() {
 
   return (
     <div className="relative">
+      <SEO />
       <Navigation lenisRef={lenisRef} />
       <main>
         <Hero lenisRef={lenisRef} />
