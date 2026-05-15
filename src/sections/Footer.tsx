@@ -67,12 +67,19 @@ export default function Footer() {
             </p>
             <div className="flex flex-col gap-3">
               <a
-                href="mailto:ccarrascosamur@gmail.com"
+                href="mailto:hola@emmagination.cl"
                 className="inline-flex items-center gap-2 px-8 py-3 bg-[#7C3AED] rounded-full text-white text-sm hover:bg-[#CC26D3] transition-all duration-300 w-fit"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
                 <Mail size={16} />
                 Contactar
+              </a>
+              <a
+                href="mailto:hola@emmagination.cl"
+                className="text-white/50 hover:text-white/80 transition-colors text-xs"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                hola@emmagination.cl
               </a>
               <a
                 href="https://wa.me/56988290618"
