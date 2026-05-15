@@ -1,20 +1,20 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Palette, Code2, Box, Zap, ArrowUpRight } from 'lucide-react';
+import { Monitor, Palette, Code2, Play } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const services = [
   {
-    icon: Palette,
+    icon: Monitor,
     title: 'Diseño Web Profesional',
     description:
       'Sitios web minimalistos y de alto rendimiento que priorizan la experiencia de usuario y la conversión. Cada píxel tiene un propósito.',
     tags: ['UI/UX', 'Responsive', 'Motion'],
   },
   {
-    icon: Box,
+    icon: Palette,
     title: 'Branding e Identidad Visual',
     description:
       'Identidades visuales que destacan en el mercado y construyen presencia duradera. Desde el logo hasta sistemas de marca completos.',
@@ -28,15 +28,13 @@ const services = [
     tags: ['React', 'Shopify', 'WebGL'],
   },
   {
-    icon: Zap,
+    icon: Play,
     title: 'Motion & Animación',
     description:
       'Animaciones cinematográficas con scroll y micro-interacciones que dan vida a las interfaces y cautivan a los usuarios.',
     tags: ['GSAP', 'Scroll', 'Micro-interactions'],
   },
 ];
-
-
 
 export default function Approach() {
   const sectionRef = useRef<HTMLElement>(null);
@@ -93,75 +91,90 @@ export default function Approach() {
       id="approach"
       className="relative w-full"
       style={{
-        backgroundColor: '#ffffff',
+        backgroundColor: '#F8F7FB',
         padding: '120px 0',
       }}
     >
       <div className="mx-auto" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
         {/* Section Header */}
-        <div ref={headerRef} className="mb-20 opacity-0">
-          <span className="label-mono text-black/50 block mb-4">
-            NUESTROS SERVICIOS
+        <div ref={headerRef} className="text-center mb-20 opacity-0">
+          <span
+            className="block mb-4"
+            style={{
+              fontFamily: 'var(--font-mono)',
+              fontSize: '0.75rem',
+              textTransform: 'uppercase',
+              fontWeight: 500,
+              letterSpacing: '1px',
+              color: '#7C3AED',
+            }}
+          >
+            SERVICIOS
           </span>
           <h2
             style={{
               fontFamily: 'var(--font-heading)',
-              fontSize: 'clamp(36px, 5vw, 64px)',
-              fontWeight: 500,
-              letterSpacing: '-1.5px',
-              lineHeight: 1.05,
-              color: '#000000',
+              fontSize: 'clamp(32px, 4vw, 48px)',
+              fontWeight: 700,
+              letterSpacing: '-1px',
+              lineHeight: 1.15,
+              color: '#1a1a2e',
             }}
           >
             Diseño,{' '}
             <span style={{ color: '#7C3AED' }}>Branding</span>,{' '}
-            <span
-              className="inline-block relative"
-              style={{
-                color: 'transparent',
-                WebkitTextStroke: '2px #382B8F',
-              }}
-            >
-              Code
-            </span>{' '}
-            y{' '}
+            <span style={{ color: '#7C3AED' }}>Code</span> y{' '}
             <span style={{ color: '#CC26D3' }}>Motion</span>
           </h2>
           <p
-            className="mt-6 max-w-2xl text-black/60"
+            className="mt-4 max-w-2xl mx-auto"
             style={{
               fontFamily: 'var(--font-body)',
-              fontSize: '1.125rem',
+              fontSize: '1rem',
               lineHeight: 1.6,
+              color: '#6b7280',
             }}
           >
-            Enfoque estratégico que combina design thinking con excelencia
-            técnica. Transformamos problemas complejos en soluciones digitales
-            elegantes que generan resultados.
+            Enfoque estratégico que combina design thinking con excelencia técnica.
+            Transformamos problemas complejos en soluciones digitales elegantes.
           </p>
         </div>
 
-        {/* Services Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Services Grid - 4 columns */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((service, index) => {
             const Icon = service.icon;
             return (
               <div
                 key={service.title}
                 ref={(el) => { cardsRef.current[index] = el; }}
-                className="group relative p-8 bg-white/60 backdrop-blur-sm border border-black/5 hover:border-[#7C3AED]/30 hover:bg-white transition-all duration-500 opacity-0"
+                className="group relative p-6 bg-white rounded-2xl border border-gray-100 hover:border-[#7C3AED]/20 hover:shadow-xl hover:shadow-[#7C3AED]/5 transition-all duration-500 opacity-0"
               >
+                {/* Top accent line */}
+                <div
+                  className="absolute top-0 left-6 right-6 h-[2px] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+                  style={{
+                    background: 'linear-gradient(90deg, #7C3AED, #CC26D3)',
+                  }}
+                />
+
                 {/* Icon */}
-                <div className="w-12 h-12 flex items-center justify-center rounded-lg bg-[#7C3AED]/10 text-[#7C3AED] mb-6 group-hover:bg-[#7C3AED] group-hover:text-white transition-all duration-300">
-                  <Icon size={24} strokeWidth={1.5} />
+                <div
+                  className="w-10 h-10 flex items-center justify-center rounded-xl mb-5 transition-all duration-300"
+                  style={{
+                    background: 'linear-gradient(135deg, #7C3AED15, #CC26D315)',
+                    color: '#7C3AED',
+                  }}
+                >
+                  <Icon size={20} strokeWidth={1.5} />
                 </div>
 
                 {/* Title */}
                 <h3
-                  className="text-black text-xl mb-3"
+                  className="text-[#1a1a2e] text-base mb-3"
                   style={{
                     fontFamily: 'var(--font-heading)',
-                    fontWeight: 500,
+                    fontWeight: 600,
                   }}
                 >
                   {service.title}
@@ -169,7 +182,7 @@ export default function Approach() {
 
                 {/* Description */}
                 <p
-                  className="text-black/50 text-sm mb-6"
+                  className="text-gray-500 text-sm mb-5"
                   style={{
                     fontFamily: 'var(--font-body)',
                     lineHeight: 1.6,
@@ -183,62 +196,20 @@ export default function Approach() {
                   {service.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="px-3 py-1 bg-black/5 text-black/50 rounded-full text-xs"
-                      style={{ fontFamily: 'var(--font-mono)' }}
+                      className="px-2.5 py-1 rounded-md text-xs"
+                      style={{
+                        fontFamily: 'var(--font-mono)',
+                        background: 'rgba(124, 58, 237, 0.06)',
+                        color: '#7C3AED',
+                      }}
                     >
                       {tag}
                     </span>
                   ))}
                 </div>
-
-                {/* Arrow link */}
-                <div className="mt-6 flex items-center gap-2 text-[#7C3AED] opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                  <span
-                    className="text-sm font-medium"
-                    style={{ fontFamily: 'var(--font-body)' }}
-                  >
-                    Ver más
-                  </span>
-                  <ArrowUpRight size={16} />
-                </div>
               </div>
             );
           })}
-        </div>
-
-        {/* Bottom stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mt-20 pt-16 border-t border-black/10">
-          {[
-            { number: '50+', label: 'Proyectos' },
-            { number: '30+', label: 'Clientes' },
-            { number: '5+', label: 'Años' },
-            { number: '100%', label: 'Satisfacción' },
-          ].map((stat) => (
-            <div key={stat.label} className="text-center md:text-left">
-              <div
-                className="text-black"
-                style={{
-                  fontFamily: 'var(--font-heading)',
-                  fontSize: 'clamp(28px, 3vw, 40px)',
-                  fontWeight: 500,
-                  letterSpacing: '-1px',
-                }}
-              >
-                {stat.number}
-              </div>
-              <div
-                className="text-black/50 mt-1"
-                style={{
-                  fontFamily: 'var(--font-mono)',
-                  fontSize: '0.75rem',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                }}
-              >
-                {stat.label}
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </section>
