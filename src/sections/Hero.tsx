@@ -238,7 +238,7 @@ export default function Hero({ lenisRef }: HeroProps) {
             className="text-white/70 text-sm"
             style={{ fontFamily: 'var(--font-body)' }}
           >
-            Diseño web, branding y experiencias digitales
+            Agencia de diseño web, branding y SEO en Chile
           </span>
         </div>
 
@@ -248,13 +248,13 @@ export default function Hero({ lenisRef }: HeroProps) {
           className="text-white leading-none opacity-0"
           style={{
             fontFamily: 'var(--font-heading)',
-            fontSize: 'clamp(48px, 10vw, 96px)',
+            fontSize: 'clamp(42px, 9vw, 84px)',
             fontWeight: 700,
             letterSpacing: '-3px',
-            lineHeight: 1.0,
+            lineHeight: 1.05,
           }}
         >
-          CREAMOS
+          Diseño Web,
           <br />
           <span
             style={{
@@ -264,10 +264,10 @@ export default function Hero({ lenisRef }: HeroProps) {
               backgroundClip: 'text',
             }}
           >
-            REALIDADES
+            Branding y SEO
           </span>
           <br />
-          DIGITALES
+          en Chile
         </h1>
 
         {/* Tagline: Deja de ser logo. Para ser marca. */}
@@ -286,14 +286,14 @@ export default function Hero({ lenisRef }: HeroProps) {
               lineHeight: 1.1,
             }}
           >
-            <span className="text-white">Deja de ser logo.</span>
+            <span className="text-white">Deja de ser un logo.</span>
             <br />
             <span
               style={{
                 color: 'rgba(255, 255, 255, 0.35)',
               }}
             >
-              Para ser marca.
+              Pasa a ser una marca.
             </span>
           </p>
         </div>
@@ -309,8 +309,8 @@ export default function Hero({ lenisRef }: HeroProps) {
             fontWeight: 300,
           }}
         >
-          Diseñamos identidades, optimizamos tiendas Shopify y posicionamos
-          marcas en Google. Hacemos que tu negocio se vea, se entienda y se compre.
+          Diseñamos identidades y posicionamos marcas en Google. Hacemos que tu
+          negocio se vea, se entienda y se compre.
         </p>
 
         {/* CTAs */}
