@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { Monitor, Palette, Code2, Play, Camera } from 'lucide-react';
+import { Link } from 'react-router';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -9,6 +10,7 @@ const services = [
   {
     icon: Monitor,
     title: 'Diseño Web Profesional',
+    href: '/servicios/diseno-web',
     description:
       'Sitios web minimalistos y de alto rendimiento que priorizan la experiencia de usuario y la conversión. Cada píxel tiene un propósito.',
     tags: ['UI/UX', 'Responsive', 'Motion'],
@@ -16,6 +18,7 @@ const services = [
   {
     icon: Palette,
     title: 'Branding e Identidad Visual',
+    href: '/servicios/branding',
     description:
       'Identidades visuales que destacan en el mercado y construyen presencia duradera. Desde el logo hasta sistemas de marca completos.',
     tags: ['Logo', 'Estrategia', 'Guidelines'],
@@ -23,9 +26,10 @@ const services = [
   {
     icon: Code2,
     title: 'Desarrollo & Shopify',
+    href: '/servicios/seo',
     description:
-      'Código limpio y escalable. React, WebGL e integración de CMS headless. Temas Shopify personalizados que convierten.',
-    tags: ['React', 'Shopify', 'WebGL'],
+      'SEO técnico, local y estratégico para mejorar visibilidad, estructura y captación orgánica sin depender solo de anuncios.',
+    tags: ['SEO técnico', 'SEO local', 'Contenido'],
   },
   {
     icon: Play,
@@ -46,7 +50,7 @@ const services = [
 export default function Approach() {
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
-  const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const cardsRef = useRef<(HTMLElement | null)[]>([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -152,8 +156,9 @@ export default function Approach() {
           {services.map((service, index) => {
             const Icon = service.icon;
             return (
-              <div
+              <Link
                 key={service.title}
+                to={service.href ?? '/#contact'}
                 ref={(el) => { cardsRef.current[index] = el; }}
                 className="group relative p-6 bg-white rounded-2xl border border-gray-100 hover:border-[#7C3AED]/20 hover:shadow-xl hover:shadow-[#7C3AED]/5 transition-all duration-500 opacity-0"
               >
@@ -214,7 +219,7 @@ export default function Approach() {
                     </span>
                   ))}
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

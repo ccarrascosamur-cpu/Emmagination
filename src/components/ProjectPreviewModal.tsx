@@ -1,19 +1,7 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { X, ExternalLink, FileText } from 'lucide-react';
-
-interface Project {
-  id: number;
-  title: string;
-  category: string;
-  year: string;
-  image: string;
-  pdf?: string;
-  description: string;
-  url: string;
-  services: string[];
-  offset: number;
-}
+import type { Project } from '../data/projects';
 
 interface ProjectPreviewModalProps {
   project: Project | null;

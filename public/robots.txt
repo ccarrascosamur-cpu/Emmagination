@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://emmagination.ccarrascosamur.workers.dev/sitemap.xml

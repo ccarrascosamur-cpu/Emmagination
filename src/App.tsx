@@ -14,12 +14,16 @@ import Process from './sections/Process';
 import Testimonial from './sections/Testimonial';
 import Footer from './sections/Footer';
 import PortfolioPage from './pages/PortfolioPage';
+import ServicePage from './pages/ServicePage';
+import ProjectCasePage from './pages/ProjectCasePage';
+import { homeSeo } from './lib/route-seo';
 
 gsap.registerPlugin(ScrollTrigger);
 
 function HomePage({ lenisRef }: { lenisRef: React.MutableRefObject<Lenis | null> }) {
   return (
     <main>
+      <SEO {...homeSeo} />
       <Hero lenisRef={lenisRef} />
       <StatsBar />
       <SelectedWork />
@@ -74,13 +78,27 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
+  useEffect(() => {
+    if (!location.hash) return;
+
+    const target = document.querySelector(location.hash);
+    if (!target) return;
+
+    const timeoutId = window.setTimeout(() => {
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [location.hash, location.pathname]);
+
   return (
     <div className="relative">
-      <SEO />
       <Navigation lenisRef={lenisRef} />
       <Routes>
         <Route path="/" element={<HomePage lenisRef={lenisRef} />} />
         <Route path="/portafolio" element={<PortfolioPage />} />
+        <Route path="/servicios/:slug" element={<ServicePage />} />
+        <Route path="/proyectos/:slug" element={<ProjectCasePage />} />
       </Routes>
       <WhatsAppButton />
     </div>

@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ExternalLink, Eye, ArrowLeft } from 'lucide-react';
-import { projects, categories, type Project } from '../data/projects';
+import type { Project } from '../data/projects';
 import ProjectPreviewModal from '../components/ProjectPreviewModal';
 import Footer from '../sections/Footer';
+import SEO from '../components/SEO';
+import { portfolioSeo } from '../lib/route-seo';
+import { useSiteData } from '../lib/site-data-client';
+import { getProjectCategories } from '../lib/site-data';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -100,7 +104,8 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
 
 export default function PortfolioPage() {
   const navigate = useNavigate();
-  const pageRef = useRef<HTMLDivElement>(null);
+  const { data } = useSiteData();
+  const pageRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const filtersRef = useRef<HTMLDivElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
@@ -108,11 +113,13 @@ export default function PortfolioPage() {
   const [activeFilter, setActiveFilter] = useState('Todos');
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const categories = getProjectCategories(data.projects);
 
   const filteredProjects =
     activeFilter === 'Todos'
-      ? projects
-      : projects.filter((p) => p.category === activeFilter);
+      ? data.projects
+      : data.projects.filter((p) => p.category === activeFilter);
 
   const openProject = (project: Project) => {
     setSelectedProject(project);
@@ -180,8 +187,20 @@ export default function PortfolioPage() {
     return () => ctx.revert();
   }, [filteredProjects]);
 
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
+
   return (
-    <div ref={pageRef} className="relative min-h-screen" style={{ backgroundColor: '#F8F7FB' }}>
+    <main ref={pageRef} className="relative min-h-screen" style={{ backgroundColor: '#F8F7FB' }}>
+      <SEO {...portfolioSeo} />
       {/* Top dark header bar */}
       <div className="relative w-full" style={{ backgroundColor: '#000000' }}>
         {/* Back button */}
@@ -218,6 +237,17 @@ export default function PortfolioPage() {
             >
               Portafolio
             </h1>
+            <p
+              className="mt-4 max-w-2xl text-white/65"
+              style={{
+                fontFamily: 'var(--font-body)',
+                fontSize: '1rem',
+                lineHeight: 1.7,
+              }}
+            >
+              Casos de diseño web, branding, Shopify y landing pages desarrollados
+              para marcas que necesitaban vender mejor y comunicar con claridad.
+            </p>
           </div>
         </section>
 
@@ -266,7 +296,7 @@ export default function PortfolioPage() {
                 key={project.id}
                 ref={(el) => { cardsRef.current[index] = el; }}
                 className="group cursor-pointer opacity-0"
-                style={{ marginTop: typeof window !== 'undefined' && window.innerWidth >= 768 ? `${project.offset}px` : 0 }}
+                style={{ marginTop: isDesktop ? `${project.offset}px` : 0 }}
               >
                 {/* Laptop Mockup */}
                 <div className="relative">
@@ -274,11 +304,18 @@ export default function PortfolioPage() {
 
                   {/* Hover overlay */}
                   <div className="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10">
+                    <Link
+                      to={`/proyectos/${project.slug}`}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
+                      style={{ fontFamily: 'var(--font-body)', transitionDelay: '0ms' }}
+                    >
+                      Caso
+                    </Link>
                     {project.pdf && (
                       <button
                         onClick={(e) => { e.stopPropagation(); openProject(project); }}
                         className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
-                        style={{ fontFamily: 'var(--font-body)', transitionDelay: '0ms' }}
+                        style={{ fontFamily: 'var(--font-body)', transitionDelay: '80ms' }}
                       >
                         <Eye size={16} />
                         Ver PDF
@@ -290,7 +327,7 @@ export default function PortfolioPage() {
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
-                      style={{ fontFamily: 'var(--font-body)', transitionDelay: '80ms' }}
+                      style={{ fontFamily: 'var(--font-body)', transitionDelay: '160ms' }}
                     >
                       <ExternalLink size={16} />
                       Visitar
@@ -324,7 +361,7 @@ export default function PortfolioPage() {
                     className="text-black/50 text-sm mb-3"
                     style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}
                   >
-                    {project.description}
+                    {project.excerpt}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {project.services.map((service, i) => (
@@ -355,6 +392,6 @@ export default function PortfolioPage() {
         isOpen={isModalOpen}
         onClose={closeModal}
       />
-    </div>
+    </main>
   );
 }

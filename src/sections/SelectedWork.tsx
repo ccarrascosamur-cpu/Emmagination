@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router';
+import { Link } from 'react-router';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ExternalLink, Eye, ArrowRight } from 'lucide-react';
-import { projects, type Project } from '../data/projects';
+import type { Project } from '../data/projects';
 import ProjectPreviewModal from '../components/ProjectPreviewModal';
+import { useSiteData } from '../lib/site-data-client';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -112,17 +113,17 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
 }
 
 export default function SelectedWork() {
-  const navigate = useNavigate();
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
   const ctaRef = useRef<HTMLDivElement>(null);
+  const { data } = useSiteData();
 
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
 
-  // Show only the last 4 projects
-  const recentProjects = projects.slice(0, 4);
+  const recentProjects = data.projects.filter((project) => project.featured).slice(0, 4);
 
   const openProject = (project: Project) => {
     setSelectedProject(project);
@@ -192,6 +193,17 @@ export default function SelectedWork() {
     return () => ctx.revert();
   }, []);
 
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
+
   return (
     <>
       <section
@@ -242,7 +254,7 @@ export default function SelectedWork() {
                 key={project.id}
                 ref={(el) => { cardsRef.current[index] = el; }}
                 className="group cursor-pointer opacity-0"
-                style={{ marginTop: typeof window !== 'undefined' && window.innerWidth >= 768 ? `${project.offset}px` : 0 }}
+                style={{ marginTop: isDesktop ? `${project.offset}px` : 0 }}
               >
                 {/* Laptop Mockup */}
                 <div className="relative">
@@ -250,11 +262,18 @@ export default function SelectedWork() {
 
                   {/* Hover overlay */}
                   <div className="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10">
+                    <Link
+                      to={`/proyectos/${project.slug}`}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
+                      style={{ fontFamily: 'var(--font-body)', transitionDelay: '0ms' }}
+                    >
+                      Caso
+                    </Link>
                     {project.pdf && (
                       <button
                         onClick={(e) => { e.stopPropagation(); openProject(project); }}
                         className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
-                        style={{ fontFamily: 'var(--font-body)', transitionDelay: '0ms' }}
+                        style={{ fontFamily: 'var(--font-body)', transitionDelay: '80ms' }}
                       >
                         <Eye size={16} />
                         Ver PDF
@@ -266,7 +285,7 @@ export default function SelectedWork() {
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
                       className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
-                      style={{ fontFamily: 'var(--font-body)', transitionDelay: '80ms' }}
+                      style={{ fontFamily: 'var(--font-body)', transitionDelay: '160ms' }}
                     >
                       <ExternalLink size={16} />
                       Visitar
@@ -300,7 +319,7 @@ export default function SelectedWork() {
                     className="text-black/50 text-sm mb-3"
                     style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}
                   >
-                    {project.description}
+                    {project.excerpt}
                   </p>
                   {/* Services tags */}
                   <div className="flex flex-wrap gap-2">
@@ -325,8 +344,8 @@ export default function SelectedWork() {
 
           {/* CTA to full portfolio */}
           <div ref={ctaRef} className="flex justify-center mt-20 opacity-0">
-            <button
-              onClick={() => navigate('/portafolio')}
+            <Link
+              to="/portafolio"
               className="group inline-flex items-center gap-3 px-8 py-4 rounded-full text-white text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-[#7C3AED]/25"
               style={{
                 fontFamily: 'var(--font-body)',
@@ -335,7 +354,7 @@ export default function SelectedWork() {
             >
               Ver todos los proyectos
               <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
           </div>
         </div>
       </section>

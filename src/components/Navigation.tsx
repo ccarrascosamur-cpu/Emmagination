@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useLocation } from 'react-router';
+import { Link, useNavigate, useLocation } from 'react-router';
 import Lenis from '@studio-freight/lenis';
 
 interface NavigationProps {
@@ -27,16 +27,13 @@ export default function Navigation({ lenisRef }: NavigationProps) {
     }
   };
 
-  const handleNavClick = (target: string) => {
-    if (isHome) {
-      scrollTo(target);
-    } else {
-      navigate('/' + target);
-    }
-  };
-
-  const handlePortfolioClick = () => {
-    navigate('/portafolio');
+  const handleSectionLinkClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    target: string,
+  ) => {
+    if (!isHome) return;
+    event.preventDefault();
+    scrollTo(target);
   };
 
   const handleLogoClick = () => {
@@ -58,8 +55,14 @@ export default function Navigation({ lenisRef }: NavigationProps) {
       style={{ zIndex: 100 }}
     >
       {/* Isotipo + Tipografía */}
-      <button
-        onClick={handleLogoClick}
+      <Link
+        to="/"
+        onClick={(event) => {
+          if (isHome) {
+            event.preventDefault();
+            handleLogoClick();
+          }
+        }}
         className="flex items-center gap-3"
       >
         <img
@@ -75,43 +78,54 @@ export default function Navigation({ lenisRef }: NavigationProps) {
             EMMA<strong>GINATION</strong>
           </span>
         </div>
-      </button>
+      </Link>
 
       {/* Navigation Links */}
       <div className="flex items-center gap-8">
-        <button
-          onClick={handlePortfolioClick}
+        <Link
+          to="/servicios/seo"
+          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm hidden lg:inline-block"
+          style={{ fontFamily: 'var(--font-body)' }}
+        >
+          SEO
+        </Link>
+        <Link
+          to="/portafolio"
           className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
           style={{ fontFamily: 'var(--font-body)' }}
         >
           Portafolio
-        </button>
-        <button
-          onClick={() => handleNavClick('#approach')}
+        </Link>
+        <a
+          href="/#approach"
+          onClick={(event) => handleSectionLinkClick(event, '#approach')}
           className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
           style={{ fontFamily: 'var(--font-body)' }}
         >
           Servicios
-        </button>
-        <button
-          onClick={() => handleNavClick('#process')}
+        </a>
+        <a
+          href="/#process"
+          onClick={(event) => handleSectionLinkClick(event, '#process')}
           className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
           style={{ fontFamily: 'var(--font-body)' }}
         >
           Proceso
-        </button>
-        <button
-          onClick={() => handleNavClick('#contact')}
+        </a>
+        <a
+          href="/#contact"
+          onClick={(event) => handleSectionLinkClick(event, '#contact')}
           className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
           style={{ fontFamily: 'var(--font-body)' }}
         >
           Contacto
-        </button>
+        </a>
       </div>
 
       {/* CTA Button */}
-      <button
-        onClick={() => handleNavClick('#contact')}
+      <a
+        href="/#contact"
+        onClick={(event) => handleSectionLinkClick(event, '#contact')}
         className="hidden md:inline-flex px-6 py-2.5 rounded-full text-white text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-[#7C3AED]/25"
         style={{
           fontFamily: 'var(--font-body)',
@@ -119,7 +133,7 @@ export default function Navigation({ lenisRef }: NavigationProps) {
         }}
       >
         Trabajemos juntos
-      </button>
+      </a>
     </nav>
   );
 }

@@ -1,17 +1,23 @@
-import { Instagram, Linkedin, Twitter, Mail, Phone, MessageCircle } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { Instagram, Linkedin, Mail, Phone, MessageCircle } from 'lucide-react';
+import { Link, useLocation } from 'react-router';
+import { useSiteData } from '../lib/site-data-client';
 
 export default function Footer() {
-  const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
+  const { data } = useSiteData();
+  const whatsappNumber = data.config.contactPhone.replace(/[^\d]/g, '');
 
-  const handleNavClick = (href: string) => {
-    if (href.startsWith('#')) {
-      const el = document.querySelector(href);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      }
-    } else {
-      navigate(href);
+  const handleSectionLinkClick = (
+    event: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    if (!isHome) return;
+
+    const el = document.querySelector(href);
+    if (el) {
+      event.preventDefault();
+      el.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -67,7 +73,7 @@ export default function Footer() {
             </p>
             <div className="flex flex-col gap-3">
               <a
-                href="mailto:hola@emmagination.cl"
+                href={`mailto:${data.config.contactEmail}`}
                 className="inline-flex items-center gap-2 px-8 py-3 bg-[#7C3AED] rounded-full text-white text-sm hover:bg-[#CC26D3] transition-all duration-300 w-fit"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
@@ -75,14 +81,14 @@ export default function Footer() {
                 Contactar
               </a>
               <a
-                href="mailto:hola@emmagination.cl"
+                href={`mailto:${data.config.contactEmail}`}
                 className="text-white/50 hover:text-white/80 transition-colors text-xs"
                 style={{ fontFamily: 'var(--font-mono)' }}
               >
-                hola@emmagination.cl
+                {data.config.contactEmail}
               </a>
               <a
-                href="https://wa.me/56988290618"
+                href={`https://wa.me/${whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 px-8 py-3 bg-[#25D366] rounded-full text-white text-sm hover:bg-[#128C7E] transition-all duration-300 w-fit"
@@ -92,12 +98,12 @@ export default function Footer() {
                 WhatsApp
               </a>
               <a
-                href="tel:+56988290618"
+                href={`tel:${whatsappNumber}`}
                 className="inline-flex items-center gap-2 text-white/70 hover:text-white transition-colors text-sm"
                 style={{ fontFamily: 'var(--font-body)' }}
               >
                 <Phone size={16} />
-                +56 9 8829 0618
+                {data.config.contactPhone}
               </a>
             </div>
           </div>
@@ -118,13 +124,24 @@ export default function Footer() {
                   { label: 'Contacto', href: '#contact' },
                 ].map((item) => (
                   <li key={item.label}>
-                    <button
-                      onClick={() => handleNavClick(item.href)}
-                      className="text-white/70 hover:text-white transition-colors text-sm"
-                      style={{ fontFamily: 'var(--font-body)' }}
-                    >
-                      {item.label}
-                    </button>
+                    {item.href.startsWith('#') ? (
+                      <a
+                        href={`/${item.href}`}
+                        onClick={(event) => handleSectionLinkClick(event, item.href)}
+                        className="text-white/70 hover:text-white transition-colors text-sm"
+                        style={{ fontFamily: 'var(--font-body)' }}
+                      >
+                        {item.label}
+                      </a>
+                    ) : (
+                      <Link
+                        to={item.href}
+                        className="text-white/70 hover:text-white transition-colors text-sm"
+                        style={{ fontFamily: 'var(--font-body)' }}
+                      >
+                        {item.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -139,19 +156,18 @@ export default function Footer() {
               </h4>
               <ul className="space-y-3">
                 {[
-                  'Diseño Web',
-                  'Branding',
-                  'Shopify',
-                  'UX/UI',
-                  'Motion',
+                  { label: 'Diseño Web', href: '/servicios/diseno-web' },
+                  { label: 'Branding', href: '/servicios/branding' },
+                  { label: 'SEO', href: '/servicios/seo' },
                 ].map((item) => (
-                  <li key={item}>
-                    <span
+                  <li key={item.label}>
+                    <Link
+                      to={item.href}
                       className="text-white/70 text-sm"
                       style={{ fontFamily: 'var(--font-body)' }}
                     >
-                      {item}
-                    </span>
+                      {item.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -166,13 +182,14 @@ export default function Footer() {
               </h4>
               <div className="flex gap-4">
                 {[
-                  { icon: Instagram, label: 'Instagram' },
-                  { icon: Linkedin, label: 'LinkedIn' },
-                  { icon: Twitter, label: 'Twitter' },
-                ].map(({ icon: Icon, label }) => (
+                  { icon: Instagram, label: 'Instagram', href: data.config.instagramUrl },
+                  { icon: Linkedin, label: 'LinkedIn', href: data.config.linkedinUrl },
+                ].map(({ icon: Icon, label, href }) => (
                   <a
                     key={label}
-                    href="#"
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="w-10 h-10 flex items-center justify-center rounded-full border border-white/10 text-white/50 hover:text-white hover:border-[#7C3AED] hover:bg-[#7C3AED]/10 transition-all duration-300"
                     aria-label={label}
                   >
@@ -180,6 +197,15 @@ export default function Footer() {
                   </a>
                 ))}
               </div>
+              <a
+                href={data.config.googleBusinessUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-5 inline-flex text-white/55 hover:text-white transition-colors text-xs"
+                style={{ fontFamily: 'var(--font-mono)' }}
+              >
+                Ver perfil en Google Business
+              </a>
             </div>
           </div>
         </div>
