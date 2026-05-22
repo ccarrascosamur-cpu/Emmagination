@@ -8,10 +8,14 @@ import SEO from './components/SEO';
 import WhatsAppButton from './components/WhatsAppButton';
 import Hero from './sections/Hero';
 import StatsBar from './sections/StatsBar';
+import Marquee from './sections/Marquee';
 import SelectedWork from './sections/SelectedWork';
 import Approach from './sections/Approach';
 import Process from './sections/Process';
+import Calculadora from './sections/Calculadora';
 import Testimonial from './sections/Testimonial';
+import CTABanner from './sections/CTABanner';
+import AuditoriaSEO from './sections/AuditoriaSEO';
 import Footer from './sections/Footer';
 import PortfolioPage from './pages/PortfolioPage';
 import ServicePage from './pages/ServicePage';
@@ -26,10 +30,14 @@ function HomePage({ lenisRef }: { lenisRef: React.MutableRefObject<Lenis | null>
       <SEO {...homeSeo} />
       <Hero lenisRef={lenisRef} />
       <StatsBar />
+      <Marquee />
       <SelectedWork />
       <Approach />
       <Process />
+      <Calculadora />
       <Testimonial />
+      <CTABanner />
+      <AuditoriaSEO />
       <Footer />
     </main>
   );
@@ -56,6 +64,15 @@ export default function App() {
     });
 
     gsap.ticker.lagSmoothing(0);
+
+    // Scroll progress bar
+    ScrollTrigger.create({
+      start: 'top top',
+      end: 'max',
+      onUpdate: (self) => {
+        gsap.set('#scroll-progress', { width: `${self.progress * 100}%` });
+      },
+    });
 
     // Page load animation
     gsap.fromTo(
@@ -93,6 +110,19 @@ export default function App() {
 
   return (
     <div className="relative">
+      <div
+        id="scroll-progress"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          height: '3px',
+          width: '0%',
+          zIndex: 9999,
+          background: 'linear-gradient(90deg, #7C3AED, #CC26D3)',
+          pointerEvents: 'none',
+        }}
+      />
       <Navigation lenisRef={lenisRef} />
       <Routes>
         <Route path="/" element={<HomePage lenisRef={lenisRef} />} />

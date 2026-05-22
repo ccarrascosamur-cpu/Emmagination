@@ -15,7 +15,7 @@ export default function Navigation({ lenisRef }: NavigationProps) {
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 50);
+      setScrolled(window.scrollY > 30);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
@@ -49,7 +49,7 @@ export default function Navigation({ lenisRef }: NavigationProps) {
       ref={navRef}
       className={`fixed top-0 left-0 w-full h-20 flex items-center justify-between px-8 lg:px-16 transition-all duration-500 ${
         scrolled
-          ? 'bg-black/80 backdrop-blur-md border-b border-white/5'
+          ? 'nav-scrolled'
           : 'bg-transparent'
       }`}
       style={{ zIndex: 100 }}
@@ -111,6 +111,22 @@ export default function Navigation({ lenisRef }: NavigationProps) {
           style={{ fontFamily: 'var(--font-body)' }}
         >
           Proceso
+        </a>
+        <a
+          href="/#cotizar"
+          onClick={(event) => handleSectionLinkClick(event, '#cotizar')}
+          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
+          style={{ fontFamily: 'var(--font-body)' }}
+        >
+          Cotizar
+        </a>
+        <a
+          href="/#auditoria"
+          onClick={(event) => handleSectionLinkClick(event, '#auditoria')}
+          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
+          style={{ fontFamily: 'var(--font-body)' }}
+        >
+          Auditoría
         </a>
         <a
           href="/#contact"

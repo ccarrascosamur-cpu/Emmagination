@@ -358,9 +358,12 @@
   <!-- TAB: PROJECTS -->
   <div id="tab-projects" class="tab-content active">
     <div class="panel">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
         <span class="panel-title">Proyectos</span>
-        <button id="btn-new-project" class="btn btn-primary btn-sm">+ Nuevo proyecto</button>
+        <div style="display:flex; gap:10px;">
+          <button id="btn-extract-project" class="btn btn-primary btn-sm">✨ Agregar desde URL</button>
+          <button id="btn-new-project" class="btn btn-secondary btn-sm">+ Nuevo proyecto</button>
+        </div>
       </div>
       <div id="project-list" class="project-grid"></div>
     </div>
@@ -381,7 +384,7 @@
   <div id="tab-content" class="tab-content">
     <div class="panel">
       <span class="panel-title">Hero / Página de inicio</span>
-      <div class="form-grid" id="hero-form">
+      <form class="form-grid" id="hero-form">
         <div class="full"><label>Badge</label><input name="badge" /></div>
         <div><label>Título línea 1</label><input name="titleLine1" /></div>
         <div><label>Título línea 2</label><input name="titleLine2" /></div>
@@ -391,7 +394,7 @@
         <div class="full"><label>Subtítulo</label><textarea name="subtitle"></textarea></div>
         <div><label>CTA Primario</label><input name="ctaPrimary" /></div>
         <div><label>CTA Secundario</label><input name="ctaSecondary" /></div>
-      </div>
+      </form>
     </div>
   </div>
 
@@ -399,21 +402,21 @@
   <div id="tab-config" class="tab-content">
     <div class="panel">
       <span class="panel-title">Configuración pública</span>
-      <div class="form-grid" id="config-form">
+      <form class="form-grid" id="config-form">
         <div><label>Email</label><input name="contactEmail" /></div>
         <div><label>Teléfono</label><input name="contactPhone" /></div>
         <div><label>Instagram</label><input name="instagramUrl" /></div>
         <div><label>LinkedIn</label><input name="linkedinUrl" /></div>
         <div class="full"><label>Google Business</label><input name="googleBusinessUrl" /></div>
-      </div>
+      </form>
     </div>
     <div class="panel">
       <span class="panel-title">SEO Global</span>
-      <div class="form-grid" id="seo-form">
+      <form class="form-grid" id="seo-form">
         <div class="full"><label>Título del sitio</label><input name="siteTitle" /></div>
         <div class="full"><label>Descripción</label><textarea name="siteDescription"></textarea></div>
         <div class="full"><label>Keywords</label><input name="siteKeywords" /></div>
-      </div>
+      </form>
     </div>
   </div>
 
@@ -428,6 +431,37 @@
     </div>
   </div>
 </div>
+
+<!-- MODAL: EXTRACT FROM URL -->
+<div id="modal-extract" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>✨ Agregar proyecto desde URL</h2>
+      <button class="modal-close" onclick="closeModal('modal-extract')">&times;</button>
+    </div>
+    <form id="extract-form">
+      <label>URL del sitio web</label>
+      <input name="url" type="url" placeholder="https://ejemplo.cl" required style="margin-bottom:16px;" />
+      <p class="hint">La IA analizará el sitio y generará automáticamente el contenido del proyecto.</p>
+      <div id="extract-loading" style="display:none; text-align:center; padding:20px;">
+        <div style="font-size:32px; animation:spin 1s linear infinite;">⏳</div>
+        <p style="color:var(--muted); margin-top:12px;">Analizando sitio con IA...</p>
+      </div>
+      <div id="extract-preview" style="display:none; margin-top:16px;"></div>
+      <div style="display:flex; gap:12px; margin-top:20px;">
+        <button type="submit" class="btn btn-success">Analizar</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-extract')">Cancelar</button>
+      </div>
+    </form>
+  </div>
+</div>
+<style>
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .extract-preview-item { padding:10px 0; border-bottom:1px solid var(--line); }
+  .extract-preview-item:last-child { border-bottom:none; }
+  .extract-label { font-size:11px; text-transform:uppercase; color:var(--muted); letter-spacing:0.05em; }
+  .extract-value { font-size:14px; margin-top:4px; }
+</style>
 
 <!-- MODAL: PROJECT FORM -->
 <div id="modal-project" class="modal-overlay">

@@ -11,9 +11,15 @@ const stats = [
   { value: '100%', label: 'Satisfacción' },
 ];
 
+function parseStatValue(value: string): { num: number; suffix: string } {
+  const match = value.match(/^(\d+)(.*)$/);
+  return match ? { num: parseInt(match[1]), suffix: match[2] } : { num: 0, suffix: value };
+}
+
 export default function StatsBar() {
   const sectionRef = useRef<HTMLElement>(null);
   const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
+  const valueRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -35,6 +41,27 @@ export default function StatsBar() {
             },
           }
         );
+      });
+
+      // Animated counters
+      valueRefs.current.forEach((el, i) => {
+        if (!el) return;
+        const { num, suffix } = parseStatValue(stats[i].value);
+        const proxy = { val: 0 };
+        gsap.to(proxy, {
+          val: num,
+          duration: 2.2,
+          ease: 'power3.out',
+          delay: i * 0.12,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          },
+          onUpdate: () => {
+            if (el) el.textContent = Math.round(proxy.val) + suffix;
+          },
+        });
       });
     }, sectionRef);
 
@@ -59,6 +86,7 @@ export default function StatsBar() {
               className="text-center relative opacity-0"
             >
               <div
+                ref={(el) => { valueRefs.current[index] = el; }}
                 className="text-white"
                 style={{
                   fontFamily: 'var(--font-heading)',

@@ -199,10 +199,10 @@ export default function PortfolioPage() {
   }, []);
 
   return (
-    <main ref={pageRef} className="relative min-h-screen" style={{ backgroundColor: '#F8F7FB' }}>
+    <main ref={pageRef} className="relative min-h-screen" style={{ background: 'radial-gradient(ellipse at 30% 0%, #1a0f2e 0%, #0d0618 40%, #050208 100%)' }}>
       <SEO {...portfolioSeo} />
-      {/* Top dark header bar */}
-      <div className="relative w-full" style={{ backgroundColor: '#000000' }}>
+      {/* Top header */}
+      <div className="relative w-full">
         {/* Back button */}
         <div className="absolute top-24 left-8 lg:left-16 z-50">
           <button
@@ -287,9 +287,32 @@ export default function PortfolioPage() {
         </div>
       </div>
 
-      {/* Projects Grid — light background */}
-      <section className="relative w-full" style={{ padding: '80px 0 120px' }}>
-        <div className="mx-auto" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
+      {/* Projects Grid */}
+      <section className="relative w-full overflow-hidden" style={{ padding: '80px 0 120px' }}>
+        {/* Decorative orbs */}
+        <div
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: '700px',
+            height: '700px',
+            background: 'radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%)',
+            filter: 'blur(100px)',
+            top: '5%',
+            right: '-10%',
+          }}
+        />
+        <div
+          className="absolute rounded-full pointer-events-none"
+          style={{
+            width: '500px',
+            height: '500px',
+            background: 'radial-gradient(circle, rgba(204,38,211,0.1) 0%, transparent 70%)',
+            filter: 'blur(120px)',
+            bottom: '10%',
+            left: '-8%',
+          }}
+        />
+        <div className="mx-auto relative" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 lg:gap-20">
             {filteredProjects.map((project, index) => (
               <div
@@ -339,7 +362,7 @@ export default function PortfolioPage() {
                 <div className="mt-10 px-2">
                   <div className="flex items-baseline justify-between mb-2">
                     <h3
-                      className="text-[#1a1a2e] text-xl group-hover:text-[#7C3AED] transition-colors duration-300"
+                      className="text-white text-xl transition-colors duration-300"
                       style={{
                         fontFamily: 'var(--font-heading)',
                         fontWeight: 600,
@@ -348,7 +371,7 @@ export default function PortfolioPage() {
                       {project.title}
                     </h3>
                     <span
-                      className="text-black/30"
+                      className="text-white/25"
                       style={{
                         fontFamily: 'var(--font-mono)',
                         fontSize: '0.75rem',
@@ -358,7 +381,7 @@ export default function PortfolioPage() {
                     </span>
                   </div>
                   <p
-                    className="text-black/50 text-sm mb-3"
+                    className="text-white/45 text-sm mb-3"
                     style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}
                   >
                     {project.excerpt}
@@ -370,8 +393,9 @@ export default function PortfolioPage() {
                         className="px-3 py-1 rounded-full text-xs"
                         style={{
                           fontFamily: 'var(--font-mono)',
-                          background: 'rgba(124, 58, 237, 0.08)',
-                          color: '#7C3AED',
+                          background: 'rgba(167, 139, 250, 0.12)',
+                          color: '#C084FC',
+                          border: '1px solid rgba(167, 139, 250, 0.2)',
                         }}
                       >
                         {service}

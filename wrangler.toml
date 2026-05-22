@@ -10,6 +10,9 @@ directory = "./dist"
 binding = "SITE_DATA"
 id = "5ab5c5bbce6b47c3aa6fe9ef0d33e1d6"
 
+[ai]
+binding = "AI"
+
 # Production environment
 # Deploy with: wrangler deploy --env production
 [env.production]
@@ -18,6 +21,9 @@ name = "emmagination-production"
 [[env.production.kv_namespaces]]
 binding = "SITE_DATA"
 id = "5ab5c5bbce6b47c3aa6fe9ef0d33e1d6"
+
+[env.production.ai]
+binding = "AI"
 
 [env.production.assets]
 directory = "./dist"

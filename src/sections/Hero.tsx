@@ -7,6 +7,7 @@ interface HeroProps {
   lenisRef: React.MutableRefObject<any>;
 }
 
+
 export default function Hero({ lenisRef }: HeroProps) {
   const { data } = useSiteData();
   const hero = data.hero;
@@ -66,9 +67,9 @@ export default function Hero({ lenisRef }: HeroProps) {
       { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
     )
       .fromTo(
-        titleRef.current,
-        { opacity: 0, y: 40 },
-        { opacity: 1, y: 0, duration: 1.2, ease: 'power3.out' },
+        titleRef.current ? titleRef.current.querySelectorAll('.line-inner') : [],
+        { y: '108%' },
+        { y: '0%', stagger: 0.12, ease: 'power4.out', duration: 1.1 },
         '-=0.4'
       )
       .fromTo(
@@ -248,7 +249,7 @@ export default function Hero({ lenisRef }: HeroProps) {
         {/* Title */}
         <h1
           ref={titleRef}
-          className="text-white leading-none opacity-0"
+          className="hero-title text-white leading-none"
           style={{
             fontFamily: 'var(--font-heading)',
             fontSize: 'clamp(42px, 9vw, 84px)',
@@ -257,20 +258,30 @@ export default function Hero({ lenisRef }: HeroProps) {
             lineHeight: 1.05,
           }}
         >
-          {hero.titleLine1}
-          <br />
-          <span
-            style={{
-              background: 'linear-gradient(135deg, #A78BFA 0%, #C084FC 50%, #E879F9 100%)',
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              backgroundClip: 'text',
-            }}
-          >
-            {hero.titleLine2}
+          <span className="block" style={{ overflow: 'hidden', paddingBottom: '0.06em' }}>
+            <span className="line-inner block" style={{ transform: 'translateY(108%)' }}>
+              {hero.titleLine1}
+            </span>
           </span>
-          <br />
-          {hero.titleLine3}
+          <span className="block" style={{ overflow: 'hidden', paddingBottom: '0.06em' }}>
+            <span
+              className="line-inner block"
+              style={{
+                transform: 'translateY(108%)',
+                background: 'linear-gradient(135deg, #A78BFA 0%, #C084FC 50%, #E879F9 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+              }}
+            >
+              {hero.titleLine2}
+            </span>
+          </span>
+          <span className="block" style={{ overflow: 'hidden', paddingBottom: '0.06em' }}>
+            <span className="line-inner block" style={{ transform: 'translateY(108%)' }}>
+              {hero.titleLine3}
+            </span>
+          </span>
         </h1>
 
         {/* Tagline: Deja de ser logo. Para ser marca. */}

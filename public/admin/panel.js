@@ -1,5 +1,6 @@
 const API_URL = '/api/data';
-const AUTH_KEY = 'emmagination-admin-auth';
+const LOGIN_URL = '/api/login';
+const AUTH_KEY = 'emmagination-admin-token';
 
 // ── STATE ──
 let state = null;
@@ -25,8 +26,8 @@ function parseFaqs(v) {
 function formatFaqs(faqs) { return Array.isArray(faqs) ? faqs.map(f => `${f.question} | ${f.answer}`).join('\n') : ''; }
 
 function getAuthHeader() {
-  const raw = localStorage.getItem(AUTH_KEY);
-  return raw ? `Basic ${raw}` : '';
+  const token = localStorage.getItem(AUTH_KEY);
+  return token ? `Bearer ${token}` : '';
 }
 
 function showStatus(msg, type = '') {
@@ -41,31 +42,31 @@ function initLogin() {
   const saved = localStorage.getItem(AUTH_KEY);
   if (saved) { showApp(); return; }
 
-  $('#login-btn').addEventListener('click', async () => {
-    const user = $('#login-user').value.trim();
-    const pass = $('#login-pass').value;
-    if (!user || !pass) { $('#login-error').textContent = 'Ingresa usuario y contraseña'; return; }
+  $('#login-btn').addEventListener('click', doLogin);
+  $('#login-pass').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
+}
 
-    // Test auth with a POST (GET doesn't require auth)
-    try {
-      const test = await fetch(`${API_URL}?_t=${Date.now()}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Basic ${btoa(`${user}:${pass}`)}` },
-        body: JSON.stringify({ projects: [], services: [], config: {}, hero: {}, seo: {} }),
-      });
-      if (test.status === 401) {
-        $('#login-error').textContent = 'Usuario o contraseña incorrectos';
-        return;
-      }
-      // Restore original data after test
-      localStorage.setItem(AUTH_KEY, btoa(`${user}:${pass}`));
-      showApp();
-    } catch (e) {
-      $('#login-error').textContent = 'Error de conexión';
+async function doLogin() {
+  const user = $('#login-user').value.trim();
+  const pass = $('#login-pass').value;
+  if (!user || !pass) { $('#login-error').textContent = 'Ingresa usuario y contraseña'; return; }
+
+  try {
+    const res = await fetch(`${LOGIN_URL}?_t=${Date.now()}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ user, password: pass }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) {
+      $('#login-error').textContent = data.error || 'Usuario o contraseña incorrectos';
+      return;
     }
-  });
-
-  $('#login-pass').addEventListener('keypress', (e) => { if (e.key === 'Enter') $('#login-btn').click(); });
+    localStorage.setItem(AUTH_KEY, data.token);
+    showApp();
+  } catch (e) {
+    $('#login-error').textContent = 'Error de conexión';
+  }
 }
 
 function showApp() {
@@ -81,9 +82,12 @@ function logout() {
 
 // ── API ──
 async function fetchData() {
+  const auth = getAuthHeader();
+  if (!auth) throw new Error('No autenticado');
   const res = await fetch(`${API_URL}?_t=${Date.now()}`, {
-    headers: { Accept: 'application/json', 'Cache-Control': 'no-store' },
+    headers: { Accept: 'application/json', 'Cache-Control': 'no-store', Authorization: auth },
   });
+  if (res.status === 401) { logout(); throw new Error('Sesión expirada'); }
   if (!res.ok) throw new Error(`GET ${res.status}`);
   return res.json();
 }
@@ -119,14 +123,31 @@ function renderProjects() {
   if (!state.projects?.length) { list.innerHTML = '<p style="color:var(--muted)">No hay proyectos</p>'; return; }
 
   list.innerHTML = state.projects.map(p => `
-    <div class="project-card" data-id="${p.id}" onclick="editProject(${p.id})">
-      ${p.featured ? '<span class="badge-featured">⭐</span>' : ''}
-      <img src="${p.image || ''}" alt="" onerror="this.style.display='none'" />
-      <h3>${escapeHtml(p.title)}</h3>
-      <div class="meta">${escapeHtml(p.category || '')} · ${p.year || ''}</div>
+    <div class="project-card" data-id="${p.id}">
+      <div style="position:relative;" onclick="editProject(${p.id})">
+        ${p.featured ? '<span class="badge-featured">⭐ Destacado</span>' : ''}
+        <img src="${p.image || ''}" alt="" onerror="this.style.display='none'" />
+        <h3>${escapeHtml(p.title)}</h3>
+        <div class="meta">${escapeHtml(p.category || '')} · ${p.year || ''}</div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:12px; padding-top:12px; border-top:1px solid var(--line);">
+        <button type="button" class="btn btn-sm ${p.featured ? 'btn-secondary' : 'btn-primary'}" style="flex:1; font-size:12px; padding:6px 10px;"
+          onclick="toggleFeatured(${p.id}, event)">
+          ${p.featured ? '⭐ Quitar destacado' : '☆ Destacar'}
+        </button>
+      </div>
     </div>
   `).join('');
 }
+
+window.toggleFeatured = function(id, event) {
+  if (event) event.stopPropagation();
+  const project = state.projects.find(p => p.id === id);
+  if (!project) return;
+  project.featured = !project.featured;
+  renderProjects();
+  showStatus(project.featured ? '⭐ Proyecto destacado' : 'Proyecto quitado de destacados', 'ok');
+};
 
 window.editProject = function(id) {
   editingProjectId = id;
@@ -158,10 +179,95 @@ window.editProject = function(id) {
 };
 
 function initProjectForm() {
-  // Auto-slug
-  const titleInput = $('#project-form title');
-  const slugInput = $('#project-form slug');
-  // Note: query by form element name
+  // Extract from URL
+  $('#btn-extract-project').addEventListener('click', () => {
+    $('#extract-form').reset();
+    $('#extract-loading').style.display = 'none';
+    $('#extract-preview').style.display = 'none';
+    openModal('modal-extract');
+  });
+
+  $('#extract-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const url = e.target.url.value.trim();
+    if (!url) return;
+
+    $('#extract-loading').style.display = 'block';
+    $('#extract-preview').style.display = 'none';
+
+    try {
+      const auth = getAuthHeader();
+      const res = await fetch(`/api/extract?_t=${Date.now()}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: auth },
+        body: JSON.stringify({ url }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        showStatus('Error: ' + (data.error || 'Falló la extracción'), 'error');
+        $('#extract-loading').style.display = 'none';
+        return;
+      }
+
+      // Show preview
+      const p = data.project;
+      $('#extract-preview').innerHTML = `
+        <div class="extract-preview-item">
+          <div class="extract-label">Título</div>
+          <div class="extract-value">${escapeHtml(p.title)}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Cliente</div>
+          <div class="extract-value">${escapeHtml(p.client)}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Categoría</div>
+          <div class="extract-value">${escapeHtml(p.category)}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Descripción</div>
+          <div class="extract-value">${escapeHtml(p.description)}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Servicios</div>
+          <div class="extract-value">${p.services.map(s => escapeHtml(s)).join(', ')}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Desafío</div>
+          <div class="extract-value">${escapeHtml(p.challenge)}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Solución</div>
+          <div class="extract-value">${escapeHtml(p.solution)}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Resultados</div>
+          <div class="extract-value">${p.results.map(r => '• ' + escapeHtml(r)).join('<br>')}</div>
+        </div>
+      `;
+      $('#extract-preview').style.display = 'block';
+      $('#extract-loading').style.display = 'none';
+
+      // Add confirm button
+      const confirmBtn = document.createElement('button');
+      confirmBtn.type = 'button';
+      confirmBtn.className = 'btn btn-success';
+      confirmBtn.textContent = '✅ Agregar este proyecto';
+      confirmBtn.style.marginTop = '16px';
+      confirmBtn.onclick = () => {
+        state.projects.unshift(p);
+        renderProjects();
+        closeModal('modal-extract');
+        showStatus('Proyecto agregado desde URL. Guarda para persistir.', 'ok');
+      };
+      $('#extract-preview').appendChild(confirmBtn);
+
+    } catch (err) {
+      showStatus('Error: ' + err.message, 'error');
+      $('#extract-loading').style.display = 'none';
+    }
+  });
 
   $('#btn-new-project').addEventListener('click', () => {
     editingProjectId = null;
@@ -318,26 +424,64 @@ function initServiceForm() {
   });
 }
 
+// ── DEFAULTS ──
+const DEFAULT_HERO = {
+  badge: 'Agencia de diseño web, branding y SEO en Chile',
+  titleLine1: 'Diseño Web,',
+  titleLine2: 'Branding y SEO',
+  titleLine3: 'en Chile',
+  taglineLine1: 'Deja de ser un logo.',
+  taglineLine2: 'Pasa a ser una marca.',
+  subtitle: 'Diseñamos identidades y posicionamos marcas en Google. Hacemos que tu negocio se vea, se entienda y se compre.',
+  ctaPrimary: 'Trabajemos juntos',
+  ctaSecondary: 'Ver proyectos',
+};
+
+const DEFAULT_CONFIG = {
+  contactEmail: 'hola@emmagination.cl',
+  contactPhone: '+56 9 8829 0618',
+  instagramUrl: 'https://instagram.com/emmagination',
+  linkedinUrl: 'https://linkedin.com/company/emmagination',
+  googleBusinessUrl: 'https://share.google/SI0GjDkMkZa63cVnL',
+};
+
+const DEFAULT_SEO = {
+  siteTitle: 'EMMAGINATION | Diseño Web, Branding y Experiencias Digitales en Chile',
+  siteDescription: 'EMMAGINATION - Agencia de diseño web, branding, desarrollo Shopify y producción de contenido en Chile.',
+  siteKeywords: 'diseño web, branding, shopify, desarrollo web, seo chile, agencia digital, e-commerce',
+  ogImage: '/images/isotipo.png',
+  twitterHandle: '@emmagination',
+};
+
 // ── HERO / CONFIG / SEO ──
 function fillForms() {
-  if (state.hero) {
-    const f = $('#hero-form');
-    Object.entries(state.hero).forEach(([k, v]) => {
-      const el = f.elements.namedItem(k);
+  const hero = { ...DEFAULT_HERO, ...state.hero };
+  const config = { ...DEFAULT_CONFIG, ...state.config };
+  const seo = { ...DEFAULT_SEO, ...state.seo };
+
+  // Hero
+  const hf = $('#hero-form');
+  if (hf) {
+    Object.entries(hero).forEach(([k, v]) => {
+      const el = hf.elements.namedItem(k);
       if (el) el.value = v || '';
     });
   }
-  if (state.config) {
-    const f = $('#config-form');
-    Object.entries(state.config).forEach(([k, v]) => {
-      const el = f.elements.namedItem(k);
+
+  // Config
+  const cf = $('#config-form');
+  if (cf) {
+    Object.entries(config).forEach(([k, v]) => {
+      const el = cf.elements.namedItem(k);
       if (el) el.value = v || '';
     });
   }
-  if (state.seo) {
-    const f = $('#seo-form');
-    Object.entries(state.seo).forEach(([k, v]) => {
-      const el = f.elements.namedItem(k);
+
+  // SEO
+  const sf = $('#seo-form');
+  if (sf) {
+    Object.entries(seo).forEach(([k, v]) => {
+      const el = sf.elements.namedItem(k);
       if (el) el.value = v || '';
     });
   }
@@ -346,35 +490,41 @@ function fillForms() {
 function updateStateFromForms() {
   // Hero
   const hf = $('#hero-form');
-  state.hero = {
-    badge: hf.badge.value.trim(),
-    titleLine1: hf.titleLine1.value.trim(),
-    titleLine2: hf.titleLine2.value.trim(),
-    titleLine3: hf.titleLine3.value.trim(),
-    taglineLine1: hf.taglineLine1.value.trim(),
-    taglineLine2: hf.taglineLine2.value.trim(),
-    subtitle: hf.subtitle.value.trim(),
-    ctaPrimary: hf.ctaPrimary.value.trim(),
-    ctaSecondary: hf.ctaSecondary.value.trim(),
-  };
+  if (hf) {
+    state.hero = {
+      badge: hf.badge?.value?.trim() || '',
+      titleLine1: hf.titleLine1?.value?.trim() || '',
+      titleLine2: hf.titleLine2?.value?.trim() || '',
+      titleLine3: hf.titleLine3?.value?.trim() || '',
+      taglineLine1: hf.taglineLine1?.value?.trim() || '',
+      taglineLine2: hf.taglineLine2?.value?.trim() || '',
+      subtitle: hf.subtitle?.value?.trim() || '',
+      ctaPrimary: hf.ctaPrimary?.value?.trim() || '',
+      ctaSecondary: hf.ctaSecondary?.value?.trim() || '',
+    };
+  }
   // Config
   const cf = $('#config-form');
-  state.config = {
-    contactEmail: cf.contactEmail.value.trim(),
-    contactPhone: cf.contactPhone.value.trim(),
-    instagramUrl: cf.instagramUrl.value.trim(),
-    linkedinUrl: cf.linkedinUrl.value.trim(),
-    googleBusinessUrl: cf.googleBusinessUrl.value.trim(),
-  };
+  if (cf) {
+    state.config = {
+      contactEmail: cf.contactEmail?.value?.trim() || '',
+      contactPhone: cf.contactPhone?.value?.trim() || '',
+      instagramUrl: cf.instagramUrl?.value?.trim() || '',
+      linkedinUrl: cf.linkedinUrl?.value?.trim() || '',
+      googleBusinessUrl: cf.googleBusinessUrl?.value?.trim() || '',
+    };
+  }
   // SEO
   const sf = $('#seo-form');
-  state.seo = {
-    siteTitle: sf.siteTitle.value.trim(),
-    siteDescription: sf.siteDescription.value.trim(),
-    siteKeywords: sf.siteKeywords.value.trim(),
-    ogImage: state.seo?.ogImage || '/images/isotipo.png',
-    twitterHandle: state.seo?.twitterHandle || '@emmagination',
-  };
+  if (sf) {
+    state.seo = {
+      siteTitle: sf.siteTitle?.value?.trim() || '',
+      siteDescription: sf.siteDescription?.value?.trim() || '',
+      siteKeywords: sf.siteKeywords?.value?.trim() || '',
+      ogImage: state.seo?.ogImage || '/images/isotipo.png',
+      twitterHandle: state.seo?.twitterHandle || '@emmagination',
+    };
+  }
 }
 
 // ── SAVE / EXPORT / IMPORT ──

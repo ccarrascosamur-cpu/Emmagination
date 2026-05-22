@@ -1,12 +1,21 @@
+import { useState } from 'react';
 import { Instagram, Linkedin, Mail, Phone, MessageCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
 import { useSiteData } from '../lib/site-data-client';
+
+const SVCS_CONTACT = ['Diseño Web', 'Branding', 'SEO', 'Shopify', 'Todo'];
 
 export default function Footer() {
   const location = useLocation();
   const isHome = location.pathname === '/';
   const { data } = useSiteData();
   const whatsappNumber = data.config.contactPhone.replace(/[^\d]/g, '');
+
+  const [svc, setSvc] = useState('Diseño Web');
+  const [formName, setFormName] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+  const [formMsg, setFormMsg] = useState('');
+  const [formSent, setFormSent] = useState(false);
 
   const handleSectionLinkClick = (
     event: React.MouseEvent<HTMLAnchorElement>,
@@ -21,6 +30,27 @@ export default function Footer() {
     }
   };
 
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formName || !formEmail) return;
+    try {
+      await fetch('https://formspree.io/f/mredkeor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: formName,
+          email: formEmail,
+          message: formMsg,
+          service: svc,
+          subject: `Nuevo lead: ${svc} - ${formName}`,
+        }),
+      });
+    } catch {
+      // silently fail
+    }
+    setFormSent(true);
+  };
+
   return (
     <footer
       id="contact"
@@ -31,6 +61,110 @@ export default function Footer() {
       }}
     >
       <div className="mx-auto" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
+        {/* Contact Form Section */}
+        <div className="mb-20">
+          <div className="sec-label" style={{ marginBottom: '1rem' }}>
+            Contacto
+          </div>
+          <h2
+            className="sec-h2"
+            style={{
+              fontFamily: 'var(--font-heading)',
+              fontSize: 'clamp(2rem, 4vw, 3.2rem)',
+              fontWeight: 800,
+              letterSpacing: '-0.03em',
+              lineHeight: 1.08,
+              marginBottom: '0.9rem',
+            }}
+          >
+            Hablemos de<br /><em>tu proyecto</em>
+          </h2>
+          <p
+            className="sec-sub"
+            style={{
+              color: '#9E9CC8',
+              maxWidth: '520px',
+              fontSize: '1rem',
+              lineHeight: 1.8,
+              marginBottom: '2.5rem',
+            }}
+          >
+            Completa el formulario y te respondemos en menos de 24 horas.
+          </p>
+
+          {!formSent ? (
+            <form onSubmit={handleFormSubmit} className="max-w-xl">
+              <div className="ct-svc-label">¿Qué necesitas?</div>
+              <div className="ct-chips">
+                {SVCS_CONTACT.map((s) => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={`ct-chip${svc === s ? ' ct-chip-on' : ''}`}
+                    onClick={() => setSvc(s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+
+              <div className="flex flex-col gap-4 mb-4">
+                <input
+                  type="text"
+                  placeholder="Tu nombre"
+                  required
+                  value={formName}
+                  onChange={(e) => setFormName(e.target.value)}
+                  className="ct-input"
+                />
+                <input
+                  type="email"
+                  placeholder="tu@empresa.cl"
+                  required
+                  value={formEmail}
+                  onChange={(e) => setFormEmail(e.target.value)}
+                  className="ct-input"
+                />
+                <textarea
+                  rows={4}
+                  placeholder={`Cuéntanos sobre tu proyecto de ${svc}…`}
+                  value={formMsg}
+                  onChange={(e) => setFormMsg(e.target.value)}
+                  className="ct-input ct-textarea"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="calc-btn-next"
+                style={{ display: 'inline-flex' }}
+              >
+                Empezar mi proyecto →
+              </button>
+            </form>
+          ) : (
+            <div
+              className="max-w-xl rounded-2xl border p-8 text-center"
+              style={{
+                borderColor: 'rgba(168,85,247,0.2)',
+                background: 'rgba(168,85,247,0.06)',
+              }}
+            >
+              <div style={{ fontSize: '2.8rem', marginBottom: '0.9rem' }}>🎉</div>
+              <div
+                className="sec-h2"
+                style={{ fontSize: '1.4rem', marginBottom: '0.5rem' }}
+              >
+                ¡Mensaje enviado!
+              </div>
+              <p className="sec-sub" style={{ margin: '0 auto' }}>
+                Gracias por contactarnos. Te responderemos en menos de 24 horas
+                con una propuesta para tu proyecto de {svc}.
+              </p>
+            </div>
+          )}
+        </div>
+
         {/* Main Footer Content */}
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-16 mb-20">
           {/* Left - Brand */}
@@ -112,22 +246,21 @@ export default function Footer() {
           <div className="flex flex-col sm:flex-row gap-12 lg:gap-20">
             {/* Navigation */}
             <div>
-              <h4
-                className="label-mono text-white/40 mb-6"
-              >
-                NAVEGACIÓN
-              </h4>
+              <h4 className="label-mono text-white/40 mb-6">NAVEGACIÓN</h4>
               <ul className="space-y-3">
                 {[
                   { label: 'Proyectos', href: '/portafolio' },
                   { label: 'Servicios', href: '#approach' },
+                  { label: 'Cotizar', href: '#cotizar' },
                   { label: 'Contacto', href: '#contact' },
                 ].map((item) => (
                   <li key={item.label}>
                     {item.href.startsWith('#') ? (
                       <a
                         href={`/${item.href}`}
-                        onClick={(event) => handleSectionLinkClick(event, item.href)}
+                        onClick={(event) =>
+                          handleSectionLinkClick(event, item.href)
+                        }
                         className="text-white/70 hover:text-white transition-colors text-sm"
                         style={{ fontFamily: 'var(--font-body)' }}
                       >
@@ -149,11 +282,7 @@ export default function Footer() {
 
             {/* Services */}
             <div>
-              <h4
-                className="label-mono text-white/40 mb-6"
-              >
-                SERVICIOS
-              </h4>
+              <h4 className="label-mono text-white/40 mb-6">SERVICIOS</h4>
               <ul className="space-y-3">
                 {[
                   { label: 'Diseño Web', href: '/servicios/diseno-web' },
@@ -175,11 +304,7 @@ export default function Footer() {
 
             {/* Social */}
             <div>
-              <h4
-                className="label-mono text-white/40 mb-6"
-              >
-                REDES
-              </h4>
+              <h4 className="label-mono text-white/40 mb-6">REDES</h4>
               <div className="flex gap-4">
                 {[
                   { icon: Instagram, label: 'Instagram', href: data.config.instagramUrl },
