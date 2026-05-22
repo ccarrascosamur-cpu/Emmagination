@@ -117,7 +117,7 @@ export default function AuditoriaSEO() {
       const data = await res.json();
       setResult(data);
       // Enviar lead a Formspree
-      sendAuditLead({ email, url, scores: data.pagespeed });
+      sendAuditLead({ email, url, data });
     } catch (e) {
       setError('No pudimos analizar ese sitio. Verifica que la URL sea correcta e intenta de nuevo.');
     } finally {
@@ -125,16 +125,63 @@ export default function AuditoriaSEO() {
     }
   };
 
-  const sendAuditLead = async (payload: { email: string; url: string; scores: any }) => {
+  const sendAuditLead = async (payload: { email: string; url: string; data: any }) => {
     try {
+      const d = payload.data;
+      const mob = d?.pagespeed?.mobile?.scores;
+      const meta = d?.meta;
+      const srv = d?.server;
+      const robots = d?.robots;
+      const sitemap = d?.sitemap;
+      const gScore = d ? calcGlobalScore(d) : 0;
+
+      const scoreLine = (label: string, val: number | null) =>
+        val != null ? `${label}: ${val}/100` : `${label}: N/D`;
+
+      const checkLine = (label: string, ok: boolean, detail?: string) =>
+        ok ? `✅ ${label}${detail ? ': ' + detail : ''}` : `❌ ${label}${detail ? ': ' + detail : ' — necesita atención'}`;
+
+      const message = `
+🔍 NUEVA AUDITORÍA SEO GRATUITA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 SCORE GLOBAL: ${gScore}/100 — ${scoreLabel(gScore)}
+
+📈 SCORES PAGESPEED (Mobile):
+${scoreLine('Performance', mob?.performance)}
+${scoreLine('SEO', mob?.seo)}
+${scoreLine('Accesibilidad', mob?.accessibility)}
+${scoreLine('Best Practices', mob?.bestPractices)}
+
+🔎 ANÁLISIS TÉCNICO:
+${checkLine('Title tag', meta?.title?.ok, meta?.title?.value ? `${meta.title.length} chars` : undefined)}
+${checkLine('Meta description', meta?.description?.ok, meta?.description?.value ? `${meta.description.length} chars` : undefined)}
+${checkLine('H1 correcto', meta?.headings?.h1ok, `${meta?.headings?.h1 || 0} H1`)}
+${checkLine('Imágenes con alt', meta?.imgsNoAlt?.ok, meta?.imgsNoAlt?.count > 0 ? `${meta.imgsNoAlt.count} sin alt` : undefined)}
+${checkLine('URL canónica', meta?.canonical?.ok)}
+${checkLine('Schema.org', meta?.schema?.present)}
+${checkLine('HTTPS activo', srv?.https)}
+${checkLine('robots.txt', robots?.exists)}
+${checkLine('sitemap.xml', sitemap?.exists, sitemap?.urlCount ? `${sitemap.urlCount} URLs` : undefined)}
+
+🌐 DATOS DEL SITIO:
+- URL: ${payload.url}
+- Plataforma: ${meta?.platform || 'Desconocida'}
+- TTFB: ${srv?.responseTime ? srv.responseTime + 'ms' : 'N/D'}
+
+📧 PROSPECTO:
+- Email: ${payload.email}
+      `.trim();
+
       await fetch('https://formspree.io/f/mredkeor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({
-          subject: `🔍 Nueva auditoría SEO — ${payload.url}`,
+          subject: `🔍 Auditoría SEO — ${payload.url} — Score ${gScore}/100`,
           email: payload.email,
           url_analizada: payload.url,
-          message: `Nuevo lead desde auditoría SEO. URL: ${payload.url}`,
+          score_global: gScore,
+          message,
         }),
       });
     } catch { /* silent */ }
