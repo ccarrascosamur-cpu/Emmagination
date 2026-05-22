@@ -10,6 +10,7 @@ interface NavigationProps {
 export default function Navigation({ lenisRef }: NavigationProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
   const navRef = useRef<HTMLElement>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -117,47 +118,58 @@ export default function Navigation({ lenisRef }: NavigationProps) {
           </span>
         </Link>
 
-        {/* Navigation Links — desktop */}
-        <div className="hidden lg:flex items-center gap-7">
-          <a
-            href="/#approach"
-            onClick={(event) => handleSectionLinkClick(event, '#approach')}
-            className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
-            Servicios
-          </a>
-          <Link
-            to="/portafolio"
-            className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
-            Portafolio
-          </Link>
-          <a
-            href="/#process"
-            onClick={(event) => handleSectionLinkClick(event, '#process')}
-            className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
-            Proceso
-          </a>
-          <a
-            href="/#cotizar"
-            onClick={(event) => handleSectionLinkClick(event, '#cotizar')}
-            className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
-            Cotizar
-          </a>
-          <a
-            href="/#contact"
-            onClick={(event) => handleSectionLinkClick(event, '#contact')}
-            className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
-            style={{ fontFamily: 'var(--font-body)' }}
-          >
-            Contacto
-          </a>
+        {/* Navigation Links — desktop with hover glow effect */}
+        <div className="hidden lg:flex items-center gap-1">
+          {navLinks.map((link) =>
+            link.isPage ? (
+              <Link
+                key={link.label}
+                to={link.href}
+                className="nav-link-glow relative px-4 py-2 text-white/70 text-[13px] transition-colors duration-300 hover:text-white"
+                style={{ fontFamily: 'var(--font-body)' }}
+                onMouseEnter={() => setHoveredLink(link.label)}
+                onMouseLeave={() => setHoveredLink(null)}
+              >
+                <span className="relative z-10">{link.label}</span>
+                {hoveredLink === link.label && (
+                  <span
+                    className="absolute inset-0 rounded-lg transition-all duration-300"
+                    style={{
+                      background: 'rgba(168, 85, 247, 0.12)',
+                      border: '1px solid rgba(168, 85, 247, 0.25)',
+                      boxShadow: '0 0 20px rgba(168, 85, 247, 0.15)',
+                    }}
+                  />
+                )}
+              </Link>
+            ) : (
+              <a
+                key={link.label}
+                href={link.href}
+                onClick={(event) =>
+                  link.target
+                    ? handleSectionLinkClick(event, link.target)
+                    : undefined
+                }
+                className="nav-link-glow relative px-4 py-2 text-white/70 text-[13px] transition-colors duration-300 hover:text-white"
+                style={{ fontFamily: 'var(--font-body)' }}
+                onMouseEnter={() => setHoveredLink(link.label)}
+                onMouseLeave={() => setHoveredLink(null)}
+              >
+                <span className="relative z-10">{link.label}</span>
+                {hoveredLink === link.label && (
+                  <span
+                    className="absolute inset-0 rounded-lg transition-all duration-300"
+                    style={{
+                      background: 'rgba(168, 85, 247, 0.12)',
+                      border: '1px solid rgba(168, 85, 247, 0.25)',
+                      boxShadow: '0 0 20px rgba(168, 85, 247, 0.15)',
+                    }}
+                  />
+                )}
+              </a>
+            ),
+          )}
         </div>
 
         {/* CTA Button — desktop */}
