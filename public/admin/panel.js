@@ -1,612 +1,406 @@
 const API_URL = '/api/data';
 const AUTH_KEY = 'emmagination-admin-auth';
 
-// ── DOM refs ──
-const els = {
-  authUser: document.getElementById('auth-user'),
-  authPassword: document.getElementById('auth-password'),
-  saveAuth: document.getElementById('save-auth'),
-  reloadData: document.getElementById('reload-data'),
-  saveAll: document.getElementById('save-all'),
-  exportJson: document.getElementById('export-json'),
-  importJsonBtn: document.getElementById('import-json-btn'),
-  importJsonFile: document.getElementById('import-json-file'),
-  status: document.getElementById('status'),
-  // Tabs
-  navTabs: document.querySelectorAll('.nav-tab'),
-  tabContents: document.querySelectorAll('.tab-content'),
-  // Projects
-  addProject: document.getElementById('add-project'),
-  deleteProject: document.getElementById('delete-project'),
-  projectList: document.getElementById('project-list'),
-  projectForm: document.getElementById('project-form'),
-  projectEditor: document.getElementById('project-editor'),
-  // Services
-  addService: document.getElementById('add-service'),
-  deleteService: document.getElementById('delete-service'),
-  serviceList: document.getElementById('service-list'),
-  serviceForm: document.getElementById('service-form'),
-  serviceEditor: document.getElementById('service-editor'),
-  // Hero
-  heroForm: document.getElementById('hero-form'),
-  heroPreview: document.getElementById('hero-preview'),
-  // SEO
-  seoForm: document.getElementById('seo-form'),
-  seoPreview: document.getElementById('seo-preview'),
-  // Config
-  configForm: document.getElementById('config-form'),
-};
-
-// ── State ──
+// ── STATE ──
 let state = null;
-let activeProjectId = null;
-let activeServiceSlug = null;
-let currentTab = 'projects';
+let editingProjectId = null;
+let editingServiceSlug = null;
 
-function setStatus(message, type = '') {
-  els.status.textContent = message;
-  els.status.className = `status ${type}`.trim();
-}
+// ── UTILS ──
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
 
-// ── Utils ──
-function slugify(value) {
-  return String(value || '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
+function slugify(v) {
+  return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
-
-function splitLines(value) {
-  return String(value || '')
-    .split('\n')
-    .map((item) => item.trim())
-    .filter(Boolean);
+function splitLines(v) { return String(v || '').split('\n').map(s => s.trim()).filter(Boolean); }
+function joinLines(v) { return Array.isArray(v) ? v.join('\n') : ''; }
+function parseFaqs(v) {
+  return splitLines(v).map(line => {
+    const parts = line.split('|').map(p => p.trim());
+    return { question: parts[0] || '', answer: parts[1] || '' };
+  }).filter(f => f.question && f.answer);
 }
-
-function joinLines(value) {
-  return Array.isArray(value) ? value.join('\n') : '';
-}
-
-function parseFaqs(value) {
-  return String(value || '')
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const parts = line.split('|').map((p) => p.trim());
-      return { question: parts[0] || '', answer: parts[1] || '' };
-    })
-    .filter((faq) => faq.question && faq.answer);
-}
-
-function formatFaqs(faqs) {
-  return Array.isArray(faqs)
-    ? faqs.map((f) => `${f.question} | ${f.answer}`).join('\n')
-    : '';
-}
+function formatFaqs(faqs) { return Array.isArray(faqs) ? faqs.map(f => `${f.question} | ${f.answer}`).join('\n') : ''; }
 
 function getAuthHeader() {
   const raw = localStorage.getItem(AUTH_KEY);
   return raw ? `Basic ${raw}` : '';
 }
 
-function saveAuth() {
-  const user = els.authUser.value.trim();
-  const password = els.authPassword.value;
-  if (!user || !password) {
-    setStatus('Ingresa usuario y password.', 'error');
-    return;
-  }
-  localStorage.setItem(AUTH_KEY, btoa(`${user}:${password}`));
-  setStatus('Credenciales guardadas.', 'ok');
+function showStatus(msg, type = '') {
+  const bar = $('#status-bar');
+  bar.textContent = msg;
+  bar.className = 'status-bar show ' + type;
+  setTimeout(() => bar.classList.remove('show'), 4000);
 }
 
-function readAuth() {
-  const raw = localStorage.getItem(AUTH_KEY);
-  if (!raw) return;
-  try {
-    const decoded = atob(raw);
-    const separator = decoded.indexOf(':');
-    if (separator < 0) return;
-    els.authUser.value = decoded.slice(0, separator);
-    els.authPassword.value = decoded.slice(separator + 1);
-  } catch {
-    localStorage.removeItem(AUTH_KEY);
-  }
-}
+// ── LOGIN ──
+function initLogin() {
+  const saved = localStorage.getItem(AUTH_KEY);
+  if (saved) { showApp(); return; }
 
-async function fetchData() {
-  const url = `${API_URL}?_t=${Date.now()}`;
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'Cache-Control': 'no-store, no-cache, must-revalidate',
-      Pragma: 'no-cache',
-    },
+  $('#login-btn').addEventListener('click', async () => {
+    const user = $('#login-user').value.trim();
+    const pass = $('#login-pass').value;
+    if (!user || !pass) { $('#login-error').textContent = 'Ingresa usuario y contraseña'; return; }
+
+    // Test auth with a POST (GET doesn't require auth)
+    try {
+      const test = await fetch(`${API_URL}?_t=${Date.now()}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Basic ${btoa(`${user}:${pass}`)}` },
+        body: JSON.stringify({ projects: [], services: [], config: {}, hero: {}, seo: {} }),
+      });
+      if (test.status === 401) {
+        $('#login-error').textContent = 'Usuario o contraseña incorrectos';
+        return;
+      }
+      // Restore original data after test
+      localStorage.setItem(AUTH_KEY, btoa(`${user}:${pass}`));
+      showApp();
+    } catch (e) {
+      $('#login-error').textContent = 'Error de conexión';
+    }
   });
-  if (!response.ok) throw new Error(`GET ${API_URL} → ${response.status}`);
-  return response.json();
+
+  $('#login-pass').addEventListener('keypress', (e) => { if (e.key === 'Enter') $('#login-btn').click(); });
+}
+
+function showApp() {
+  $('#login-screen').style.display = 'none';
+  $('#app').style.display = 'block';
+  loadAll();
+}
+
+function logout() {
+  localStorage.removeItem(AUTH_KEY);
+  location.reload();
+}
+
+// ── API ──
+async function fetchData() {
+  const res = await fetch(`${API_URL}?_t=${Date.now()}`, {
+    headers: { Accept: 'application/json', 'Cache-Control': 'no-store' },
+  });
+  if (!res.ok) throw new Error(`GET ${res.status}`);
+  return res.json();
 }
 
 async function saveData(payload) {
-  const headers = {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-    'Cache-Control': 'no-store',
-    Pragma: 'no-cache',
-  };
   const auth = getAuthHeader();
-  if (auth) headers.Authorization = auth;
-  const url = `${API_URL}?_t=${Date.now()}`;
-  const response = await fetch(url, { method: 'POST', headers, body: JSON.stringify(payload) });
-  if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || `POST ${API_URL} → ${response.status}`);
-  }
-  return response.json();
+  if (!auth) throw new Error('No autenticado');
+  const res = await fetch(`${API_URL}?_t=${Date.now()}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: auth },
+    body: JSON.stringify(payload),
+  });
+  if (res.status === 401) { logout(); throw new Error('Sesión expirada'); }
+  if (!res.ok) throw new Error(await res.text() || `POST ${res.status}`);
+  return res.json();
 }
 
-// ── Tabs ──
-function switchTab(tabId) {
-  currentTab = tabId;
-  els.navTabs.forEach((tab) => tab.classList.toggle('active', tab.dataset.tab === tabId));
-  els.tabContents.forEach((content) => content.classList.toggle('active', content.id === `tab-${tabId}`));
-}
-
-els.navTabs.forEach((tab) => {
-  tab.addEventListener('click', () => switchTab(tab.dataset.tab));
-});
-
-// ── Projects ──
-function getActiveProject() {
-  return state.projects.find((p) => p.id === activeProjectId) || null;
-}
-
-function renderProjectList() {
-  els.projectList.innerHTML = '';
-  if (!state.projects.length) {
-    els.projectList.innerHTML = '<p class="hint">No hay proyectos. Crea uno nuevo.</p>';
-    els.projectEditor.style.display = 'none';
-    return;
-  }
-  state.projects.forEach((project) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = `project-item${project.id === activeProjectId ? ' active' : ''}`;
-    btn.innerHTML = `
-      <strong>${project.title || 'Sin título'}</strong>
-      <span>${project.category || 'Sin categoría'} · ${project.year || ''}</span>
-      <span>${project.slug || ''} ${project.featured ? '⭐' : ''}</span>
-    `;
-    btn.addEventListener('click', () => {
-      activeProjectId = project.id;
-      renderProjectList();
-      fillProjectForm();
-      els.projectEditor.style.display = 'block';
+// ── TABS ──
+function initTabs() {
+  $$('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      $$('.tab').forEach(t => t.classList.remove('active'));
+      $$('.tab-content').forEach(c => c.classList.remove('active'));
+      tab.classList.add('active');
+      $(`#tab-${tab.dataset.tab}`).classList.add('active');
     });
-    els.projectList.appendChild(btn);
   });
 }
 
-function fillProjectForm() {
-  const project = getActiveProject();
-  if (!project) { els.projectForm.reset(); return; }
-  const values = {
-    title: project.title,
-    slug: project.slug,
-    client: project.client,
-    category: project.category,
-    year: project.year,
-    offset: project.offset,
-    image: project.image,
-    pdf: project.pdf || '',
-    url: project.url,
-    featured: String(project.featured),
-    description: project.description,
-    excerpt: project.excerpt,
-    services: joinLines(project.services),
-    challenge: project.challenge,
-    solution: project.solution,
-    results: joinLines(project.results),
-    gallery: joinLines(project.gallery),
-    seoTitle: project.seoTitle || '',
-    seoDescription: project.seoDescription || '',
-  };
-  Object.entries(values).forEach(([key, value]) => {
-    const input = els.projectForm.elements.namedItem(key);
-    if (input) input.value = value;
-  });
+// ── PROJECTS ──
+function renderProjects() {
+  const list = $('#project-list');
+  if (!state.projects?.length) { list.innerHTML = '<p style="color:var(--muted)">No hay proyectos</p>'; return; }
+
+  list.innerHTML = state.projects.map(p => `
+    <div class="project-card" data-id="${p.id}" onclick="editProject(${p.id})">
+      ${p.featured ? '<span class="badge-featured">⭐</span>' : ''}
+      <img src="${p.image || ''}" alt="" onerror="this.style.display='none'" />
+      <h3>${escapeHtml(p.title)}</h3>
+      <div class="meta">${escapeHtml(p.category || '')} · ${p.year || ''}</div>
+    </div>
+  `).join('');
 }
 
-function bindProjectForm() {
-  const titleInput = els.projectForm.elements.namedItem('title');
-  const slugInput = els.projectForm.elements.namedItem('slug');
-  titleInput.addEventListener('input', () => {
-    if (!slugInput.dataset.touched) {
-      slugInput.value = slugify(titleInput.value);
-      updateActiveProjectFromForm();
+window.editProject = function(id) {
+  editingProjectId = id;
+  const p = state.projects.find(x => x.id === id);
+  if (!p) return;
+
+  $('#modal-project-title').textContent = 'Editar proyecto';
+  const f = $('#project-form');
+  f.title.value = p.title || '';
+  f.slug.value = p.slug || '';
+  f.client.value = p.client || '';
+  f.category.value = p.category || '';
+  f.year.value = p.year || '';
+  f.featured.value = String(p.featured ?? false);
+  f.image.value = p.image || '';
+  f.url.value = p.url || '';
+  f.description.value = p.description || '';
+  f.excerpt.value = p.excerpt || '';
+  f.services.value = joinLines(p.services);
+  f.challenge.value = p.challenge || '';
+  f.solution.value = p.solution || '';
+  f.results.value = joinLines(p.results);
+  f.gallery.value = joinLines(p.gallery);
+  f.seoTitle.value = p.seoTitle || '';
+  f.seoDescription.value = p.seoDescription || '';
+
+  $('#btn-delete-project').style.display = 'inline-flex';
+  openModal('modal-project');
+};
+
+function initProjectForm() {
+  // Auto-slug
+  const titleInput = $('#project-form title');
+  const slugInput = $('#project-form slug');
+  // Note: query by form element name
+
+  $('#btn-new-project').addEventListener('click', () => {
+    editingProjectId = null;
+    $('#modal-project-title').textContent = 'Nuevo proyecto';
+    $('#project-form').reset();
+    $('#btn-delete-project').style.display = 'none';
+    openModal('modal-project');
+  });
+
+  $('#project-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target;
+    const project = {
+      id: editingProjectId || (Math.max(0, ...state.projects.map(p => p.id || 0)) + 1),
+      title: f.title.value.trim(),
+      slug: f.slug.value.trim() || slugify(f.title.value),
+      client: f.client.value.trim(),
+      category: f.category.value.trim(),
+      year: f.year.value.trim(),
+      featured: f.featured.value === 'true',
+      image: f.image.value.trim(),
+      url: f.url.value.trim(),
+      description: f.description.value.trim(),
+      excerpt: f.excerpt.value.trim(),
+      services: splitLines(f.services.value),
+      challenge: f.challenge.value.trim(),
+      solution: f.solution.value.trim(),
+      results: splitLines(f.results.value),
+      gallery: splitLines(f.gallery.value),
+      seoTitle: f.seoTitle.value.trim(),
+      seoDescription: f.seoDescription.value.trim(),
+      offset: 0,
+      pdf: '',
+    };
+
+    if (editingProjectId) {
+      state.projects = state.projects.map(p => p.id === editingProjectId ? project : p);
+    } else {
+      state.projects.unshift(project);
     }
+    closeModal('modal-project');
+    renderProjects();
+    showStatus('Proyecto guardado. Recuerda guardar todos los cambios.', 'ok');
   });
-  slugInput.addEventListener('input', () => { slugInput.dataset.touched = 'true'; updateActiveProjectFromForm(); });
-  els.projectForm.addEventListener('input', (e) => { if (e.target !== slugInput) updateActiveProjectFromForm(); });
-}
 
-function updateActiveProjectFromForm() {
-  const project = getActiveProject();
-  if (!project) return;
-  const next = {
-    ...project,
-    title: els.projectForm.elements.namedItem('title').value.trim(),
-    slug: els.projectForm.elements.namedItem('slug').value.trim(),
-    client: els.projectForm.elements.namedItem('client').value.trim(),
-    category: els.projectForm.elements.namedItem('category').value.trim(),
-    year: els.projectForm.elements.namedItem('year').value.trim(),
-    offset: Number(els.projectForm.elements.namedItem('offset').value) || 0,
-    image: els.projectForm.elements.namedItem('image').value.trim(),
-    pdf: els.projectForm.elements.namedItem('pdf').value.trim(),
-    url: els.projectForm.elements.namedItem('url').value.trim(),
-    featured: els.projectForm.elements.namedItem('featured').value === 'true',
-    description: els.projectForm.elements.namedItem('description').value.trim(),
-    excerpt: els.projectForm.elements.namedItem('excerpt').value.trim(),
-    services: splitLines(els.projectForm.elements.namedItem('services').value),
-    challenge: els.projectForm.elements.namedItem('challenge').value.trim(),
-    solution: els.projectForm.elements.namedItem('solution').value.trim(),
-    results: splitLines(els.projectForm.elements.namedItem('results').value),
-    gallery: splitLines(els.projectForm.elements.namedItem('gallery').value),
-    seoTitle: els.projectForm.elements.namedItem('seoTitle').value.trim(),
-    seoDescription: els.projectForm.elements.namedItem('seoDescription').value.trim(),
-  };
-  state.projects = state.projects.map((item) => (item.id === next.id ? next : item));
-  renderProjectList();
-}
+  $('#btn-delete-project').addEventListener('click', () => {
+    if (!editingProjectId) return;
+    const p = state.projects.find(x => x.id === editingProjectId);
+    if (!confirm(`¿Eliminar "${p?.title}"?`)) return;
+    state.projects = state.projects.filter(p => p.id !== editingProjectId);
+    editingProjectId = null;
+    closeModal('modal-project');
+    renderProjects();
+    showStatus('Proyecto eliminado. Recuerda guardar todos los cambios.', 'ok');
+  });
 
-function addProject() {
-  const nextId = Math.max(0, ...state.projects.map((p) => Number(p.id) || 0)) + 1;
-  const title = `Nuevo proyecto ${nextId}`;
-  const project = {
-    id: nextId, slug: slugify(title), title, client: '', category: 'Proyecto',
-    year: String(new Date().getFullYear()), image: '', pdf: '', description: '',
-    excerpt: '', url: '', services: [], offset: 0, featured: false,
-    seoTitle: '', seoDescription: '', challenge: '', solution: '', results: [], gallery: [],
-  };
-  state.projects.unshift(project);
-  activeProjectId = project.id;
-  renderProjectList();
-  fillProjectForm();
-  els.projectEditor.style.display = 'block';
-  setStatus('Proyecto creado. Guarda para persistir.', '');
-}
-
-function deleteProject() {
-  if (!activeProjectId) return;
-  const current = getActiveProject();
-  if (!current) return;
-  if (!window.confirm(`¿Eliminar "${current.title}"?`)) return;
-  state.projects = state.projects.filter((p) => p.id !== activeProjectId);
-  activeProjectId = state.projects[0]?.id || null;
-  renderProjectList();
-  fillProjectForm();
-  if (!activeProjectId) els.projectEditor.style.display = 'none';
-  setStatus('Proyecto eliminado. Guarda para persistir.', '');
-}
-
-// ── Services ──
-function getActiveService() {
-  return state.services.find((s) => s.slug === activeServiceSlug) || null;
-}
-
-function renderServiceList() {
-  els.serviceList.innerHTML = '';
-  if (!state.services.length) {
-    els.serviceList.innerHTML = '<p class="hint">No hay servicios. Crea uno nuevo.</p>';
-    els.serviceEditor.style.display = 'none';
-    return;
-  }
-  state.services.forEach((service) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = `service-item${service.slug === activeServiceSlug ? ' active' : ''}`;
-    btn.innerHTML = `
-      <strong>${service.shortTitle || service.title || 'Sin título'}</strong>
-      <span>${service.category || 'Sin categoría'} · /servicios/${service.slug}</span>
-    `;
-    btn.addEventListener('click', () => {
-      activeServiceSlug = service.slug;
-      renderServiceList();
-      fillServiceForm();
-      els.serviceEditor.style.display = 'block';
-    });
-    els.serviceList.appendChild(btn);
+  // Auto-generate slug from title
+  $('#project-form').elements.namedItem('title').addEventListener('input', function() {
+    const slugEl = $('#project-form').elements.namedItem('slug');
+    if (!slugEl.dataset.touched) slugEl.value = slugify(this.value);
+  });
+  $('#project-form').elements.namedItem('slug').addEventListener('input', function() {
+    this.dataset.touched = 'true';
   });
 }
 
-function fillServiceForm() {
-  const service = getActiveService();
-  if (!service) { els.serviceForm.reset(); return; }
-  const values = {
-    slug: service.slug,
-    shortTitle: service.shortTitle,
-    title: service.title,
-    heroTitle: service.heroTitle,
-    intro: service.intro,
-    description: service.description,
-    keywords: service.keywords,
-    category: service.category,
-    benefits: joinLines(service.benefits),
-    deliverables: joinLines(service.deliverables),
-    process: joinLines(service.process),
-    faqs: formatFaqs(service.faqs),
-    relatedProjectIds: Array.isArray(service.relatedProjectIds) ? service.relatedProjectIds.join(',') : '',
-  };
-  Object.entries(values).forEach(([key, value]) => {
-    const input = els.serviceForm.elements.namedItem(key);
-    if (input) input.value = value;
-  });
-}
+// ── SERVICES ──
+function renderServices() {
+  const list = $('#service-list');
+  if (!state.services?.length) { list.innerHTML = '<p style="color:var(--muted)">No hay servicios</p>'; return; }
 
-function bindServiceForm() {
-  const titleInput = els.serviceForm.elements.namedItem('title');
-  const slugInput = els.serviceForm.elements.namedItem('slug');
-  const shortInput = els.serviceForm.elements.namedItem('shortTitle');
-  titleInput.addEventListener('input', () => {
-    if (!slugInput.dataset.touched) slugInput.value = slugify(titleInput.value);
-    if (!shortInput.dataset.touched) shortInput.value = titleInput.value;
-    updateActiveServiceFromForm();
-  });
-  slugInput.addEventListener('input', () => { slugInput.dataset.touched = 'true'; updateActiveServiceFromForm(); });
-  shortInput.addEventListener('input', () => { shortInput.dataset.touched = 'true'; updateActiveServiceFromForm(); });
-  els.serviceForm.addEventListener('input', (e) => {
-    if (e.target !== slugInput && e.target !== shortInput) updateActiveServiceFromForm();
-  });
-}
-
-function updateActiveServiceFromForm() {
-  const service = getActiveService();
-  if (!service) return;
-  const next = {
-    ...service,
-    slug: els.serviceForm.elements.namedItem('slug').value.trim(),
-    shortTitle: els.serviceForm.elements.namedItem('shortTitle').value.trim(),
-    title: els.serviceForm.elements.namedItem('title').value.trim(),
-    heroTitle: els.serviceForm.elements.namedItem('heroTitle').value.trim(),
-    intro: els.serviceForm.elements.namedItem('intro').value.trim(),
-    description: els.serviceForm.elements.namedItem('description').value.trim(),
-    keywords: els.serviceForm.elements.namedItem('keywords').value.trim(),
-    category: els.serviceForm.elements.namedItem('category').value.trim(),
-    benefits: splitLines(els.serviceForm.elements.namedItem('benefits').value),
-    deliverables: splitLines(els.serviceForm.elements.namedItem('deliverables').value),
-    process: splitLines(els.serviceForm.elements.namedItem('process').value),
-    faqs: parseFaqs(els.serviceForm.elements.namedItem('faqs').value),
-    relatedProjectIds: els.serviceForm.elements.namedItem('relatedProjectIds').value
-      .split(',').map((s) => Number(s.trim())).filter((n) => !isNaN(n) && n > 0),
-  };
-  state.services = state.services.map((item) => (item.slug === service.slug ? next : item));
-  activeServiceSlug = next.slug;
-  renderServiceList();
-}
-
-function addService() {
-  const nextNum = state.services.length + 1;
-  const title = `Nuevo servicio ${nextNum}`;
-  const service = {
-    slug: slugify(title), shortTitle: title, title, heroTitle: '', intro: '',
-    description: '', keywords: '', category: 'Servicio', benefits: [],
-    deliverables: [], process: [], faqs: [], relatedProjectIds: [],
-  };
-  state.services.push(service);
-  activeServiceSlug = service.slug;
-  renderServiceList();
-  fillServiceForm();
-  els.serviceEditor.style.display = 'block';
-  setStatus('Servicio creado. Guarda para persistir.', '');
-}
-
-function deleteService() {
-  if (!activeServiceSlug) return;
-  const current = getActiveService();
-  if (!current) return;
-  if (!window.confirm(`¿Eliminar "${current.title}"?`)) return;
-  state.services = state.services.filter((s) => s.slug !== activeServiceSlug);
-  activeServiceSlug = state.services[0]?.slug || null;
-  renderServiceList();
-  fillServiceForm();
-  if (!activeServiceSlug) els.serviceEditor.style.display = 'none';
-  setStatus('Servicio eliminado. Guarda para persistir.', '');
-}
-
-// ── Hero ──
-function fillHeroForm() {
-  if (!state.hero) return;
-  Object.entries(state.hero).forEach(([key, value]) => {
-    const input = els.heroForm.elements.namedItem(key);
-    if (input) input.value = value;
-  });
-  updateHeroPreview();
-  updateCharCounts();
-}
-
-function updateHeroFromForm() {
-  state.hero = {
-    badge: els.heroForm.elements.namedItem('badge').value.trim(),
-    titleLine1: els.heroForm.elements.namedItem('titleLine1').value.trim(),
-    titleLine2: els.heroForm.elements.namedItem('titleLine2').value.trim(),
-    titleLine3: els.heroForm.elements.namedItem('titleLine3').value.trim(),
-    taglineLine1: els.heroForm.elements.namedItem('taglineLine1').value.trim(),
-    taglineLine2: els.heroForm.elements.namedItem('taglineLine2').value.trim(),
-    subtitle: els.heroForm.elements.namedItem('subtitle').value.trim(),
-    ctaPrimary: els.heroForm.elements.namedItem('ctaPrimary').value.trim(),
-    ctaSecondary: els.heroForm.elements.namedItem('ctaSecondary').value.trim(),
-  };
-  updateHeroPreview();
-  updateCharCounts();
-}
-
-function updateHeroPreview() {
-  if (!state.hero) return;
-  els.heroPreview.innerHTML = `
-    <div style="padding:20px; text-align:center;">
-      <span style="display:inline-block;padding:6px 14px;border-radius:999px;background:rgba(124,58,237,0.2);font-size:0.85rem;margin-bottom:16px;">${escapeHtml(state.hero.badge)}</span>
-      <h1 style="font-size:1.8rem;font-weight:700;margin:0 0 8px;line-height:1.1;">
-        ${escapeHtml(state.hero.titleLine1)}<br>
-        <span style="color:#A78BFA;">${escapeHtml(state.hero.titleLine2)}</span><br>
-        ${escapeHtml(state.hero.titleLine3)}
-      </h1>
-      <p style="font-size:1.1rem;font-weight:600;margin:12px 0;">
-        ${escapeHtml(state.hero.taglineLine1)}<br>
-        <span style="opacity:0.5;">${escapeHtml(state.hero.taglineLine2)}</span>
-      </p>
-      <p style="opacity:0.7;font-size:0.9rem;">${escapeHtml(state.hero.subtitle)}</p>
-      <div style="margin-top:16px;display:flex;gap:12px;justify-content:center;">
-        <span style="padding:8px 16px;border-radius:999px;background:linear-gradient(135deg,#7C3AED,#9333EA);font-size:0.85rem;">${escapeHtml(state.hero.ctaPrimary)}</span>
-        <span style="padding:8px 16px;border-radius:999px;border:1px solid rgba(255,255,255,0.2);font-size:0.85rem;">${escapeHtml(state.hero.ctaSecondary)}</span>
+  list.innerHTML = state.services.map(s => `
+    <div class="project-card" onclick="editService('${s.slug}')">
+      <div style="height:80px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.1)); border-radius:12px; margin-bottom:12px;">
+        <span style="font-size:32px;">🛠</span>
       </div>
+      <h3>${escapeHtml(s.shortTitle || s.title)}</h3>
+      <div class="meta">${escapeHtml(s.category || '')} · /servicios/${s.slug}</div>
     </div>
-  `;
+  `).join('');
 }
 
-// ── SEO ──
-function fillSeoForm() {
-  if (!state.seo) return;
-  Object.entries(state.seo).forEach(([key, value]) => {
-    const input = els.seoForm.elements.namedItem(key);
-    if (input) input.value = value;
+window.editService = function(slug) {
+  editingServiceSlug = slug;
+  const s = state.services.find(x => x.slug === slug);
+  if (!s) return;
+
+  $('#modal-service-title').textContent = 'Editar servicio';
+  const f = $('#service-form');
+  f.slug.value = s.slug || '';
+  f.shortTitle.value = s.shortTitle || '';
+  f.title.value = s.title || '';
+  f.heroTitle.value = s.heroTitle || '';
+  f.intro.value = s.intro || '';
+  f.description.value = s.description || '';
+  f.keywords.value = s.keywords || '';
+  f.category.value = s.category || '';
+  f.benefits.value = joinLines(s.benefits);
+  f.deliverables.value = joinLines(s.deliverables);
+  f.process.value = joinLines(s.process);
+  f.faqs.value = formatFaqs(s.faqs);
+
+  $('#btn-delete-service').style.display = 'inline-flex';
+  openModal('modal-service');
+};
+
+function initServiceForm() {
+  $('#btn-new-service').addEventListener('click', () => {
+    editingServiceSlug = null;
+    $('#modal-service-title').textContent = 'Nuevo servicio';
+    $('#service-form').reset();
+    $('#btn-delete-service').style.display = 'none';
+    openModal('modal-service');
   });
-  updateSeoPreview();
-  updateCharCounts();
-}
 
-function updateSeoFromForm() {
-  state.seo = {
-    siteTitle: els.seoForm.elements.namedItem('siteTitle').value.trim(),
-    siteDescription: els.seoForm.elements.namedItem('siteDescription').value.trim(),
-    siteKeywords: els.seoForm.elements.namedItem('siteKeywords').value.trim(),
-    ogImage: els.seoForm.elements.namedItem('ogImage').value.trim(),
-    twitterHandle: els.seoForm.elements.namedItem('twitterHandle').value.trim(),
-  };
-  updateSeoPreview();
-  updateCharCounts();
-}
+  $('#service-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const f = e.target;
+    const service = {
+      slug: f.slug.value.trim() || slugify(f.title.value),
+      shortTitle: f.shortTitle.value.trim(),
+      title: f.title.value.trim(),
+      heroTitle: f.heroTitle.value.trim(),
+      intro: f.intro.value.trim(),
+      description: f.description.value.trim(),
+      keywords: f.keywords.value.trim(),
+      category: f.category.value.trim(),
+      benefits: splitLines(f.benefits.value),
+      deliverables: splitLines(f.deliverables.value),
+      process: splitLines(f.process.value),
+      faqs: parseFaqs(f.faqs.value),
+      relatedProjectIds: [],
+    };
 
-function updateSeoPreview() {
-  if (!state.seo) return;
-  const title = state.seo.siteTitle || 'EMMAGINATION';
-  const desc = state.seo.siteDescription || '';
-  const url = 'https://emmagination.ccarrascosamur.workers.dev/';
-  els.seoPreview.innerHTML = `
-    <div style="max-width:600px;">
-      <div style="color:#8ab4f8;font-size:14px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${url}</div>
-      <div style="color:#bdc1c6;font-size:20px;font-weight:400;margin-bottom:8px;line-height:1.3;">${escapeHtml(title)}</div>
-      <div style="color:#969ba1;font-size:14px;line-height:1.58;">${escapeHtml(desc.substring(0, 160))}${desc.length > 160 ? '...' : ''}</div>
-    </div>
-  `;
-}
+    if (editingServiceSlug) {
+      state.services = state.services.map(s => s.slug === editingServiceSlug ? service : s);
+    } else {
+      state.services.push(service);
+    }
+    closeModal('modal-service');
+    renderServices();
+    showStatus('Servicio guardado. Recuerda guardar todos los cambios.', 'ok');
+  });
 
-// ── Config ──
-function fillConfigForm() {
-  if (!state.config) return;
-  Object.entries(state.config).forEach(([key, value]) => {
-    const input = els.configForm.elements.namedItem(key);
-    if (input) input.value = value;
+  $('#btn-delete-service').addEventListener('click', () => {
+    if (!editingServiceSlug) return;
+    const s = state.services.find(x => x.slug === editingServiceSlug);
+    if (!confirm(`¿Eliminar "${s?.title}"?`)) return;
+    state.services = state.services.filter(s => s.slug !== editingServiceSlug);
+    editingServiceSlug = null;
+    closeModal('modal-service');
+    renderServices();
+    showStatus('Servicio eliminado. Recuerda guardar todos los cambios.', 'ok');
   });
 }
 
-function updateConfigFromForm() {
-  state.config = {
-    contactEmail: els.configForm.elements.namedItem('contactEmail').value.trim(),
-    contactPhone: els.configForm.elements.namedItem('contactPhone').value.trim(),
-    instagramUrl: els.configForm.elements.namedItem('instagramUrl').value.trim(),
-    linkedinUrl: els.configForm.elements.namedItem('linkedinUrl').value.trim(),
-    googleBusinessUrl: els.configForm.elements.namedItem('googleBusinessUrl').value.trim(),
-  };
-}
-
-// ── Char counts ──
-function updateCharCounts() {
-  const fields = [
-    { id: 'cc-badge', el: els.heroForm?.elements.namedItem('badge'), max: 60 },
-    { id: 'cc-siteTitle', el: els.seoForm?.elements.namedItem('siteTitle'), max: 60 },
-    { id: 'cc-siteDescription', el: els.seoForm?.elements.namedItem('siteDescription'), max: 160 },
-  ];
-  fields.forEach(({ id, el, max }) => {
-    const counter = document.getElementById(id);
-    if (!counter || !el) return;
-    const len = el.value.length;
-    counter.textContent = `${len}/${max}`;
-    counter.className = 'char-count ' + (len > max ? 'warn' : len > max * 0.8 ? 'warn' : 'ok');
-  });
-}
-
-function escapeHtml(text) {
-  const div = document.createElement('div');
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-// ── Persistence ──
-async function loadAll() {
-  setStatus('Cargando datos...');
-  try {
-    state = await fetchData();
-    // Ensure all sections exist
-    if (!state.projects) state.projects = [];
-    if (!state.services) state.services = [];
-    if (!state.hero) state.hero = {};
-    if (!state.seo) state.seo = {};
-    if (!state.config) state.config = {};
-
-    activeProjectId = state.projects[0]?.id || null;
-    activeServiceSlug = state.services[0]?.slug || null;
-
-    renderProjectList();
-    fillProjectForm();
-    if (!activeProjectId) els.projectEditor.style.display = 'none';
-
-    renderServiceList();
-    fillServiceForm();
-    if (!activeServiceSlug) els.serviceEditor.style.display = 'none';
-
-    fillHeroForm();
-    fillSeoForm();
-    fillConfigForm();
-
-    setStatus('Datos cargados.', 'ok');
-  } catch (err) {
-    setStatus(err.message || 'Error al cargar datos.', 'error');
+// ── HERO / CONFIG / SEO ──
+function fillForms() {
+  if (state.hero) {
+    const f = $('#hero-form');
+    Object.entries(state.hero).forEach(([k, v]) => {
+      const el = f.elements.namedItem(k);
+      if (el) el.value = v || '';
+    });
+  }
+  if (state.config) {
+    const f = $('#config-form');
+    Object.entries(state.config).forEach(([k, v]) => {
+      const el = f.elements.namedItem(k);
+      if (el) el.value = v || '';
+    });
+  }
+  if (state.seo) {
+    const f = $('#seo-form');
+    Object.entries(state.seo).forEach(([k, v]) => {
+      const el = f.elements.namedItem(k);
+      if (el) el.value = v || '';
+    });
   }
 }
 
-async function persistAll() {
+function updateStateFromForms() {
+  // Hero
+  const hf = $('#hero-form');
+  state.hero = {
+    badge: hf.badge.value.trim(),
+    titleLine1: hf.titleLine1.value.trim(),
+    titleLine2: hf.titleLine2.value.trim(),
+    titleLine3: hf.titleLine3.value.trim(),
+    taglineLine1: hf.taglineLine1.value.trim(),
+    taglineLine2: hf.taglineLine2.value.trim(),
+    subtitle: hf.subtitle.value.trim(),
+    ctaPrimary: hf.ctaPrimary.value.trim(),
+    ctaSecondary: hf.ctaSecondary.value.trim(),
+  };
+  // Config
+  const cf = $('#config-form');
+  state.config = {
+    contactEmail: cf.contactEmail.value.trim(),
+    contactPhone: cf.contactPhone.value.trim(),
+    instagramUrl: cf.instagramUrl.value.trim(),
+    linkedinUrl: cf.linkedinUrl.value.trim(),
+    googleBusinessUrl: cf.googleBusinessUrl.value.trim(),
+  };
+  // SEO
+  const sf = $('#seo-form');
+  state.seo = {
+    siteTitle: sf.siteTitle.value.trim(),
+    siteDescription: sf.siteDescription.value.trim(),
+    siteKeywords: sf.siteKeywords.value.trim(),
+    ogImage: state.seo?.ogImage || '/images/isotipo.png',
+    twitterHandle: state.seo?.twitterHandle || '@emmagination',
+  };
+}
+
+// ── SAVE / EXPORT / IMPORT ──
+async function saveAll() {
   try {
-    updateActiveProjectFromForm();
-    updateActiveServiceFromForm();
-    updateHeroFromForm();
-    updateSeoFromForm();
-    updateConfigFromForm();
-    setStatus('Guardando...');
+    updateStateFromForms();
+    $('#save-status').textContent = 'Guardando...';
     state = await saveData(state);
-    setStatus('Cambios guardados en Cloudflare KV.', 'ok');
-  } catch (err) {
-    setStatus(err.message || 'No fue posible guardar.', 'error');
+    $('#save-status').textContent = '';
+    showStatus('✅ Cambios guardados correctamente', 'ok');
+  } catch (e) {
+    $('#save-status').textContent = '';
+    showStatus('❌ ' + (e.message || 'Error al guardar'), 'error');
   }
 }
 
 function exportJson() {
-  updateActiveProjectFromForm();
-  updateActiveServiceFromForm();
-  updateHeroFromForm();
-  updateSeoFromForm();
-  updateConfigFromForm();
+  updateStateFromForms();
   const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = 'emmagination-site-data.json';
-  link.click();
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'emmagination-data.json';
+  a.click();
   URL.revokeObjectURL(url);
-  setStatus('JSON exportado.', 'ok');
+  showStatus('JSON exportado', 'ok');
 }
 
 function importJson(file) {
@@ -614,52 +408,62 @@ function importJson(file) {
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target.result);
-      if (!data.projects || !Array.isArray(data.projects)) throw new Error('JSON inválido: falta projects');
+      if (!data.projects) throw new Error('JSON inválido');
       state = data;
-      activeProjectId = state.projects[0]?.id || null;
-      activeServiceSlug = state.services?.[0]?.slug || null;
-      renderProjectList();
-      fillProjectForm();
-      renderServiceList();
-      fillServiceForm();
-      fillHeroForm();
-      fillSeoForm();
-      fillConfigForm();
-      setStatus('JSON importado. Guarda para persistir.', 'ok');
+      renderProjects();
+      renderServices();
+      fillForms();
+      showStatus('JSON importado. Guarda para persistir.', 'ok');
     } catch (err) {
-      setStatus('Error al importar: ' + err.message, 'error');
+      showStatus('Error al importar: ' + err.message, 'error');
     }
   };
   reader.readAsText(file);
 }
 
-// ── Event bindings ──
-els.saveAuth.addEventListener('click', saveAuth);
-els.reloadData.addEventListener('click', () => loadAll().catch((err) => setStatus(err.message, 'error')));
-els.saveAll.addEventListener('click', persistAll);
-els.exportJson.addEventListener('click', exportJson);
-els.importJsonBtn.addEventListener('click', () => els.importJsonFile.click());
-els.importJsonFile.addEventListener('change', (e) => { if (e.target.files[0]) importJson(e.target.files[0]); });
+// ── MODAL ──
+window.openModal = function(id) { $(`#${id}`).classList.add('open'); };
+window.closeModal = function(id) { $(`#${id}`).classList.remove('open'); };
 
-// Projects
-els.addProject.addEventListener('click', addProject);
-els.deleteProject.addEventListener('click', deleteProject);
+// Close on overlay click
+$$('.modal-overlay').forEach(el => {
+  el.addEventListener('click', (e) => { if (e.target === el) el.classList.remove('open'); });
+});
 
-// Services
-els.addService.addEventListener('click', addService);
-els.deleteService.addEventListener('click', deleteService);
+// ── ESCAPE HTML ──
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
 
-// Hero
-els.heroForm.addEventListener('input', updateHeroFromForm);
+// ── LOAD ALL ──
+async function loadAll() {
+  try {
+    state = await fetchData();
+    if (!state.projects) state.projects = [];
+    if (!state.services) state.services = [];
+    if (!state.hero) state.hero = {};
+    if (!state.seo) state.seo = {};
+    if (!state.config) state.config = {};
 
-// SEO
-els.seoForm.addEventListener('input', updateSeoFromForm);
+    renderProjects();
+    renderServices();
+    fillForms();
+    showStatus('Datos cargados', 'ok');
+  } catch (e) {
+    showStatus('Error al cargar: ' + e.message, 'error');
+  }
+}
 
-// Config
-els.configForm.addEventListener('input', updateConfigFromForm);
+// ── INIT ──
+initLogin();
+initTabs();
+initProjectForm();
+initServiceForm();
 
-// ── Init ──
-readAuth();
-bindProjectForm();
-bindServiceForm();
-loadAll().catch((err) => setStatus(err.message || 'Error inicial.', 'error'));
+$('#logout-btn').addEventListener('click', logout);
+$('#btn-save').addEventListener('click', saveAll);
+$('#btn-export').addEventListener('click', exportJson);
+$('#btn-import').addEventListener('click', () => $('#file-import').click());
+$('#file-import').addEventListener('change', (e) => { if (e.target.files[0]) importJson(e.target.files[0]); });

@@ -1,609 +1,506 @@
 <!doctype html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="robots" content="noindex, nofollow" />
-    <title>EMMAGINATION Admin</title>
-    <style>
-      :root {
-        --bg: #0b0d14;
-        --panel: #111523;
-        --soft: #171c2d;
-        --line: rgba(255,255,255,0.08);
-        --text: #f5f7ff;
-        --muted: rgba(245,247,255,0.62);
-        --accent: #7c3aed;
-        --accent-2: #c026d3;
-        --success: #10b981;
-        --danger: #ef4444;
-        --warning: #f59e0b;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>EMMAGINATION Admin</title>
+  <style>
+    :root {
+      --bg: #0a0c14;
+      --panel: #111420;
+      --soft: #181d2e;
+      --line: rgba(255,255,255,0.07);
+      --text: #f0f2fa;
+      --muted: rgba(240,242,250,0.55);
+      --accent: #7c3aed;
+      --accent-2: #a855f7;
+      --success: #22c55e;
+      --danger: #ef4444;
+    }
+    * { box-sizing: border-box; margin: 0; }
+    body {
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+    /* ── LOGIN SCREEN ── */
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    .login-box {
+      width: 100%;
+      max-width: 380px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 40px 32px;
+      text-align: center;
+    }
+    .login-box h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 6px;
+    }
+    .login-box p {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .login-box input {
+      width: 100%;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      color: var(--text);
+      font-size: 15px;
+      margin-bottom: 12px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .login-box input:focus {
+      border-color: var(--accent);
+    }
+    .login-box button {
+      width: 100%;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      border: none;
+      border-radius: 14px;
+      padding: 14px;
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: opacity 0.2s;
+    }
+    .login-box button:hover { opacity: 0.9; }
+    .login-error {
+      color: var(--danger);
+      font-size: 13px;
+      margin-top: 12px;
+      min-height: 20px;
+    }
 
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        font-family: Inter, system-ui, sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(124,58,237,0.18), transparent 30%),
-          linear-gradient(180deg, #090b11 0%, #0d1220 100%);
-        color: var(--text);
-      }
+    /* ── APP ── */
+    .app { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .app-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+    .app-header p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+    .app-header-actions { display: flex; gap: 10px; align-items: center; }
 
-      a { color: inherit; }
-      button, input, textarea, select {
-        font: inherit;
-      }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: var(--soft);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,0.05); }
+    .btn-success { background: linear-gradient(135deg, #16a34a, var(--success)); color: white; }
+    .btn-danger { background: linear-gradient(135deg, #dc2626, var(--danger)); color: white; }
+    .btn-sm { padding: 7px 14px; font-size: 13px; }
 
-      .app {
-        max-width: 1480px;
-        margin: 0 auto;
-        padding: 32px;
-      }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .panel-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
 
-      .topbar {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        gap: 16px;
-        margin-bottom: 24px;
-      }
+    /* ── PROJECT LIST ── */
+    .project-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .project-card {
+      background: var(--soft);
+      border: 1px solid transparent;
+      border-radius: 16px;
+      padding: 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .project-card:hover { border-color: rgba(124,58,237,0.3); }
+    .project-card.active {
+      border-color: var(--accent);
+      background: linear-gradient(135deg, rgba(124,58,237,0.12), rgba(168,85,247,0.08));
+    }
+    .project-card img {
+      width: 100%;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      background: rgba(255,255,255,0.03);
+    }
+    .project-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .project-card .meta {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .project-card .badge-featured {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      color: white;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
 
-      .title h1 {
-        margin: 0;
-        font-size: clamp(30px, 5vw, 52px);
-        line-height: 0.95;
-        letter-spacing: -0.04em;
-      }
+    /* ── FORM ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+    }
+    .form-grid .full { grid-column: 1 / -1; }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: rgba(240,242,250,0.75);
+      margin-bottom: 6px;
+    }
+    input, textarea, select {
+      width: 100%;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    textarea { min-height: 80px; resize: vertical; }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 4px; }
 
-      .title p {
-        margin: 10px 0 0;
-        color: var(--muted);
-        max-width: 700px;
-        line-height: 1.6;
-      }
+    /* ── MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 1000;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 640px;
+      max-height: 90vh;
+      overflow: auto;
+      padding: 28px;
+    }
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .modal-header h2 { font-size: 20px; }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 24px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+    .modal-close:hover { color: var(--text); }
 
-      .layout {
-        display: grid;
-        grid-template-columns: 280px 1fr;
-        gap: 24px;
-      }
+    /* ── TABS ── */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      background: var(--soft);
+      border-radius: 12px;
+      padding: 4px;
+      margin-bottom: 20px;
+      width: fit-content;
+    }
+    .tab {
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      transition: all 0.2s;
+    }
+    .tab:hover { color: var(--text); }
+    .tab.active { background: var(--accent); color: white; }
 
-      .sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
 
-      .panel {
-        border: 1px solid var(--line);
-        background: rgba(17,21,35,0.9);
-        backdrop-filter: blur(14px);
-        border-radius: 28px;
-        padding: 22px;
-        box-shadow: 0 24px 60px rgba(0,0,0,0.22);
-      }
+    /* ── STATUS ── */
+    .status-bar {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 24px;
+      font-size: 14px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      z-index: 100;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .status-bar.show { display: flex; }
+    .status-bar.ok { border-color: rgba(34,197,94,0.3); color: #86efac; }
+    .status-bar.error { border-color: rgba(239,68,68,0.3); color: #fca5a5; }
 
-      .panel h2, .panel h3 {
-        margin: 0 0 14px;
-        font-size: 1rem;
-        letter-spacing: 0.03em;
-        text-transform: uppercase;
-        color: rgba(245,247,255,0.72);
-      }
+    @media (max-width: 640px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .project-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
 
-      .stack {
-        display: grid;
-        gap: 14px;
-      }
+<!-- LOGIN -->
+<div id="login-screen" class="login-screen">
+  <div class="login-box">
+    <h1>🔐 Admin</h1>
+    <p>EMMAGINATION</p>
+    <input id="login-user" type="text" placeholder="Usuario" value="admin" />
+    <input id="login-pass" type="password" placeholder="Contraseña" />
+    <button id="login-btn" type="button">Entrar</button>
+    <div id="login-error" class="login-error"></div>
+  </div>
+</div>
 
-      .nav-tabs {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
+<!-- APP -->
+<div id="app" class="app" style="display:none;">
+  <div class="app-header">
+    <div>
+      <h1>Admin Panel</h1>
+      <p>Gestiona proyectos, servicios y contenido del sitio</p>
+    </div>
+    <div class="app-header-actions">
+      <a href="/" target="_blank" class="btn btn-secondary btn-sm">🌐 Ver sitio</a>
+      <button id="logout-btn" class="btn btn-secondary btn-sm">Salir</button>
+    </div>
+  </div>
 
-      .nav-tab {
-        width: 100%;
-        border: 1px solid transparent;
-        background: transparent;
-        border-radius: 14px;
-        color: var(--muted);
-        text-align: left;
-        padding: 12px 14px;
-        cursor: pointer;
-        font-size: 0.92rem;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
+  <div class="tabs">
+    <button class="tab active" data-tab="projects">📁 Proyectos</button>
+    <button class="tab" data-tab="services">🛠 Servicios</button>
+    <button class="tab" data-tab="content">📝 Contenido</button>
+    <button class="tab" data-tab="config">⚙ Config</button>
+  </div>
 
-      .nav-tab:hover {
-        background: rgba(255,255,255,0.04);
-        color: var(--text);
-      }
-
-      .nav-tab.active {
-        border-color: rgba(124,58,237,0.55);
-        background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(192,38,211,0.12));
-        color: var(--text);
-      }
-
-      .nav-tab .icon {
-        width: 22px;
-        text-align: center;
-        opacity: 0.7;
-      }
-
-      .project-list {
-        display: grid;
-        gap: 10px;
-        max-height: calc(100vh - 300px);
-        overflow: auto;
-        padding-right: 4px;
-      }
-
-      .project-item {
-        width: 100%;
-        border: 1px solid transparent;
-        background: var(--soft);
-        border-radius: 18px;
-        color: var(--text);
-        text-align: left;
-        padding: 14px;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-
-      .project-item:hover {
-        border-color: rgba(255,255,255,0.1);
-      }
-
-      .project-item.active {
-        border-color: rgba(124,58,237,0.55);
-        background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(192,38,211,0.12));
-      }
-
-      .project-item strong {
-        display: block;
-        margin-bottom: 6px;
-        font-size: 0.95rem;
-      }
-
-      .project-item span {
-        display: block;
-        color: var(--muted);
-        font-size: 0.85rem;
-      }
-
-      .service-item {
-        width: 100%;
-        border: 1px solid transparent;
-        background: var(--soft);
-        border-radius: 18px;
-        color: var(--text);
-        text-align: left;
-        padding: 14px;
-        cursor: pointer;
-        transition: all 0.2s;
-      }
-
-      .service-item:hover {
-        border-color: rgba(255,255,255,0.1);
-      }
-
-      .service-item.active {
-        border-color: rgba(124,58,237,0.55);
-        background: linear-gradient(135deg, rgba(124,58,237,0.18), rgba(192,38,211,0.12));
-      }
-
-      .grid {
-        display: grid;
-        gap: 14px;
-      }
-
-      .grid.cols-2 {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-
-      .grid.cols-3 {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-
-      label {
-        display: grid;
-        gap: 8px;
-        color: rgba(245,247,255,0.82);
-        font-size: 0.92rem;
-      }
-
-      input, textarea, select {
-        width: 100%;
-        border: 1px solid var(--line);
-        background: #0b1020;
-        color: var(--text);
-        border-radius: 14px;
-        padding: 12px 14px;
-        outline: none;
-        transition: border-color 0.2s;
-      }
-
-      input:focus, textarea:focus, select:focus {
-        border-color: rgba(124,58,237,0.5);
-      }
-
-      textarea {
-        min-height: 120px;
-        resize: vertical;
-      }
-
-      textarea.small {
-        min-height: 60px;
-      }
-
-      .toolbar {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-      }
-
-      .btn {
-        border: 0;
-        border-radius: 999px;
-        padding: 12px 18px;
-        cursor: pointer;
-        color: white;
-        background: linear-gradient(135deg, var(--accent), var(--accent-2));
-        font-size: 0.92rem;
-        transition: opacity 0.2s, transform 0.1s;
-      }
-
-      .btn:hover { opacity: 0.9; }
-      .btn:active { transform: scale(0.98); }
-
-      .btn.secondary {
-        background: rgba(255,255,255,0.07);
-        color: var(--text);
-        border: 1px solid var(--line);
-      }
-
-      .btn.success {
-        background: linear-gradient(135deg, #0f9f6e, var(--success));
-      }
-
-      .btn.danger {
-        background: linear-gradient(135deg, #b91c1c, var(--danger));
-      }
-
-      .btn.warning {
-        background: linear-gradient(135deg, #d97706, var(--warning));
-      }
-
-      .badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 8px 12px;
-        border-radius: 999px;
-        background: rgba(255,255,255,0.06);
-        color: var(--muted);
-        font-size: 0.88rem;
-      }
-
-      .hint {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.6;
-        font-size: 0.92rem;
-      }
-
-      .status {
-        min-height: 24px;
-        color: var(--muted);
-      }
-
-      .status.ok { color: #7ef0c0; }
-      .status.error { color: #ff8e8e; }
-      .status.warn { color: #fcd34d; }
-
-      .section-divider {
-        height: 1px;
-        background: var(--line);
-        margin: 20px 0;
-      }
-
-      .tab-content {
-        display: none;
-      }
-
-      .tab-content.active {
-        display: block;
-      }
-
-      .preview-box {
-        background: rgba(0,0,0,0.3);
-        border-radius: 16px;
-        padding: 16px;
-        font-size: 0.88rem;
-        color: var(--muted);
-        border: 1px solid var(--line);
-      }
-
-      .preview-box .preview-title {
-        font-size: 0.8rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: rgba(245,247,255,0.4);
-        margin-bottom: 8px;
-      }
-
-      .char-count {
-        text-align: right;
-        font-size: 0.8rem;
-        color: var(--muted);
-        margin-top: 4px;
-      }
-
-      .char-count.warn { color: var(--warning); }
-      .char-count.ok { color: var(--success); }
-
-      @media (max-width: 980px) {
-        .layout {
-          grid-template-columns: 1fr;
-        }
-
-        .grid.cols-2, .grid.cols-3 {
-          grid-template-columns: 1fr;
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="app">
-      <div class="topbar">
-        <div class="title">
-          <h1>Admin Panel</h1>
-          <p>
-            Gestiona proyectos, servicios, contenido del sitio y configuración SEO.
-            Los cambios se guardan en <code>/api/data</code> vía Cloudflare Worker.
-          </p>
-        </div>
-        <div class="stack">
-          <span class="badge">Sitio: <a href="/" target="_blank" rel="noreferrer">Ver público ↗</a></span>
-          <span class="badge">Admin: <strong>/admin</strong></span>
-        </div>
+  <!-- TAB: PROJECTS -->
+  <div id="tab-projects" class="tab-content active">
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <span class="panel-title">Proyectos</span>
+        <button id="btn-new-project" class="btn btn-primary btn-sm">+ Nuevo proyecto</button>
       </div>
+      <div id="project-list" class="project-grid"></div>
+    </div>
+  </div>
 
-      <div class="layout">
-        <aside class="sidebar">
-          <div class="panel">
-            <h2>Acceso</h2>
-            <div class="stack">
-              <label>
-                Usuario
-                <input id="auth-user" type="text" placeholder="admin" />
-              </label>
-              <label>
-                Password
-                <input id="auth-password" type="password" placeholder="change-me" />
-              </label>
-              <div class="toolbar">
-                <button class="btn secondary" id="save-auth" type="button">Guardar credenciales</button>
-                <button class="btn secondary" id="reload-data" type="button">↻ Recargar</button>
-              </div>
-              <p class="hint">
-                Credenciales por defecto: <code>admin</code> / <code>change-me</code>.
-                Cámbialas en producción.
-              </p>
-            </div>
-          </div>
+  <!-- TAB: SERVICES -->
+  <div id="tab-services" class="tab-content">
+    <div class="panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+        <span class="panel-title">Servicios</span>
+        <button id="btn-new-service" class="btn btn-primary btn-sm">+ Nuevo servicio</button>
+      </div>
+      <div id="service-list" class="project-grid"></div>
+    </div>
+  </div>
 
-          <div class="panel">
-            <h2>Secciones</h2>
-            <div class="nav-tabs">
-              <button class="nav-tab active" data-tab="projects">
-                <span class="icon">📁</span> Proyectos
-              </button>
-              <button class="nav-tab" data-tab="services">
-                <span class="icon">🛠</span> Servicios
-              </button>
-              <button class="nav-tab" data-tab="hero">
-                <span class="icon">🏠</span> Hero / Inicio
-              </button>
-              <button class="nav-tab" data-tab="seo">
-                <span class="icon">🔍</span> SEO Global
-              </button>
-              <button class="nav-tab" data-tab="config">
-                <span class="icon">⚙</span> Configuración
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        <section class="stack">
-          <!-- TAB: PROJECTS -->
-          <div id="tab-projects" class="tab-content active">
-            <div class="panel">
-              <div class="toolbar" style="justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h2 style="margin:0;">Proyectos</h2>
-                <button class="btn" id="add-project" type="button">+ Nuevo proyecto</button>
-              </div>
-              <div id="project-list" class="project-list"></div>
-            </div>
-
-            <div id="project-editor" class="panel" style="display:none;">
-              <div class="toolbar" style="justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h2 style="margin:0;">Editar proyecto</h2>
-                <button class="btn danger" id="delete-project" type="button">Eliminar</button>
-              </div>
-              <form id="project-form" class="stack">
-                <div class="grid cols-2">
-                  <label>Título<input name="title" required /></label>
-                  <label>Slug<input name="slug" required /></label>
-                </div>
-                <div class="grid cols-2">
-                  <label>Cliente<input name="client" /></label>
-                  <label>Categoría<input name="category" /></label>
-                </div>
-                <div class="grid cols-2">
-                  <label>Año<input name="year" /></label>
-                  <label>Offset desktop<input name="offset" type="number" /></label>
-                </div>
-                <div class="grid cols-2">
-                  <label>Imagen principal<input name="image" /></label>
-                  <label>PDF<input name="pdf" /></label>
-                </div>
-                <div class="grid cols-2">
-                  <label>URL pública<input name="url" /></label>
-                  <label>Destacado
-                    <select name="featured">
-                      <option value="true">Sí</option>
-                      <option value="false">No</option>
-                    </select>
-                  </label>
-                </div>
-                <label>Descripción breve<textarea name="description"></textarea></label>
-                <label>Excerpt de grilla<textarea name="excerpt"></textarea></label>
-                <label>Servicios (una línea por item)<textarea name="services"></textarea></label>
-                <label>Desafío<textarea name="challenge"></textarea></label>
-                <label>Solución<textarea name="solution"></textarea></label>
-                <label>Resultados (una línea por item)<textarea name="results"></textarea></label>
-                <label>Galería (una URL por línea)<textarea name="gallery"></textarea></label>
-                <div class="grid cols-2">
-                  <label>SEO title<input name="seoTitle" /></label>
-                  <label>SEO description<textarea name="seoDescription"></textarea></label>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          <!-- TAB: SERVICES -->
-          <div id="tab-services" class="tab-content">
-            <div class="panel">
-              <div class="toolbar" style="justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h2 style="margin:0;">Servicios</h2>
-                <button class="btn" id="add-service" type="button">+ Nuevo servicio</button>
-              </div>
-              <div id="service-list" class="project-list"></div>
-            </div>
-
-            <div id="service-editor" class="panel" style="display:none;">
-              <div class="toolbar" style="justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h2 style="margin:0;">Editar servicio</h2>
-                <button class="btn danger" id="delete-service" type="button">Eliminar</button>
-              </div>
-              <form id="service-form" class="stack">
-                <div class="grid cols-2">
-                  <label>Slug<input name="slug" required /></label>
-                  <label>Título corto<input name="shortTitle" required /></label>
-                </div>
-                <label>Título completo<input name="title" required /></label>
-                <label>Hero title<textarea name="heroTitle"></textarea></label>
-                <label>Intro<textarea name="intro"></textarea></label>
-                <label>Descripción SEO<textarea name="description"></textarea></label>
-                <label>Keywords SEO<textarea name="keywords"></textarea></label>
-                <label>Categoría<input name="category" /></label>
-                <label>Beneficios (una línea por item)<textarea name="benefits"></textarea></label>
-                <label>Entregables (una línea por item)<textarea name="deliverables"></textarea></label>
-                <label>Proceso (una línea por item)<textarea name="process"></textarea></label>
-                <label>FAQs (formato: Pregunta? | Respuesta, uno por línea)<textarea name="faqs"></textarea></label>
-                <label>IDs de proyectos relacionados (ej: 1,2,3)<input name="relatedProjectIds" /></label>
-              </form>
-            </div>
-          </div>
-
-          <!-- TAB: HERO -->
-          <div id="tab-hero" class="tab-content">
-            <div class="panel">
-              <h2>Contenido del Hero (Inicio)</h2>
-              <p class="hint">Edita el texto principal de la página de inicio.</p>
-              <form id="hero-form" class="stack" style="margin-top:16px;">
-                <label>Badge (etiqueta superior)
-                  <input name="badge" />
-                  <div class="char-count" id="cc-badge"></div>
-                </label>
-                <div class="grid cols-3">
-                  <label>Título línea 1<input name="titleLine1" /></label>
-                  <label>Título línea 2<input name="titleLine2" /></label>
-                  <label>Título línea 3<input name="titleLine3" /></label>
-                </div>
-                <div class="grid cols-2">
-                  <label>Tagline línea 1<input name="taglineLine1" /></label>
-                  <label>Tagline línea 2<input name="taglineLine2" /></label>
-                </div>
-                <label>Subtítulo<textarea name="subtitle"></textarea></label>
-                <div class="grid cols-2">
-                  <label>CTA Primario<input name="ctaPrimary" /></label>
-                  <label>CTA Secundario<input name="ctaSecondary" /></label>
-                </div>
-              </form>
-            </div>
-            <div class="panel preview-box">
-              <div class="preview-title">Vista previa</div>
-              <div id="hero-preview"></div>
-            </div>
-          </div>
-
-          <!-- TAB: SEO -->
-          <div id="tab-seo" class="tab-content">
-            <div class="panel">
-              <h2>Configuración SEO Global</h2>
-              <p class="hint">Estos valores se usan como fallback cuando una página no define su propio SEO.</p>
-              <form id="seo-form" class="stack" style="margin-top:16px;">
-                <label>Título del sitio
-                  <input name="siteTitle" />
-                  <div class="char-count" id="cc-siteTitle"></div>
-                </label>
-                <label>Descripción del sitio
-                  <textarea name="siteDescription"></textarea>
-                  <div class="char-count" id="cc-siteDescription"></div>
-                </label>
-                <label>Keywords globales
-                  <textarea name="siteKeywords"></textarea>
-                </label>
-                <label>Imagen OG (Open Graph)
-                  <input name="ogImage" />
-                </label>
-                <label>Twitter handle
-                  <input name="twitterHandle" placeholder="@emmagination" />
-                </label>
-              </form>
-            </div>
-            <div class="panel preview-box">
-              <div class="preview-title">Vista previa en Google</div>
-              <div id="seo-preview" style="font-family: Arial, sans-serif;"></div>
-            </div>
-          </div>
-
-          <!-- TAB: CONFIG -->
-          <div id="tab-config" class="tab-content">
-            <div class="panel">
-              <h2>Configuración Pública</h2>
-              <form id="config-form" class="grid cols-2" style="margin-top:16px;">
-                <label>Email<input name="contactEmail" /></label>
-                <label>Teléfono<input name="contactPhone" /></label>
-                <label>Instagram URL<input name="instagramUrl" /></label>
-                <label>LinkedIn URL<input name="linkedinUrl" /></label>
-                <label style="grid-column:1 / -1;">Google Business URL<input name="googleBusinessUrl" /></label>
-              </form>
-            </div>
-          </div>
-
-          <!-- SAVE BAR -->
-          <div class="panel">
-            <div class="toolbar">
-              <button class="btn success" id="save-all" type="button">💾 Guardar todos los cambios</button>
-              <button class="btn secondary" id="export-json" type="button">📥 Exportar JSON</button>
-              <button class="btn warning" id="import-json-btn" type="button">📤 Importar JSON</button>
-              <input type="file" id="import-json-file" accept=".json" style="display:none;" />
-            </div>
-            <p id="status" class="status"></p>
-          </div>
-        </section>
+  <!-- TAB: CONTENT -->
+  <div id="tab-content" class="tab-content">
+    <div class="panel">
+      <span class="panel-title">Hero / Página de inicio</span>
+      <div class="form-grid" id="hero-form">
+        <div class="full"><label>Badge</label><input name="badge" /></div>
+        <div><label>Título línea 1</label><input name="titleLine1" /></div>
+        <div><label>Título línea 2</label><input name="titleLine2" /></div>
+        <div><label>Título línea 3</label><input name="titleLine3" /></div>
+        <div><label>Tagline 1</label><input name="taglineLine1" /></div>
+        <div><label>Tagline 2</label><input name="taglineLine2" /></div>
+        <div class="full"><label>Subtítulo</label><textarea name="subtitle"></textarea></div>
+        <div><label>CTA Primario</label><input name="ctaPrimary" /></div>
+        <div><label>CTA Secundario</label><input name="ctaSecondary" /></div>
       </div>
     </div>
+  </div>
 
-    <script type="module" src="/admin/panel.js"></script>
-  </body>
+  <!-- TAB: CONFIG -->
+  <div id="tab-config" class="tab-content">
+    <div class="panel">
+      <span class="panel-title">Configuración pública</span>
+      <div class="form-grid" id="config-form">
+        <div><label>Email</label><input name="contactEmail" /></div>
+        <div><label>Teléfono</label><input name="contactPhone" /></div>
+        <div><label>Instagram</label><input name="instagramUrl" /></div>
+        <div><label>LinkedIn</label><input name="linkedinUrl" /></div>
+        <div class="full"><label>Google Business</label><input name="googleBusinessUrl" /></div>
+      </div>
+    </div>
+    <div class="panel">
+      <span class="panel-title">SEO Global</span>
+      <div class="form-grid" id="seo-form">
+        <div class="full"><label>Título del sitio</label><input name="siteTitle" /></div>
+        <div class="full"><label>Descripción</label><textarea name="siteDescription"></textarea></div>
+        <div class="full"><label>Keywords</label><input name="siteKeywords" /></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAVE BAR -->
+  <div style="position:sticky; bottom:0; padding:16px 0; background:linear-gradient(to top, var(--bg), transparent);">
+    <div class="panel" style="display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:0;">
+      <button id="btn-save" class="btn btn-success">💾 Guardar cambios</button>
+      <button id="btn-export" class="btn btn-secondary">📥 Exportar JSON</button>
+      <button id="btn-import" class="btn btn-secondary">📤 Importar JSON</button>
+      <input type="file" id="file-import" accept=".json" style="display:none;" />
+      <span id="save-status" style="color:var(--muted); font-size:13px; margin-left:auto;"></span>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PROJECT FORM -->
+<div id="modal-project" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-project-title">Nuevo proyecto</h2>
+      <button class="modal-close" onclick="closeModal('modal-project')">&times;</button>
+    </div>
+    <form id="project-form" class="form-grid">
+      <div class="full"><label>Título *</label><input name="title" required /></div>
+      <div><label>Slug *</label><input name="slug" required /><p class="hint">URL amigable: portal-zen</p></div>
+      <div><label>Cliente</label><input name="client" /></div>
+      <div><label>Categoría</label><input name="category" placeholder="E-commerce, Landing Page..." /></div>
+      <div><label>Año</label><input name="year" placeholder="2024" /></div>
+      <div>
+        <label>Destacado</label>
+        <select name="featured">
+          <option value="true">Sí ⭐</option>
+          <option value="false">No</option>
+        </select>
+      </div>
+      <div class="full"><label>Imagen principal *</label><input name="image" placeholder="/images/project-nombre.jpg" required /></div>
+      <div class="full"><label>URL del proyecto</label><input name="url" placeholder="https://..." /></div>
+      <div class="full"><label>Descripción corta *</label><textarea name="description" required></textarea></div>
+      <div class="full"><label>Excerpt (para la grilla)</label><textarea name="excerpt"></textarea></div>
+      <div class="full"><label>Servicios (uno por línea)</label><textarea name="services" placeholder="Shopify&#10;Branding&#10;Diseño web"></textarea></div>
+      <div class="full"><label>Desafío</label><textarea name="challenge"></textarea></div>
+      <div class="full"><label>Solución</label><textarea name="solution"></textarea></div>
+      <div class="full"><label>Resultados (uno por línea)</label><textarea name="results"></textarea></div>
+      <div class="full"><label>Galería (una URL por línea)</label><textarea name="gallery"></textarea></div>
+      <div><label>SEO Title</label><input name="seoTitle" /></div>
+      <div><label>SEO Description</label><textarea name="seoDescription" class="small"></textarea></div>
+      <div class="full" style="display:flex; gap:12px; margin-top:8px;">
+        <button type="submit" class="btn btn-success">Guardar proyecto</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-project')">Cancelar</button>
+        <button type="button" id="btn-delete-project" class="btn btn-danger" style="margin-left:auto;">Eliminar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: SERVICE FORM -->
+<div id="modal-service" class="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 id="modal-service-title">Nuevo servicio</h2>
+      <button class="modal-close" onclick="closeModal('modal-service')">&times;</button>
+    </div>
+    <form id="service-form" class="form-grid">
+      <div><label>Slug *</label><input name="slug" required /></div>
+      <div><label>Título corto *</label><input name="shortTitle" required /></div>
+      <div class="full"><label>Título completo *</label><input name="title" required /></div>
+      <div class="full"><label>Hero title</label><textarea name="heroTitle"></textarea></div>
+      <div class="full"><label>Intro</label><textarea name="intro"></textarea></div>
+      <div class="full"><label>Descripción SEO</label><textarea name="description"></textarea></div>
+      <div class="full"><label>Keywords SEO</label><input name="keywords" /></div>
+      <div><label>Categoría</label><input name="category" /></div>
+      <div class="full"><label>Beneficios (uno por línea)</label><textarea name="benefits"></textarea></div>
+      <div class="full"><label>Entregables (uno por línea)</label><textarea name="deliverables"></textarea></div>
+      <div class="full"><label>Proceso (uno por línea)</label><textarea name="process"></textarea></div>
+      <div class="full"><label>FAQs (Pregunta? | Respuesta, uno por línea)</label><textarea name="faqs"></textarea></div>
+      <div class="full" style="display:flex; gap:12px; margin-top:8px;">
+        <button type="submit" class="btn btn-success">Guardar servicio</button>
+        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-service')">Cancelar</button>
+        <button type="button" id="btn-delete-service" class="btn btn-danger" style="margin-left:auto;">Eliminar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- STATUS -->
+<div id="status-bar" class="status-bar"></div>
+
+<script type="module" src="/admin/panel.js"></script>
+</body>
 </html>

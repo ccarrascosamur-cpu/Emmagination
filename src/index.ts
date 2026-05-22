@@ -86,6 +86,17 @@ async function readStoredData(env: Env) {
 }
 
 async function handleApi(request: Request, env: Env) {
+  // Both GET and POST require authentication
+  if (!isAuthorized(request, env)) {
+    return json(
+      { error: 'Unauthorized' },
+      {
+        status: 401,
+        headers: { 'WWW-Authenticate': 'Basic realm="admin"' },
+      },
+    );
+  }
+
   if (request.method === 'GET') {
     return json(await readStoredData(env));
   }
@@ -98,16 +109,6 @@ async function handleApi(request: Request, env: Env) {
             'Missing KV binding SITE_DATA. Configure a KV namespace before using the admin in production.',
         },
         { status: 500 },
-      );
-    }
-
-    if (!isAuthorized(request, env)) {
-      return json(
-        { error: 'Unauthorized' },
-        {
-          status: 401,
-          headers: { 'WWW-Authenticate': 'Basic realm="admin"' },
-        },
       );
     }
 
