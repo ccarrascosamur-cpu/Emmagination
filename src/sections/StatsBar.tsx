@@ -62,7 +62,7 @@ export default function StatsBar() {
     }, sectionRef);
 
     return () => ctx.revert();
-  }, []);
+  }, [stats]);
 
   return (
     <section
@@ -77,7 +77,7 @@ export default function StatsBar() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12 relative">
           {stats.map((stat, index) => (
             <div
-              key={stat.label}
+              key={`stat-${index}`}
               ref={(el) => { itemsRef.current[index] = el; }}
               className="text-center relative opacity-0"
             >
