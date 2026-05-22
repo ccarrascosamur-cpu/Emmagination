@@ -24,14 +24,17 @@ for (const route of routes) {
   await writeFile(outputPath, html, 'utf8');
 }
 
+const now = new Date().toISOString().split('T')[0];
+
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${routes
   .map(
     (route) => `  <url>
     <loc>https://emmagination.ccarrascosamur.workers.dev${route.url}</loc>
+    <lastmod>${now}</lastmod>
     <changefreq>${route.url === '/' ? 'weekly' : 'monthly'}</changefreq>
-    <priority>${route.url === '/' ? '1.0' : '0.8'}</priority>
+    <priority>${route.url === '/' ? '1.0' : route.url.startsWith('/servicios/') ? '0.9' : route.url.startsWith('/proyectos/') ? '0.8' : '0.8'}</priority>
   </url>`,
   )
   .join('\n')}

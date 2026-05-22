@@ -2,9 +2,9 @@ import { Link, Navigate, useParams } from 'react-router';
 import { ArrowLeft, ArrowRight, MapPin, Star } from 'lucide-react';
 import SEO from '../components/SEO';
 import Footer from '../sections/Footer';
-import { getServiceBySlug } from '../data/services';
 import { buildServiceSeo } from '../lib/route-seo';
 import { useSiteData } from '../lib/site-data-client';
+import { getServiceBySlug } from '../lib/site-data';
 
 export default function ServicePage() {
   const { slug } = useParams();
@@ -14,7 +14,7 @@ export default function ServicePage() {
     return <Navigate to="/servicios/seo" replace />;
   }
 
-  const service = slug ? getServiceBySlug(slug) : undefined;
+  const service = slug ? getServiceBySlug(data.services, slug) : undefined;
 
   if (!service || !slug) {
     return <Navigate to="/" replace />;

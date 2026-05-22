@@ -8,7 +8,21 @@ export function absoluteUrl(path = '/') {
   return new URL(path, SITE_URL).toString();
 }
 
-export function buildOrganizationSchema() {
+export function buildOrganizationSchema(config?: {
+  contactEmail?: string;
+  contactPhone?: string;
+  instagramUrl?: string;
+  linkedinUrl?: string;
+  googleBusinessUrl?: string;
+}) {
+  const email = config?.contactEmail ?? 'hola@emmagination.cl';
+  const phone = config?.contactPhone ?? '+56 9 8829 0618';
+  const sameAs = [
+    config?.instagramUrl ?? 'https://instagram.com/emmagination',
+    config?.linkedinUrl ?? 'https://linkedin.com/company/emmagination',
+    config?.googleBusinessUrl ?? GOOGLE_BUSINESS_PROFILE_URL,
+  ].filter(Boolean);
+
   return {
     '@context': 'https://schema.org',
     '@type': 'ProfessionalService',
@@ -18,20 +32,31 @@ export function buildOrganizationSchema() {
     logo: DEFAULT_OG_IMAGE,
     description:
       'Agencia de diseño web, branding, Shopify y posicionamiento SEO en Chile.',
-    areaServed: 'CL',
+    areaServed: {
+      '@type': 'Country',
+      name: 'Chile',
+    },
     availableLanguage: ['es', 'en'],
-    email: 'hola@emmagination.cl',
-    telephone: '+56 9 8829 0618',
-    sameAs: [
-      'https://instagram.com/emmagination',
-      'https://linkedin.com/company/emmagination',
-      GOOGLE_BUSINESS_PROFILE_URL,
-    ],
+    email,
+    telephone: phone,
+    sameAs,
     contactPoint: {
       '@type': 'ContactPoint',
-      telephone: '+56 9 8829 0618',
+      telephone: phone,
       contactType: 'sales',
       availableLanguage: ['Spanish'],
+      areaServed: 'CL',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'CL',
+    },
+    priceRange: '$$',
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '18:00',
     },
   };
 }
@@ -45,5 +70,66 @@ export function buildWebsiteSchema() {
     inLanguage: 'es-CL',
     description:
       'Sitio oficial de EMMAGINATION, agencia de diseño web, branding y experiencias digitales en Chile.',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_URL}/portafolio?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+}
+
+export function buildBreadcrumbSchema(items: { name: string; url: string }[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items.map((item, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      name: item.name,
+      item: item.url,
+    })),
+  };
+}
+
+export function buildLocalBusinessSchema(config?: {
+  contactEmail?: string;
+  contactPhone?: string;
+  googleBusinessUrl?: string;
+}) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ProfessionalService',
+    '@id': `${SITE_URL}/#business`,
+    name: SITE_NAME,
+    image: DEFAULT_OG_IMAGE,
+    url: SITE_URL,
+    telephone: config?.contactPhone ?? '+56 9 8829 0618',
+    email: config?.contactEmail ?? 'hola@emmagination.cl',
+    priceRange: '$$',
+    areaServed: {
+      '@type': 'Country',
+      name: 'Chile',
+    },
+    address: {
+      '@type': 'PostalAddress',
+      addressCountry: 'CL',
+    },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: '-33.4489',
+      longitude: '-70.6693',
+    },
+    openingHoursSpecification: {
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
+      opens: '09:00',
+      closes: '18:00',
+    },
+    sameAs: [
+      config?.googleBusinessUrl ?? GOOGLE_BUSINESS_PROFILE_URL,
+    ].filter(Boolean),
   };
 }

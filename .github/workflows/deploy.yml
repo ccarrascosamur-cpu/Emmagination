@@ -25,9 +25,19 @@ jobs:
       - name: Check dist folder
         run: ls -la dist/
 
-      - name: Deploy to Cloudflare Workers
+      # Deploy to staging (default) on every push to main
+      - name: Deploy to Staging
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
+
+      # Deploy to production only when commit message contains [production]
+      - name: Deploy to Production
+        if: contains(github.event.head_commit.message, '[production]')
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy --env production

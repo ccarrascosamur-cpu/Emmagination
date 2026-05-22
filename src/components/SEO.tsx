@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { DEFAULT_LOCALE, SITE_NAME, absoluteUrl } from '../lib/seo';
+import { useSiteData } from '../lib/site-data-client';
 
 interface SEOProps {
   title?: string;
@@ -10,39 +11,54 @@ interface SEOProps {
   canonicalPath?: string;
   robots?: string;
   schema?: Record<string, unknown> | Array<Record<string, unknown>>;
+  noIndex?: boolean;
 }
 
 export default function SEO({
-  title = `${SITE_NAME} | Diseño Web, Branding y Experiencias Digitales en Chile`,
-  description = 'EMMAGINATION - Agencia de diseño web, branding, desarrollo Shopify y producción de contenido en Chile. Creamos experiencias digitales que transforman marcas.',
-  keywords = 'diseño web, branding, shopify, desarrollo web, seo chile, agencia digital, e-commerce, producción de video',
-  image = '/images/isotipo.png',
+  title: titleProp,
+  description: descriptionProp,
+  keywords: keywordsProp,
+  image: imageProp,
   type = 'website',
   canonicalPath = '/',
   robots = 'index, follow',
   schema,
+  noIndex = false,
 }: SEOProps) {
+  const { data } = useSiteData();
+  const seo = data.seo;
+
+  const title = titleProp || seo.siteTitle || `${SITE_NAME} | Diseño Web, Branding y Experiencias Digitales en Chile`;
+  const description = descriptionProp || seo.siteDescription || 'EMMAGINATION - Agencia de diseño web, branding, desarrollo Shopify y producción de contenido en Chile. Creamos experiencias digitales que transforman marcas.';
+  const keywords = keywordsProp || seo.siteKeywords || 'diseño web, branding, shopify, desarrollo web, seo chile, agencia digital, e-commerce, producción de video';
+  const image = imageProp || seo.ogImage || '/images/isotipo.png';
+  const twitterHandle = seo.twitterHandle || '@emmagination';
   useEffect(() => {
     document.title = title;
 
     const canonicalUrl = absoluteUrl(canonicalPath);
     const imageUrl = absoluteUrl(image);
+    const finalRobots = noIndex ? 'noindex, nofollow' : robots;
 
-    const metaTags = {
+    const metaTags: Record<string, string> = {
       'description': description,
       'keywords': keywords,
-      'robots': robots,
+      'robots': finalRobots,
+      'googlebot': 'index, follow, max-image-preview:large',
       'og:title': title,
       'og:description': description,
       'og:image': imageUrl,
       'og:type': type,
       'og:url': canonicalUrl,
       'og:locale': DEFAULT_LOCALE,
+      'og:site_name': SITE_NAME,
       'twitter:card': 'summary_large_image',
       'twitter:title': title,
       'twitter:description': description,
       'twitter:image': imageUrl,
       'twitter:url': canonicalUrl,
+      'twitter:site': twitterHandle,
+      'author': SITE_NAME,
     };
 
     Object.entries(metaTags).forEach(([name, content]) => {
@@ -71,6 +87,11 @@ export default function SEO({
       meta.setAttribute('content', content);
     });
 
+    // Image dimensions for social sharing
+    setOrCreateMeta('og:image:width', '1200', 'property');
+    setOrCreateMeta('og:image:height', '630', 'property');
+    setOrCreateMeta('og:image:alt', title, 'property');
+
     let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!canonicalLink) {
       canonicalLink = document.createElement('link');
@@ -93,7 +114,17 @@ export default function SEO({
     } else if (existingSchema) {
       existingSchema.remove();
     }
-  }, [canonicalPath, description, image, keywords, robots, schema, title, type]);
+  }, [canonicalPath, description, image, keywords, robots, schema, title, type, noIndex]);
 
   return null;
+}
+
+function setOrCreateMeta(name: string, content: string, attr: 'name' | 'property' = 'name') {
+  let meta = document.querySelector(`meta[${attr}="${name}"]`) as HTMLMetaElement | null;
+  if (!meta) {
+    meta = document.createElement('meta');
+    meta.setAttribute(attr, name);
+    document.head.appendChild(meta);
+  }
+  meta.setAttribute('content', content);
 }

@@ -1,14 +1,16 @@
-import { getServiceBySlug, servicePages } from '../data/services';
-import { defaultSiteData, getProjectBySlug } from './site-data';
+import { defaultSiteData, getProjectBySlug, getServiceBySlug } from './site-data';
 import {
   DEFAULT_OG_IMAGE,
   DEFAULT_LOCALE,
   SITE_NAME,
   absoluteUrl,
+  buildBreadcrumbSchema,
+  buildLocalBusinessSchema,
   buildOrganizationSchema,
   buildWebsiteSchema,
 } from './seo';
 const projects = defaultSiteData.projects;
+const services = defaultSiteData.services;
 
 export interface RouteSeoData {
   title: string;
@@ -33,7 +35,8 @@ export const homeSeo: RouteSeoData = {
   robots: 'index, follow',
   schema: [
     buildWebsiteSchema(),
-    buildOrganizationSchema(),
+    buildOrganizationSchema(defaultSiteData.config),
+    buildLocalBusinessSchema(defaultSiteData.config),
     {
       '@context': 'https://schema.org',
       '@type': 'WebPage',
@@ -47,6 +50,9 @@ export const homeSeo: RouteSeoData = {
         url: absoluteUrl('/'),
       },
       primaryImageOfPage: absoluteUrl('/images/isotipo.png'),
+      breadcrumb: buildBreadcrumbSchema([
+        { name: 'Inicio', url: absoluteUrl('/') },
+      ]),
     },
   ],
 };
@@ -62,7 +68,8 @@ export const portfolioSeo: RouteSeoData = {
   type: 'website',
   robots: 'index, follow',
   schema: [
-    buildOrganizationSchema(),
+    buildOrganizationSchema(defaultSiteData.config),
+    buildLocalBusinessSchema(defaultSiteData.config),
     {
       '@context': 'https://schema.org',
       '@type': 'CollectionPage',
@@ -78,29 +85,16 @@ export const portfolioSeo: RouteSeoData = {
         description: project.description,
         dateCreated: project.year,
       })),
-      breadcrumb: {
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Inicio',
-            item: absoluteUrl('/'),
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: 'Portafolio',
-            item: absoluteUrl('/portafolio'),
-          },
-        ],
-      },
+      breadcrumb: buildBreadcrumbSchema([
+        { name: 'Inicio', url: absoluteUrl('/') },
+        { name: 'Portafolio', url: absoluteUrl('/portafolio') },
+      ]),
     },
   ],
 };
 
 export function buildServiceSeo(slug: string): RouteSeoData | null {
-  const service = getServiceBySlug(slug);
+  const service = getServiceBySlug(services, slug);
   if (!service) return null;
 
   const canonicalPath = `/servicios/${service.slug}`;
@@ -114,13 +108,17 @@ export function buildServiceSeo(slug: string): RouteSeoData | null {
     type: 'website',
     robots: 'index, follow',
     schema: [
-      buildOrganizationSchema(),
+      buildOrganizationSchema(defaultSiteData.config),
+      buildLocalBusinessSchema(defaultSiteData.config),
       {
         '@context': 'https://schema.org',
         '@type': 'Service',
         name: service.title,
         serviceType: service.category,
-        areaServed: 'Chile',
+        areaServed: {
+          '@type': 'Country',
+          name: 'Chile',
+        },
         provider: {
           '@type': 'ProfessionalService',
           name: SITE_NAME,
@@ -128,6 +126,12 @@ export function buildServiceSeo(slug: string): RouteSeoData | null {
         },
         description: service.description,
         url: absoluteUrl(canonicalPath),
+        offers: {
+          '@type': 'Offer',
+          areaServed: 'CL',
+          priceCurrency: 'CLP',
+          availability: 'https://schema.org/InStock',
+        },
       },
       {
         '@context': 'https://schema.org',
@@ -141,30 +145,11 @@ export function buildServiceSeo(slug: string): RouteSeoData | null {
           },
         })),
       },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Inicio',
-            item: absoluteUrl('/'),
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: 'Servicios',
-            item: absoluteUrl('/#approach'),
-          },
-          {
-            '@type': 'ListItem',
-            position: 3,
-            name: service.shortTitle,
-            item: absoluteUrl(canonicalPath),
-          },
-        ],
-      },
+      buildBreadcrumbSchema([
+        { name: 'Inicio', url: absoluteUrl('/') },
+        { name: 'Servicios', url: absoluteUrl('/#approach') },
+        { name: service.shortTitle, url: absoluteUrl(canonicalPath) },
+      ]),
     ],
   };
 }
@@ -190,7 +175,8 @@ export function buildProjectSeo(slug: string): RouteSeoData | null {
     type: 'article',
     robots: 'index, follow',
     schema: [
-      buildOrganizationSchema(),
+      buildOrganizationSchema(defaultSiteData.config),
+      buildLocalBusinessSchema(defaultSiteData.config),
       {
         '@context': 'https://schema.org',
         '@type': 'CreativeWork',
@@ -207,30 +193,11 @@ export function buildProjectSeo(slug: string): RouteSeoData | null {
           url: absoluteUrl('/'),
         },
       },
-      {
-        '@context': 'https://schema.org',
-        '@type': 'BreadcrumbList',
-        itemListElement: [
-          {
-            '@type': 'ListItem',
-            position: 1,
-            name: 'Inicio',
-            item: absoluteUrl('/'),
-          },
-          {
-            '@type': 'ListItem',
-            position: 2,
-            name: 'Portafolio',
-            item: absoluteUrl('/portafolio'),
-          },
-          {
-            '@type': 'ListItem',
-            position: 3,
-            name: project.title,
-            item: absoluteUrl(canonicalPath),
-          },
-        ],
-      },
+      buildBreadcrumbSchema([
+        { name: 'Inicio', url: absoluteUrl('/') },
+        { name: 'Portafolio', url: absoluteUrl('/portafolio') },
+        { name: project.title, url: absoluteUrl(canonicalPath) },
+      ]),
     ],
   };
 }
@@ -243,7 +210,7 @@ export function getPrerenderRoutes() {
       url: `/proyectos/${project.slug}`,
       file: `proyectos/${project.slug}/index.html`,
     })),
-    ...servicePages.map((service) => ({
+    ...services.map((service) => ({
       url: `/servicios/${service.slug}`,
       file: `servicios/${service.slug}/index.html`,
     })),

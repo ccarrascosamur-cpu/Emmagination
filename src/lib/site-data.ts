@@ -21,6 +21,47 @@ export interface ProjectRecord {
   gallery: string[];
 }
 
+export interface ServiceFaq {
+  question: string;
+  answer: string;
+}
+
+export interface ServiceRecord {
+  slug: string;
+  shortTitle: string;
+  title: string;
+  heroTitle: string;
+  intro: string;
+  description: string;
+  keywords: string;
+  category: string;
+  benefits: string[];
+  deliverables: string[];
+  process: string[];
+  faqs: ServiceFaq[];
+  relatedProjectIds: number[];
+}
+
+export interface HeroContent {
+  badge: string;
+  titleLine1: string;
+  titleLine2: string;
+  titleLine3: string;
+  taglineLine1: string;
+  taglineLine2: string;
+  subtitle: string;
+  ctaPrimary: string;
+  ctaSecondary: string;
+}
+
+export interface SeoGlobal {
+  siteTitle: string;
+  siteDescription: string;
+  siteKeywords: string;
+  ogImage: string;
+  twitterHandle: string;
+}
+
 export interface SiteConfig {
   contactEmail: string;
   contactPhone: string;
@@ -31,10 +72,177 @@ export interface SiteConfig {
 
 export interface SiteData {
   projects: ProjectRecord[];
+  services: ServiceRecord[];
   config: SiteConfig;
+  hero: HeroContent;
+  seo: SeoGlobal;
 }
 
 export const SITE_DATA_STORAGE_KEY = 'emmagination-site-data';
+
+export const defaultHero: HeroContent = {
+  badge: 'Agencia de diseño web, branding y SEO en Chile',
+  titleLine1: 'Diseño Web,',
+  titleLine2: 'Branding y SEO',
+  titleLine3: 'en Chile',
+  taglineLine1: 'Deja de ser un logo.',
+  taglineLine2: 'Pasa a ser una marca.',
+  subtitle:
+    'Diseñamos identidades y posicionamos marcas en Google. Hacemos que tu negocio se vea, se entienda y se compre.',
+  ctaPrimary: 'Trabajemos juntos',
+  ctaSecondary: 'Ver proyectos',
+};
+
+export const defaultSeo: SeoGlobal = {
+  siteTitle: 'EMMAGINATION | Diseño Web, Branding y Experiencias Digitales en Chile',
+  siteDescription:
+    'EMMAGINATION - Agencia de diseño web, branding, desarrollo Shopify y producción de contenido en Chile. Creamos experiencias digitales que transforman marcas.',
+  siteKeywords:
+    'diseño web, branding, shopify, desarrollo web, seo chile, agencia digital, e-commerce, producción de video',
+  ogImage: '/images/isotipo.png',
+  twitterHandle: '@emmagination',
+};
+
+export const defaultServices: ServiceRecord[] = [
+  {
+    slug: 'diseno-web',
+    shortTitle: 'Diseño Web',
+    title: 'Diseño Web Profesional en Chile',
+    heroTitle: 'Sitios web pensados para verse bien, cargar rápido y convertir.',
+    intro:
+      'Diseñamos sitios corporativos, landing pages y webs comerciales con foco en claridad, performance y posicionamiento.',
+    description:
+      'Servicio de diseño web profesional en Chile para marcas que necesitan una presencia sólida, rápida y orientada a resultados.',
+    keywords:
+      'diseño web chile, diseño web profesional, landing page chile, paginas web chile, agencia diseño web',
+    category: 'Diseño web',
+    benefits: [
+      'Arquitectura clara para que Google y tus clientes entiendan tu propuesta.',
+      'Diseño responsive con jerarquía visual orientada a conversión.',
+      'Base técnica optimizada para velocidad, indexación y mantenimiento.',
+    ],
+    deliverables: [
+      'UX/UI para home, páginas clave y secciones comerciales.',
+      'Sistema visual coherente con tu marca y tus objetivos.',
+      'Implementación optimizada en frontend moderno.',
+    ],
+    process: [
+      'Auditoría de negocio, competencia y estructura de contenidos.',
+      'Wireframes y propuesta visual con foco en mensaje y conversión.',
+      'Desarrollo, QA técnico, lanzamiento y medición inicial.',
+    ],
+    faqs: [
+      {
+        question: '¿Qué tipo de sitios diseñan?',
+        answer:
+          'Trabajamos sitios corporativos, landing pages, portfolios y webs comerciales con foco en captación y posicionamiento.',
+      },
+      {
+        question: '¿Incluyen SEO técnico en el desarrollo?',
+        answer:
+          'Sí. Definimos metadata, estructura semántica, enlazado interno, performance y base técnica para indexación.',
+      },
+      {
+        question: '¿Pueden rediseñar un sitio existente?',
+        answer:
+          'Sí. Podemos rediseñar una web actual sin perder foco comercial y corrigiendo problemas de UX, velocidad y rastreo.',
+      },
+    ],
+    relatedProjectIds: [3, 4],
+  },
+  {
+    slug: 'branding',
+    shortTitle: 'Branding',
+    title: 'Branding e Identidad Visual en Chile',
+    heroTitle: 'Construimos marcas que se reconocen, se recuerdan y se entienden.',
+    intro:
+      'Desarrollamos identidades visuales con criterio estratégico para que tu marca gane coherencia y presencia.',
+    description:
+      'Servicio de branding e identidad visual en Chile para empresas que necesitan diferenciarse con claridad y consistencia.',
+    keywords:
+      'branding chile, identidad visual chile, diseño de marca, logo profesional chile, agencia branding',
+    category: 'Branding',
+    benefits: [
+      'Una marca más clara y consistente en web, redes y piezas comerciales.',
+      'Lenguaje visual alineado con el posicionamiento del negocio.',
+      'Activos de marca listos para crecer sin improvisación.',
+    ],
+    deliverables: [
+      'Concepto visual, logotipo y sistema gráfico base.',
+      'Paleta, tipografías, criterios de composición y aplicaciones.',
+      'Guía de uso para mantener consistencia en el tiempo.',
+    ],
+    process: [
+      'Diagnóstico de posicionamiento, audiencia y tono de marca.',
+      'Exploración visual y definición del sistema de identidad.',
+      'Entrega de lineamientos y aplicaciones prioritarias.',
+    ],
+    faqs: [
+      {
+        question: '¿El branding es solo el logo?',
+        answer:
+          'No. El logo es una parte. El branding incluye sistema visual, tono, consistencia y percepción de marca.',
+      },
+      {
+        question: '¿Sirve para marcas nuevas y existentes?',
+        answer:
+          'Sí. Podemos construir una identidad desde cero o reorganizar una marca que ya existe pero perdió coherencia.',
+      },
+      {
+        question: '¿Entregan archivos y lineamientos?',
+        answer:
+          'Sí. Entregamos archivos base y una guía para aplicar la identidad de forma consistente.',
+      },
+    ],
+    relatedProjectIds: [1, 2, 3],
+  },
+  {
+    slug: 'seo',
+    shortTitle: 'SEO',
+    title: 'SEO Profesional en Chile',
+    heroTitle: 'Posicionamiento orgánico pensado para atraer búsquedas correctas y convertir mejor.',
+    intro:
+      'Trabajamos SEO técnico, local, on-page y estratégico para sitios corporativos, servicios y e-commerce, incluyendo Shopify cuando corresponde.',
+    description:
+      'Servicio de SEO profesional en Chile para marcas que necesitan más visibilidad orgánica, mejor estructura técnica y crecimiento sostenible.',
+    keywords:
+      'seo chile, posicionamiento web chile, seo tecnico chile, seo local chile, agencia seo chile',
+    category: 'SEO',
+    benefits: [
+      'Más claridad para Google sobre qué ofrece tu negocio y para qué búsquedas eres relevante.',
+      'Correcciones técnicas que mejoran rastreo, indexación, velocidad y experiencia.',
+      'Enfoque combinado de posicionamiento y conversión para atraer tráfico con intención real.',
+    ],
+    deliverables: [
+      'Auditoría SEO técnica, semántica y de competencia.',
+      'Mejoras en metadata, enlazado interno, arquitectura y contenido clave.',
+      'Roadmap priorizado para SEO local, técnico y comercial.',
+    ],
+    process: [
+      'Auditoría del sitio, búsquedas objetivo, competencia y estado técnico.',
+      'Priorización de quick wins y oportunidades de crecimiento orgánico.',
+      'Implementación, validación y mejora continua según datos y resultados.',
+    ],
+    faqs: [
+      {
+        question: '¿Solo trabajan SEO para Shopify?',
+        answer:
+          'No. Trabajamos SEO para sitios corporativos, servicios, landings y e-commerce. Shopify es solo una de las plataformas que podemos optimizar.',
+      },
+      {
+        question: '¿Qué incluye su servicio de SEO?',
+        answer:
+          'Incluye auditoría técnica, arquitectura, enlazado interno, metadata, contenido, SEO local y prioridades de implementación.',
+      },
+      {
+        question: '¿Sirve para negocios locales y empresas de servicios?',
+        answer:
+          'Sí. De hecho, en negocios locales y de servicios el SEO bien estructurado suele generar oportunidades comerciales de alta intención.',
+      },
+    ],
+    relatedProjectIds: [1, 2, 3],
+  },
+];
 
 export const defaultSiteData: SiteData = {
   projects: [
@@ -161,6 +369,7 @@ export const defaultSiteData: SiteData = {
       gallery: ['/images/project-irc.jpg'],
     },
   ],
+  services: defaultServices,
   config: {
     contactEmail: 'hola@emmagination.cl',
     contactPhone: '+56 9 8829 0618',
@@ -168,6 +377,8 @@ export const defaultSiteData: SiteData = {
     linkedinUrl: 'https://linkedin.com/company/emmagination',
     googleBusinessUrl: 'https://share.google/SI0GjDkMkZa63cVnL',
   },
+  hero: defaultHero,
+  seo: defaultSeo,
 };
 
 export function slugify(input: string) {
@@ -195,6 +406,19 @@ function normalizeStringArray(value: unknown) {
       .filter(Boolean);
   }
 
+  return [];
+}
+
+function normalizeFaqs(value: unknown): ServiceFaq[] {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item): item is Record<string, unknown> => typeof item === 'object' && item !== null)
+      .map((item) => ({
+        question: normalizeString(item.question),
+        answer: normalizeString(item.answer),
+      }))
+      .filter((faq) => faq.question && faq.answer);
+  }
   return [];
 }
 
@@ -233,9 +457,65 @@ export function normalizeProject(value: unknown, index = 0): ProjectRecord {
   };
 }
 
+export function normalizeService(value: unknown, index = 0): ServiceRecord {
+  const fallback = defaultSiteData.services[index] ?? defaultSiteData.services[0];
+  const source = typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+
+  return {
+    slug: normalizeString(source.slug, fallback.slug),
+    shortTitle: normalizeString(source.shortTitle, fallback.shortTitle),
+    title: normalizeString(source.title, fallback.title),
+    heroTitle: normalizeString(source.heroTitle, fallback.heroTitle),
+    intro: normalizeString(source.intro, fallback.intro),
+    description: normalizeString(source.description, fallback.description),
+    keywords: normalizeString(source.keywords, fallback.keywords),
+    category: normalizeString(source.category, fallback.category),
+    benefits: normalizeStringArray(source.benefits).length > 0
+      ? normalizeStringArray(source.benefits)
+      : fallback.benefits,
+    deliverables: normalizeStringArray(source.deliverables).length > 0
+      ? normalizeStringArray(source.deliverables)
+      : fallback.deliverables,
+    process: normalizeStringArray(source.process).length > 0
+      ? normalizeStringArray(source.process)
+      : fallback.process,
+    faqs: normalizeFaqs(source.faqs).length > 0 ? normalizeFaqs(source.faqs) : fallback.faqs,
+    relatedProjectIds: Array.isArray(source.relatedProjectIds)
+      ? source.relatedProjectIds.map((id) => Number(id)).filter(Boolean)
+      : fallback.relatedProjectIds,
+  };
+}
+
+export function normalizeHero(value: unknown): HeroContent {
+  const source = typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+  return {
+    badge: normalizeString(source.badge, defaultHero.badge),
+    titleLine1: normalizeString(source.titleLine1, defaultHero.titleLine1),
+    titleLine2: normalizeString(source.titleLine2, defaultHero.titleLine2),
+    titleLine3: normalizeString(source.titleLine3, defaultHero.titleLine3),
+    taglineLine1: normalizeString(source.taglineLine1, defaultHero.taglineLine1),
+    taglineLine2: normalizeString(source.taglineLine2, defaultHero.taglineLine2),
+    subtitle: normalizeString(source.subtitle, defaultHero.subtitle),
+    ctaPrimary: normalizeString(source.ctaPrimary, defaultHero.ctaPrimary),
+    ctaSecondary: normalizeString(source.ctaSecondary, defaultHero.ctaSecondary),
+  };
+}
+
+export function normalizeSeo(value: unknown): SeoGlobal {
+  const source = typeof value === 'object' && value !== null ? (value as Record<string, unknown>) : {};
+  return {
+    siteTitle: normalizeString(source.siteTitle, defaultSeo.siteTitle),
+    siteDescription: normalizeString(source.siteDescription, defaultSeo.siteDescription),
+    siteKeywords: normalizeString(source.siteKeywords, defaultSeo.siteKeywords),
+    ogImage: normalizeString(source.ogImage, defaultSeo.ogImage),
+    twitterHandle: normalizeString(source.twitterHandle, defaultSeo.twitterHandle),
+  };
+}
+
 export function normalizeSiteData(input: unknown): SiteData {
   const source = typeof input === 'object' && input !== null ? (input as Record<string, unknown>) : {};
   const projectsSource = Array.isArray(source.projects) ? source.projects : defaultSiteData.projects;
+  const servicesSource = Array.isArray(source.services) ? source.services : defaultSiteData.services;
   const configSource =
     typeof source.config === 'object' && source.config !== null
       ? (source.config as Record<string, unknown>)
@@ -243,6 +523,7 @@ export function normalizeSiteData(input: unknown): SiteData {
 
   return {
     projects: projectsSource.map((project, index) => normalizeProject(project, index)),
+    services: servicesSource.map((service, index) => normalizeService(service, index)),
     config: {
       contactEmail: normalizeString(configSource.contactEmail, defaultSiteData.config.contactEmail),
       contactPhone: normalizeString(configSource.contactPhone, defaultSiteData.config.contactPhone),
@@ -253,6 +534,8 @@ export function normalizeSiteData(input: unknown): SiteData {
         defaultSiteData.config.googleBusinessUrl,
       ),
     },
+    hero: normalizeHero(source.hero),
+    seo: normalizeSeo(source.seo),
   };
 }
 
@@ -262,4 +545,11 @@ export function getProjectCategories(projects: ProjectRecord[]) {
 
 export function getProjectBySlug(projects: ProjectRecord[], slug: string) {
   return projects.find((project) => project.slug === slug);
+}
+
+export function getServiceBySlug(services: ServiceRecord[], slug: string) {
+  if (slug === 'shopify-seo') {
+    return services.find((service) => service.slug === 'seo');
+  }
+  return services.find((service) => service.slug === slug);
 }

@@ -1,3 +1,4 @@
+# Default environment (staging/preview)
 name = "emmagination"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
@@ -8,3 +9,15 @@ directory = "./dist"
 [[kv_namespaces]]
 binding = "SITE_DATA"
 id = "5ab5c5bbce6b47c3aa6fe9ef0d33e1d6"
+
+# Production environment
+# Deploy with: wrangler deploy --env production
+[env.production]
+name = "emmagination-production"
+
+[[env.production.kv_namespaces]]
+binding = "SITE_DATA"
+id = "5ab5c5bbce6b47c3aa6fe9ef0d33e1d6"
+
+[env.production.assets]
+directory = "./dist"

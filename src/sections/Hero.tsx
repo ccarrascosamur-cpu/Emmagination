@@ -1,12 +1,15 @@
 import { useEffect, useRef, useCallback } from 'react';
 import gsap from 'gsap';
 import { Sparkles, ArrowRight, ChevronDown } from 'lucide-react';
+import { useSiteData } from '../lib/site-data-client';
 
 interface HeroProps {
   lenisRef: React.MutableRefObject<any>;
 }
 
 export default function Hero({ lenisRef }: HeroProps) {
+  const { data } = useSiteData();
+  const hero = data.hero;
   const heroRef = useRef<HTMLDivElement>(null);
   const badgeRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
@@ -238,7 +241,7 @@ export default function Hero({ lenisRef }: HeroProps) {
             className="text-white/70 text-sm"
             style={{ fontFamily: 'var(--font-body)' }}
           >
-            Agencia de diseño web, branding y SEO en Chile
+            {hero.badge}
           </span>
         </div>
 
@@ -254,7 +257,7 @@ export default function Hero({ lenisRef }: HeroProps) {
             lineHeight: 1.05,
           }}
         >
-          Diseño Web,
+          {hero.titleLine1}
           <br />
           <span
             style={{
@@ -264,10 +267,10 @@ export default function Hero({ lenisRef }: HeroProps) {
               backgroundClip: 'text',
             }}
           >
-            Branding y SEO
+            {hero.titleLine2}
           </span>
           <br />
-          en Chile
+          {hero.titleLine3}
         </h1>
 
         {/* Tagline: Deja de ser logo. Para ser marca. */}
@@ -286,14 +289,14 @@ export default function Hero({ lenisRef }: HeroProps) {
               lineHeight: 1.1,
             }}
           >
-            <span className="text-white">Deja de ser un logo.</span>
+            <span className="text-white">{hero.taglineLine1}</span>
             <br />
             <span
               style={{
                 color: 'rgba(255, 255, 255, 0.35)',
               }}
             >
-              Pasa a ser una marca.
+              {hero.taglineLine2}
             </span>
           </p>
         </div>
@@ -309,8 +312,7 @@ export default function Hero({ lenisRef }: HeroProps) {
             fontWeight: 300,
           }}
         >
-          Diseñamos identidades y posicionamos marcas en Google. Hacemos que tu
-          negocio se vea, se entienda y se compre.
+          {hero.subtitle}
         </p>
 
         {/* CTAs */}
@@ -320,7 +322,7 @@ export default function Hero({ lenisRef }: HeroProps) {
             className="group inline-flex items-center gap-2 px-8 py-3.5 border border-white/20 rounded-full text-white text-sm hover:bg-white/10 transition-all duration-300"
             style={{ fontFamily: 'var(--font-body)' }}
           >
-            Ver proyectos
+            {hero.ctaSecondary}
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
           </button>
           <button
@@ -331,7 +333,7 @@ export default function Hero({ lenisRef }: HeroProps) {
               background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
             }}
           >
-            Trabajemos juntos
+            {hero.ctaPrimary}
           </button>
         </div>
       </div>

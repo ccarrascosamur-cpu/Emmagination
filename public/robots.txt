@@ -1,4 +1,13 @@
 User-agent: *
 Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+# Crawl-delay para bots agresivos
+User-agent: AhrefsBot
+Crawl-delay: 2
+
+User-agent: SemrushBot
+Crawl-delay: 2
 
 Sitemap: https://emmagination.ccarrascosamur.workers.dev/sitemap.xml

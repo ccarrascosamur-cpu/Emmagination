@@ -50,11 +50,13 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
 
     const load = async () => {
       try {
-        const response = await fetch(SITE_DATA_API_URL, {
+        const url = `${SITE_DATA_API_URL}?_t=${Date.now()}`;
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             Accept: 'application/json',
-            'Cache-Control': 'no-store',
+            'Cache-Control': 'no-store, no-cache, must-revalidate',
+            Pragma: 'no-cache',
           },
         });
 

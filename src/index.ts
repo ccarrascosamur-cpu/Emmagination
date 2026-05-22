@@ -1,6 +1,7 @@
 import { defaultSiteData, normalizeSiteData } from './lib/site-data';
 
 const STORAGE_KEY = 'site-data';
+const BUILD_TIMESTAMP = new Date().toISOString();
 
 interface WorkerKVNamespace {
   get(key: string, type: 'json'): Promise<unknown | null>;
@@ -16,10 +17,32 @@ export interface Env {
   SITE_ADMIN_PASSWORD?: string;
 }
 
+// ── Headers anti-cache para API y admin ──
+function noCacheHeaders() {
+  const headers = new Headers();
+  headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  headers.set('Pragma', 'no-cache');
+  headers.set('Expires', '0');
+  headers.set('Surrogate-Control', 'no-store');
+  headers.set('Vary', 'Authorization');
+  return headers;
+}
+
+// ── Headers anti-cache para HTML estático (SPA) ──
+function htmlNoCacheHeaders() {
+  const headers = new Headers();
+  headers.set('Cache-Control', 'no-cache, must-revalidate');
+  headers.set('Pragma', 'no-cache');
+  return headers;
+}
+
 function json(data: unknown, init: ResponseInit = {}) {
-  const headers = new Headers(init.headers || {});
+  const headers = noCacheHeaders();
   headers.set('Content-Type', 'application/json; charset=utf-8');
-  headers.set('Cache-Control', 'no-store');
+  if (init.headers) {
+    const initHeaders = new Headers(init.headers);
+    initHeaders.forEach((value, key) => headers.set(key, value));
+  }
   return new Response(JSON.stringify(data), { ...init, headers });
 }
 
@@ -107,17 +130,29 @@ async function handleApi(request: Request, env: Env) {
   });
 }
 
-async function serveAssetPath(request: Request, env: Env, pathname: string) {
+async function serveAssetPath(request: Request, env: Env, pathname: string, noCache = false) {
   const url = new URL(request.url);
   url.pathname = pathname;
-  return env.ASSETS.fetch(new Request(url.toString(), request));
+  const response = await env.ASSETS.fetch(new Request(url.toString(), request));
+
+  if (noCache) {
+    const newHeaders = new Headers(response.headers);
+    const noCache = htmlNoCacheHeaders();
+    noCache.forEach((value, key) => newHeaders.set(key, value));
+    return new Response(response.body, {
+      status: response.status,
+      statusText: response.statusText,
+      headers: newHeaders,
+    });
+  }
+
+  return response;
 }
 
 function redirectWwwToNonWww(request: Request): Response | null {
   const url = new URL(request.url);
   const hostname = url.hostname;
 
-  // Redirect www.example.com -> example.com with 301
   if (hostname.startsWith('www.')) {
     url.hostname = hostname.slice(4);
     return Response.redirect(url.toString(), 301);
@@ -126,9 +161,33 @@ function redirectWwwToNonWww(request: Request): Response | null {
   return null;
 }
 
+// ── Inyectar build timestamp en el admin para busting de cache ──
+async function serveAdmin(request: Request, env: Env) {
+  const response = await serveAssetPath(request, env, '/admin/index.html', true);
+  const body = await response.text();
+
+  // Inyectar meta tag con timestamp y version query param en el script
+  const modifiedBody = body
+    .replace(
+      '<!--app-head-->',
+      `<!--app-head-->\n    <meta name="build-timestamp" content="${BUILD_TIMESTAMP}" />\n    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate" />`
+    )
+    .replace(
+      'src="/admin/panel.js"',
+      `src="/admin/panel.js?v=${Date.now()}"`
+    );
+
+  const headers = new Headers(response.headers);
+  headers.set('Content-Type', 'text/html; charset=utf-8');
+  headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  headers.set('Pragma', 'no-cache');
+  headers.set('Expires', '0');
+
+  return new Response(modifiedBody, { status: 200, headers });
+}
+
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
-    // 301 redirect: www -> non-www
     const wwwRedirect = redirectWwwToNonWww(request);
     if (wwwRedirect) {
       return wwwRedirect;
@@ -136,21 +195,46 @@ export default {
 
     const url = new URL(request.url);
 
+    // API data — nunca cachear
     if (url.pathname === '/api/data') {
       return handleApi(request, env);
     }
 
-    if (url.pathname === '/admin') {
-      return serveAssetPath(request, env, '/admin/index.html');
+    // Admin — nunca cachear, con versionado de assets
+    if (url.pathname === '/admin' || url.pathname === '/admin/') {
+      return serveAdmin(request, env);
     }
 
+    if (url.pathname.startsWith('/admin/')) {
+      const response = await serveAssetPath(request, env, url.pathname, true);
+      const headers = new Headers(response.headers);
+      headers.set('Cache-Control', 'no-store, no-cache, must-revalidate');
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers,
+      });
+    }
+
+    // SPA fallback — no cachear HTML
     const response = await env.ASSETS.fetch(request);
     if (response.status !== 404) {
+      const contentType = response.headers.get('Content-Type') || '';
+      if (contentType.includes('text/html')) {
+        const newHeaders = new Headers(response.headers);
+        const noCache = htmlNoCacheHeaders();
+        noCache.forEach((value, key) => newHeaders.set(key, value));
+        return new Response(response.body, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: newHeaders,
+        });
+      }
       return response;
     }
 
     if (url.pathname.startsWith('/proyectos/')) {
-      return serveAssetPath(request, env, '/index.html');
+      return serveAssetPath(request, env, '/index.html', true);
     }
 
     return response;
