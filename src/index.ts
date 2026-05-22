@@ -40,6 +40,15 @@ function htmlNoCacheHeaders() {
   return headers;
 }
 
+// ── Headers de seguridad para todas las respuestas ──
+function securityHeaders(headers: Headers) {
+  headers.set('X-Content-Type-Options', 'nosniff');
+  headers.set('X-Frame-Options', 'DENY');
+  headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  headers.set('Permissions-Policy', 'accelerometer=(), camera=(), geolocation=(), gyroscope=(), magnetometer=(), microphone=(), payment=(), usb=()');
+  return headers;
+}
+
 function json(data: unknown, init: ResponseInit = {}) {
   const headers = noCacheHeaders();
   headers.set('Content-Type', 'application/json; charset=utf-8');
@@ -243,47 +252,61 @@ async function handleExtract(request: Request, env: Env) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  SEO AUDIT — 6 fuentes reales, sin costo de APIs
+//  SEO AUDIT — Análisis 100% propio, sin APIs externas (no rate limits)
 // ═══════════════════════════════════════════════════════════════════════════
 
-async function fetchPageSpeed(url: string, strategy: string) {
-  const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed` +
-    `?url=${encodeURIComponent(url)}&strategy=${strategy}` +
-    `&category=performance&category=seo&category=accessibility&category=best-practices`;
+// Calcular scores de rendimiento basados en TTFB y tamaño de página
+function calcPerformanceScore(responseTime: number, htmlLength: number): number {
+  let score = 65; // base más generosa
+  // TTFB scoring (menos penalización)
+  if (responseTime < 200) score += 20;
+  else if (responseTime < 500) score += 15;
+  else if (responseTime < 800) score += 10;
+  else if (responseTime < 1500) score += 5;
+  else if (responseTime < 3000) score += 0;
+  else score -= 10;
+  // Page size scoring
+  if (htmlLength < 50_000) score += 10;
+  else if (htmlLength < 150_000) score += 5;
+  else if (htmlLength < 500_000) score += 0;
+  else score -= 5;
+  return Math.min(100, Math.max(0, score));
+}
 
-  const res = await fetch(apiUrl, { cf: { cacheTtl: 300 } } as RequestInit);
-  if (!res.ok) throw new Error('PageSpeed error');
-  const data = await res.json();
+function calcSeoScore(meta: any): number {
+  let score = 55; // base más generosa
+  if (meta.title?.ok) score += 12;
+  if (meta.description?.ok) score += 12;
+  if (meta.headings?.h1ok) score += 8;
+  if (meta.canonical?.ok) score += 5;
+  if (meta.viewport?.present) score += 5;
+  if (meta.imgsNoAlt?.ok) score += 5;
+  if (meta.schema?.present) score += 5;
+  // Penalizaciones suaves
+  if (!meta.title?.value) score -= 15;
+  if (!meta.description?.value) score -= 10;
+  return Math.min(100, Math.max(0, score));
+}
 
-  const cats = data.lighthouseResult?.categories || {};
-  const audits = data.lighthouseResult?.audits || {};
+function calcAccessibilityScore(meta: any): number {
+  let score = 60; // base más generosa
+  if (meta.imgsNoAlt?.ok) score += 15;
+  if (meta.viewport?.present) score += 10;
+  if (meta.headings?.h1 > 0) score += 10;
+  if (meta.headings?.h2 > 0) score += 5;
+  return Math.min(100, score);
+}
 
-  return {
-    scores: {
-      performance: Math.round((cats.performance?.score || 0) * 100),
-      seo: Math.round((cats.seo?.score || 0) * 100),
-      accessibility: Math.round((cats.accessibility?.score || 0) * 100),
-      bestPractices: Math.round((cats['best-practices']?.score || 0) * 100),
-    },
-    vitals: {
-      lcp: audits['largest-contentful-paint']?.displayValue || null,
-      cls: audits['cumulative-layout-shift']?.displayValue || null,
-      fcp: audits['first-contentful-paint']?.displayValue || null,
-      ttfb: audits['server-response-time']?.displayValue || null,
-      tbt: audits['total-blocking-time']?.displayValue || null,
-      si: audits['speed-index']?.displayValue || null,
-    },
-    vitals_raw: {
-      lcp: audits['largest-contentful-paint']?.numericValue || null,
-      cls: audits['cumulative-layout-shift']?.numericValue || null,
-      fcp: audits['first-contentful-paint']?.numericValue || null,
-      ttfb: audits['server-response-time']?.numericValue || null,
-    },
-    opportunities: Object.values(audits)
-      .filter((a: any) => a.details?.type === 'opportunity' && a.numericValue > 0)
-      .slice(0, 5)
-      .map((a: any) => ({ title: a.title, savings: a.displayValue })),
-  };
+function calcBestPracticesScore(srv: any, meta: any): number {
+  let score = 55; // base más generosa
+  if (srv?.https) score += 10;
+  if (srv?.hsts) score += 5;
+  if (srv?.xContentType) score += 5;
+  if (srv?.xFrame) score += 5;
+  if (srv?.compression) score += 10;
+  if (meta?.viewport?.present) score += 5;
+  // HTTPS es crítico pero no penalizamos tanto si falta lo demás
+  return Math.min(100, score);
 }
 
 async function fetchHtmlMeta(url: string) {
@@ -423,34 +446,96 @@ async function handleSeoAudit(request: Request, _env: Env) {
   const urlObj = new URL(targetUrl);
   const domain = urlObj.origin;
 
-  const [
-    pagespeedMobile,
-    pagespeedDesktop,
-    htmlData,
-    robotsData,
-    sitemapData,
-    serverData,
-  ] = await Promise.allSettled([
-    fetchPageSpeed(targetUrl, 'mobile'),
-    fetchPageSpeed(targetUrl, 'desktop'),
+  // 1. Fetch HTML + server info primero (necesitamos responseTime y htmlLength)
+  const [htmlData, serverData, robotsData, sitemapData] = await Promise.allSettled([
     fetchHtmlMeta(targetUrl),
+    fetchServerInfo(targetUrl),
     fetchRobots(domain),
     fetchSitemap(domain),
-    fetchServerInfo(targetUrl),
   ]);
+
+  const meta = htmlData.status === 'fulfilled' ? htmlData.value : { error: true, responseTime: 0, title: { value: null, length: 0, ok: false } };
+  const srv = serverData.status === 'fulfilled' ? serverData.value : { error: true, https: false, responseTime: 0 };
+  const robots = robotsData.status === 'fulfilled' ? robotsData.value : { error: true, exists: false };
+  const sitemap = sitemapData.status === 'fulfilled' ? sitemapData.value : { error: true, exists: false };
+
+  // 2. Calcular scores propios (sin depender de APIs externas)
+  const responseTime = (srv as any).responseTime || 0;
+
+  // Obtenemos htmlLength con un fetch rápido
+  let actualHtmlLength = 0;
+  try {
+    const res = await fetch(targetUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 (compatible; EmmaginationBot/1.0)' },
+      redirect: 'follow',
+    });
+    const html = await res.text();
+    actualHtmlLength = html.length;
+  } catch { /* silent */ }
+
+  const perfScore = calcPerformanceScore(responseTime, actualHtmlLength);
+  const seoScore = calcSeoScore(meta);
+  const accScore = calcAccessibilityScore(meta);
+  const bpScore = calcBestPracticesScore(srv, meta);
+
+  // 3. Intentar PageSpeed como bonus (no crítico)
+  let pagespeedMobile = null;
+  let pagespeedDesktop = null;
+  try {
+    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed` +
+      `?url=${encodeURIComponent(targetUrl)}&strategy=mobile` +
+      `&category=performance&category=seo&category=accessibility&category=best-practices`;
+    const res = await fetch(apiUrl, { cf: { cacheTtl: 300 } } as RequestInit);
+    if (res.ok) {
+      const data = await res.json();
+      const cats = data.lighthouseResult?.categories || {};
+      const audits = data.lighthouseResult?.audits || {};
+      pagespeedMobile = {
+        scores: {
+          performance: Math.round((cats.performance?.score || 0) * 100),
+          seo: Math.round((cats.seo?.score || 0) * 100),
+          accessibility: Math.round((cats.accessibility?.score || 0) * 100),
+          bestPractices: Math.round((cats['best-practices']?.score || 0) * 100),
+        },
+        vitals: {
+          lcp: audits['largest-contentful-paint']?.displayValue || null,
+          cls: audits['cumulative-layout-shift']?.displayValue || null,
+          fcp: audits['first-contentful-paint']?.displayValue || null,
+          ttfb: audits['server-response-time']?.displayValue || null,
+          tbt: audits['total-blocking-time']?.displayValue || null,
+          si: audits['speed-index']?.displayValue || null,
+        },
+        vitals_raw: {
+          lcp: audits['largest-contentful-paint']?.numericValue || null,
+          cls: audits['cumulative-layout-shift']?.numericValue || null,
+          fcp: audits['first-contentful-paint']?.numericValue || null,
+          ttfb: audits['server-response-time']?.numericValue || null,
+        },
+      };
+    }
+  } catch { /* PageSpeed no disponible, usamos scores propios */ }
+
+  // Si PageSpeed funciona, usamos esos scores. Si no, los propios.
+  const usePageSpeed = pagespeedMobile != null && (pagespeedMobile as any).scores.performance > 0;
 
   const result = {
     url: targetUrl,
     domain: urlObj.hostname,
     timestamp: new Date().toISOString(),
-    pagespeed: {
-      mobile: pagespeedMobile.status === 'fulfilled' ? pagespeedMobile.value : null,
-      desktop: pagespeedDesktop.status === 'fulfilled' ? pagespeedDesktop.value : null,
+    scores: {
+      performance: usePageSpeed ? (pagespeedMobile as any).scores.performance : perfScore,
+      seo: usePageSpeed ? (pagespeedMobile as any).scores.seo : seoScore,
+      accessibility: usePageSpeed ? (pagespeedMobile as any).scores.accessibility : accScore,
+      bestPractices: usePageSpeed ? (pagespeedMobile as any).scores.bestPractices : bpScore,
     },
-    meta: htmlData.status === 'fulfilled' ? htmlData.value : { error: true },
-    robots: robotsData.status === 'fulfilled' ? robotsData.value : { error: true },
-    sitemap: sitemapData.status === 'fulfilled' ? sitemapData.value : { error: true },
-    server: serverData.status === 'fulfilled' ? serverData.value : { error: true },
+    pagespeed: {
+      mobile: pagespeedMobile,
+      desktop: pagespeedDesktop,
+    },
+    meta,
+    robots,
+    sitemap,
+    server: srv,
   };
 
   return jsonResponse(result);
@@ -489,6 +574,15 @@ function redirectWwwToNonWww(request: Request): Response | null {
   return null;
 }
 
+function redirectWorkersToCustomDomain(request: Request): Response | null {
+  const url = new URL(request.url);
+  if (url.hostname.includes('workers.dev')) {
+    url.hostname = 'emmagination.cl';
+    return Response.redirect(url.toString(), 301);
+  }
+  return null;
+}
+
 // ── Inyectar build timestamp en el admin para busting de cache ──
 async function serveAdmin(request: Request, env: Env) {
   const response = await serveAssetPath(request, env, '/admin/index.html', true);
@@ -516,6 +610,11 @@ async function serveAdmin(request: Request, env: Env) {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const workersRedirect = redirectWorkersToCustomDomain(request);
+    if (workersRedirect) {
+      return workersRedirect;
+    }
+
     const wwwRedirect = redirectWwwToNonWww(request);
     if (wwwRedirect) {
       return wwwRedirect;
@@ -557,25 +656,29 @@ export default {
       });
     }
 
-    // SPA fallback — no cachear HTML
+    // SPA fallback — no cachear HTML + headers de seguridad
     const response = await env.ASSETS.fetch(request);
     if (response.status !== 404) {
       const contentType = response.headers.get('Content-Type') || '';
+      const newHeaders = new Headers(response.headers);
+      // Aplicar headers de seguridad a TODO
+      securityHeaders(newHeaders);
       if (contentType.includes('text/html')) {
-        const newHeaders = new Headers(response.headers);
         const noCache = htmlNoCacheHeaders();
         noCache.forEach((value, key) => newHeaders.set(key, value));
-        return new Response(response.body, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: newHeaders,
-        });
       }
-      return response;
+      return new Response(response.body, {
+        status: response.status,
+        statusText: response.statusText,
+        headers: newHeaders,
+      });
     }
 
     if (url.pathname.startsWith('/proyectos/')) {
-      return serveAssetPath(request, env, '/index.html', true);
+      const r = await serveAssetPath(request, env, '/index.html', true);
+      const h = new Headers(r.headers);
+      securityHeaders(h);
+      return new Response(r.body, { status: r.status, statusText: r.statusText, headers: h });
     }
 
     return response;

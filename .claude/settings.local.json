@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx skills *)",
+      "Bash(npx tsc *)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e \"const fs=require\\('fs'\\); const c=fs.readFileSync\\('src/sections/Hero.tsx'\\); console.log\\(JSON.stringify\\(c.slice\\(350,620\\).toString\\(\\)\\)\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); const c=fs.readFileSync\\('src/sections/Hero.tsx'\\).toString\\(\\); const idx=c.indexOf\\('function splitChars'\\); console.log\\(JSON.stringify\\(c.slice\\(idx, idx+280\\)\\)\\);\")",
+      "Bash(node -e ' *)",
+      "Bash(npm run *)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts,null,2\\)\\)\")",
+      "Bash(node -e \"const fs=require\\('fs'\\); console.log\\(fs.readFileSync\\('scripts/deploy.mjs','utf8'\\)\\)\")"
+    ]
+  }
+}

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Instagram, Linkedin, Mail, Phone, MessageCircle } from 'lucide-react';
+import { Instagram, Mail, Phone, MessageCircle } from 'lucide-react';
 import { Link, useLocation } from 'react-router';
 import { useSiteData } from '../lib/site-data-client';
 
@@ -308,8 +308,7 @@ export default function Footer() {
               <div className="flex gap-4">
                 {[
                   { icon: Instagram, label: 'Instagram', href: data.config.instagramUrl },
-                  { icon: Linkedin, label: 'LinkedIn', href: data.config.linkedinUrl },
-                ].map(({ icon: Icon, label, href }) => (
+                ].filter(item => item.href).map(({ icon: Icon, label, href }) => (
                   <a
                     key={label}
                     href={href}

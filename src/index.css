@@ -194,9 +194,17 @@
 .hero-line {
   display: block;
   overflow: hidden;
+  cursor: default;
 }
 .hero-line-inner {
   display: block;
+  transition: transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease;
+}
+.hero-line:hover .line-inner {
+  transform: translateY(-4px) !important;
+  text-shadow: 0 20px 60px rgba(168, 85, 247, 0.45);
+  color: #ffffff !important;
+  -webkit-text-fill-color: #ffffff !important;
 }
 .hero-orb {
   position: absolute;

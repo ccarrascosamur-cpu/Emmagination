@@ -1,5 +1,5 @@
 export const SITE_NAME = 'EMMAGINATION';
-export const SITE_URL = 'https://emmagination.ccarrascosamur.workers.dev';
+export const SITE_URL = 'https://emmagination.cl';
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/isotipo.png`;
 export const DEFAULT_LOCALE = 'es_CL';
 export const GOOGLE_BUSINESS_PROFILE_URL = 'https://share.google/SI0GjDkMkZa63cVnL';

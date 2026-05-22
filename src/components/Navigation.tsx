@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router';
 import Lenis from '@studio-freight/lenis';
+import { ArrowRight } from 'lucide-react';
 
 interface NavigationProps {
   lenisRef: React.MutableRefObject<Lenis | null>;
@@ -47,14 +48,14 @@ export default function Navigation({ lenisRef }: NavigationProps) {
   return (
     <nav
       ref={navRef}
-      className={`fixed top-0 left-0 w-full h-20 flex items-center justify-between px-8 lg:px-16 transition-all duration-500 ${
+      className={`fixed top-0 left-0 w-full h-20 flex items-center justify-between px-6 lg:px-12 transition-all duration-500 ${
         scrolled
           ? 'nav-scrolled'
           : 'bg-transparent'
       }`}
       style={{ zIndex: 100 }}
     >
-      {/* Isotipo + Tipografía */}
+      {/* Logo: isotipo + EMMAGINATION + tagline */}
       <Link
         to="/"
         onClick={(event) => {
@@ -63,51 +64,50 @@ export default function Navigation({ lenisRef }: NavigationProps) {
             handleLogoClick();
           }
         }}
-        className="flex items-center gap-3"
+        className="flex items-center gap-2.5"
       >
         <img
           src="/images/isotipo.png"
           alt="EMMAGINATION"
-          className="h-10 w-auto object-contain"
+          className="h-9 w-auto object-contain"
         />
-        <div className="hidden sm:block">
+        <div className="hidden sm:flex flex-col leading-none">
           <span
-            className="text-white text-lg font-semibold tracking-tight"
+            className="text-white text-[17px] font-bold tracking-[0.14em] uppercase"
             style={{ fontFamily: 'var(--font-heading)' }}
           >
-            EMMA<strong>GINATION</strong>
+            EMMAGINATION
+          </span>
+          <span
+            className="text-white/40 text-[8.5px] tracking-[0.22em] uppercase mt-0.5"
+            style={{ fontFamily: 'var(--font-mono)', width: '100%', textAlign: 'justify', textAlignLast: 'justify', lineHeight: 1 }}
+          >
+            Web Design · Branding · Digital
           </span>
         </div>
       </Link>
 
-      {/* Navigation Links */}
-      <div className="flex items-center gap-8">
-        <Link
-          to="/servicios/seo"
-          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm hidden lg:inline-block"
+      {/* Navigation Links — centrados, estilo referencia */}
+      <div className="hidden lg:flex items-center gap-7">
+        <a
+          href="/#approach"
+          onClick={(event) => handleSectionLinkClick(event, '#approach')}
+          className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
           style={{ fontFamily: 'var(--font-body)' }}
         >
-          SEO
-        </Link>
+          Servicios
+        </a>
         <Link
           to="/portafolio"
-          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
+          className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
           style={{ fontFamily: 'var(--font-body)' }}
         >
           Portafolio
         </Link>
         <a
-          href="/#approach"
-          onClick={(event) => handleSectionLinkClick(event, '#approach')}
-          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
-          style={{ fontFamily: 'var(--font-body)' }}
-        >
-          Servicios
-        </a>
-        <a
           href="/#process"
           onClick={(event) => handleSectionLinkClick(event, '#process')}
-          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
+          className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
           style={{ fontFamily: 'var(--font-body)' }}
         >
           Proceso
@@ -115,40 +115,33 @@ export default function Navigation({ lenisRef }: NavigationProps) {
         <a
           href="/#cotizar"
           onClick={(event) => handleSectionLinkClick(event, '#cotizar')}
-          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
+          className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
           style={{ fontFamily: 'var(--font-body)' }}
         >
           Cotizar
         </a>
         <a
-          href="/#auditoria"
-          onClick={(event) => handleSectionLinkClick(event, '#auditoria')}
-          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
-          style={{ fontFamily: 'var(--font-body)' }}
-        >
-          Auditoría
-        </a>
-        <a
           href="/#contact"
           onClick={(event) => handleSectionLinkClick(event, '#contact')}
-          className="nav-link-underline text-white/80 hover:text-white transition-colors text-sm"
+          className="nav-link-underline text-white/70 hover:text-white transition-colors text-[13px]"
           style={{ fontFamily: 'var(--font-body)' }}
         >
           Contacto
         </a>
       </div>
 
-      {/* CTA Button */}
+      {/* CTA Button — estilo referencia */}
       <a
         href="/#contact"
         onClick={(event) => handleSectionLinkClick(event, '#contact')}
-        className="hidden md:inline-flex px-6 py-2.5 rounded-full text-white text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-[#7C3AED]/25"
+        className="hidden md:inline-flex items-center gap-2 px-5 py-2 rounded-lg text-white text-[13px] font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-[#7C3AED]/25 hover:opacity-90"
         style={{
           fontFamily: 'var(--font-body)',
-          background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+          background: 'linear-gradient(135deg, #3A3FD4 0%, #C840E8 100%)',
         }}
       >
-        Trabajemos juntos
+        Hablemos
+        <ArrowRight size={14} />
       </a>
     </nav>
   );

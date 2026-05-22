@@ -190,40 +190,36 @@ ${checkLine('sitemap.xml', sitemap?.exists, sitemap?.urlCount ? `${sitemap.urlCo
   // Calcular score global (0-100)
   const calcGlobalScore = (data: any): number => {
     if (!data) return 0;
-    const mob = data.pagespeed?.mobile?.scores;
     const meta = data.meta;
     const srv = data.server;
     const robots = data.robots;
     const sitemap = data.sitemap;
 
     let score = 0;
-    // Performance mobile (30%)
-    score += (mob?.performance || 0) * 0.30;
-    // SEO score (20%)
-    score += (mob?.seo || 0) * 0.20;
-    // Meta básicos (20%)
-    if (meta?.title?.ok) score += 5;
-    if (meta?.description?.ok) score += 5;
-    if (meta?.headings?.h1ok) score += 5;
-    if (meta?.canonical?.ok) score += 5;
-    // Técnico (20%)
-    if (srv?.https) score += 5;
-    if (srv?.hsts) score += 3;
-    if (srv?.xContentType) score += 3;
-    if (srv?.xFrame) score += 3;
-    if (srv?.compression) score += 3;
-    if (robots?.exists) score += 3;
-    // Sitemap (10%)
-    if (sitemap?.exists) score += 5;
-    if (sitemap?.isXml) score += 5;
+    // Performance (25%)
+    score += (data.scores?.performance || 0) * 0.25;
+    // SEO score (25%)
+    score += (data.scores?.seo || 0) * 0.25;
+    // Accesibilidad (15%)
+    score += (data.scores?.accessibility || 0) * 0.15;
+    // Best Practices (15%)
+    score += (data.scores?.bestPractices || 0) * 0.15;
+    // Bonus por estructura técnica (20% puntos fijos)
+    if (meta?.title?.ok) score += 3;
+    if (meta?.description?.ok) score += 3;
+    if (meta?.headings?.h1ok) score += 2;
+    if (meta?.canonical?.ok) score += 2;
+    if (srv?.https) score += 3;
+    if (robots?.exists) score += 2;
+    if (sitemap?.exists) score += 2;
+    if (sitemap?.isXml) score += 3;
 
     return Math.round(score);
   };
 
   const r = result;
   const globalScore = r ? calcGlobalScore(r) : 0;
-  const mob = r?.pagespeed?.mobile;
-  // const des = r?.pagespeed?.desktop;
+  const scores = r?.scores || { performance: 0, seo: 0, accessibility: 0, bestPractices: 0 };
   const meta = r?.meta;
   const srv = r?.server;
   const robots = r?.robots;
@@ -240,7 +236,7 @@ ${checkLine('sitemap.xml', sitemap?.exists, sitemap?.urlCount ? `${sitemap.urlCo
     !robots?.exists,
     !sitemap?.exists,
     !srv?.https,
-    (mob?.scores?.performance || 0) < 50,
+    (scores?.performance || 0) < 50,
   ].filter(Boolean).length : 0;
 
   return (
@@ -365,10 +361,10 @@ ${checkLine('sitemap.xml', sitemap?.exists, sitemap?.urlCount ? `${sitemap.urlCo
               Puntuación por área
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
-              <ScoreCircle score={mob?.scores?.performance || 0} label="Velocidad" size={72} />
-              <ScoreCircle score={mob?.scores?.seo || 0} label="SEO" size={72} />
-              <ScoreCircle score={mob?.scores?.accessibility || 0} label="Accesibilidad" size={72} />
-              <ScoreCircle score={mob?.scores?.bestPractices || 0} label="Buenas prácticas" size={72} />
+              <ScoreCircle score={scores.performance || 0} label="Velocidad" size={72} />
+              <ScoreCircle score={scores.seo || 0} label="SEO" size={72} />
+              <ScoreCircle score={scores.accessibility || 0} label="Accesibilidad" size={72} />
+              <ScoreCircle score={scores.bestPractices || 0} label="Buenas prácticas" size={72} />
             </div>
           </div>
 
@@ -440,15 +436,15 @@ ${checkLine('sitemap.xml', sitemap?.exists, sitemap?.urlCount ? `${sitemap.urlCo
           </div>
 
           {/* ── CORE WEB VITALS ── */}
-          {mob && (
+          {r?.pagespeed?.mobile && (
             <div style={{ padding: '0 2.5rem 1.5rem', borderBottom: '1px solid rgba(168,85,247,0.12)' }}>
               <div className="audit-section-title">Velocidad real (Mobile)</div>
               <div className="audit-vitals-grid">
                 {[
-                  { key: 'lcp', label: 'LCP', hint: 'Carga principal', val: mob.vitals_raw?.lcp, disp: mob.vitals.lcp },
-                  { key: 'cls', label: 'CLS', hint: 'Estabilidad', val: mob.vitals_raw?.cls, disp: mob.vitals.cls },
-                  { key: 'fcp', label: 'FCP', hint: 'Primera pintura', val: mob.vitals_raw?.fcp, disp: mob.vitals.fcp },
-                  { key: 'ttfb', label: 'TTFB', hint: 'Resp. servidor', val: mob.vitals_raw?.ttfb, disp: mob.vitals.ttfb },
+                  { key: 'lcp', label: 'LCP', hint: 'Carga principal', val: r.pagespeed.mobile.vitals_raw?.lcp, disp: r.pagespeed.mobile.vitals.lcp },
+                  { key: 'cls', label: 'CLS', hint: 'Estabilidad', val: r.pagespeed.mobile.vitals_raw?.cls, disp: r.pagespeed.mobile.vitals.cls },
+                  { key: 'fcp', label: 'FCP', hint: 'Primera pintura', val: r.pagespeed.mobile.vitals_raw?.fcp, disp: r.pagespeed.mobile.vitals.fcp },
+                  { key: 'ttfb', label: 'TTFB', hint: 'Resp. servidor', val: r.pagespeed.mobile.vitals_raw?.ttfb, disp: r.pagespeed.mobile.vitals.ttfb },
                 ].map((v) => (
                   <div key={v.key} className="audit-vital-card">
                     <div className="audit-vital-label">{v.label}</div>

@@ -394,8 +394,8 @@ export const defaultSiteData: SiteData = {
   config: {
     contactEmail: 'hola@emmagination.cl',
     contactPhone: '+56 9 8829 0618',
-    instagramUrl: 'https://instagram.com/emmagination',
-    linkedinUrl: 'https://linkedin.com/company/emmagination',
+    instagramUrl: 'https://instagram.com/emmagination.cl',
+    linkedinUrl: '',
     googleBusinessUrl: 'https://share.google/SI0GjDkMkZa63cVnL',
   },
   hero: defaultHero,
