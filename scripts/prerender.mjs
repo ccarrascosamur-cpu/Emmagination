@@ -31,7 +31,7 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 ${routes
   .map(
     (route) => `  <url>
-    <loc>https://emmagination.ccarrascosamur.workers.dev${route.url}</loc>
+    <loc>https://emmagination.cl${route.url}</loc>
     <lastmod>${now}</lastmod>
     <changefreq>${route.url === '/' ? 'weekly' : 'monthly'}</changefreq>
     <priority>${route.url === '/' ? '1.0' : route.url.startsWith('/servicios/') ? '0.9' : route.url.startsWith('/proyectos/') ? '0.8' : '0.8'}</priority>

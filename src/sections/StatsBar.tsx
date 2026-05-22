@@ -1,15 +1,9 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useSiteData } from '../lib/site-data-client';
 
 gsap.registerPlugin(ScrollTrigger);
-
-const stats = [
-  { value: '50+', label: 'Proyectos' },
-  { value: '30+', label: 'Clientes' },
-  { value: '5+', label: 'Años' },
-  { value: '100%', label: 'Satisfacción' },
-];
 
 function parseStatValue(value: string): { num: number; suffix: string } {
   const match = value.match(/^(\d+)(.*)$/);
@@ -17,6 +11,8 @@ function parseStatValue(value: string): { num: number; suffix: string } {
 }
 
 export default function StatsBar() {
+  const { data } = useSiteData();
+  const stats = data.stats;
   const sectionRef = useRef<HTMLElement>(null);
   const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const valueRefs = useRef<(HTMLDivElement | null)[]>([]);

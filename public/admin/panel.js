@@ -461,11 +461,21 @@ const DEFAULT_SEO = {
   twitterHandle: '@emmagination',
 };
 
-// ── HERO / CONFIG / SEO ──
+const DEFAULT_STATS = [
+  { value: '50+', label: 'Proyectos' },
+  { value: '30+', label: 'Clientes' },
+  { value: '5+', label: 'Años' },
+  { value: '100%', label: 'Satisfacción' },
+];
+
+// ── HERO / CONFIG / SEO / STATS ──
 function fillForms() {
   const hero = { ...DEFAULT_HERO, ...state.hero };
   const config = { ...DEFAULT_CONFIG, ...state.config };
   const seo = { ...DEFAULT_SEO, ...state.seo };
+  const stats = Array.isArray(state.stats) && state.stats.length === 4
+    ? state.stats
+    : DEFAULT_STATS;
 
   // Hero
   const hf = $('#hero-form');
@@ -491,6 +501,17 @@ function fillForms() {
     Object.entries(seo).forEach(([k, v]) => {
       const el = sf.elements.namedItem(k);
       if (el) el.value = v || '';
+    });
+  }
+
+  // Stats
+  const stf = $('#stats-form');
+  if (stf) {
+    stats.forEach((s, i) => {
+      const valEl = stf.elements.namedItem(`stat${i + 1}Value`);
+      const labelEl = stf.elements.namedItem(`stat${i + 1}Label`);
+      if (valEl) valEl.value = s.value || '';
+      if (labelEl) labelEl.value = s.label || '';
     });
   }
 }
@@ -532,6 +553,16 @@ function updateStateFromForms() {
       ogImage: state.seo?.ogImage || '/images/isotipo.png',
       twitterHandle: state.seo?.twitterHandle || '@emmagination',
     };
+  }
+  // Stats
+  const stf = $('#stats-form');
+  if (stf) {
+    state.stats = [
+      { value: stf.stat1Value?.value?.trim() || '', label: stf.stat1Label?.value?.trim() || '' },
+      { value: stf.stat2Value?.value?.trim() || '', label: stf.stat2Label?.value?.trim() || '' },
+      { value: stf.stat3Value?.value?.trim() || '', label: stf.stat3Label?.value?.trim() || '' },
+      { value: stf.stat4Value?.value?.trim() || '', label: stf.stat4Label?.value?.trim() || '' },
+    ];
   }
 }
 
@@ -604,6 +635,7 @@ async function loadAll() {
     if (!state.hero) state.hero = {};
     if (!state.seo) state.seo = {};
     if (!state.config) state.config = {};
+    if (!state.stats) state.stats = [...DEFAULT_STATS];
 
     renderProjects();
     renderServices();

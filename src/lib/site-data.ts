@@ -67,6 +67,11 @@ export interface SeoGlobal {
   twitterHandle: string;
 }
 
+export interface StatRecord {
+  value: string;
+  label: string;
+}
+
 export interface SiteConfig {
   contactEmail: string;
   contactPhone: string;
@@ -81,6 +86,7 @@ export interface SiteData {
   config: SiteConfig;
   hero: HeroContent;
   seo: SeoGlobal;
+  stats: StatRecord[];
 }
 
 export const SITE_DATA_STORAGE_KEY = 'emmagination-site-data';
@@ -94,8 +100,8 @@ export const defaultHero: HeroContent = {
   taglineLine2: 'Pasa a ser una marca.',
   subtitle:
     'Diseñamos identidades y posicionamos marcas en Google. Hacemos que tu negocio se vea, se entienda y se compre.',
-  ctaPrimary: 'Trabajemos juntos',
-  ctaSecondary: 'Ver proyectos',
+  ctaPrimary: 'Iniciar proyecto',
+  ctaSecondary: 'Cotizar gratis',
 };
 
 export const defaultSeo: SeoGlobal = {
@@ -249,6 +255,13 @@ export const defaultServices: ServiceRecord[] = [
   },
 ];
 
+export const defaultStats: StatRecord[] = [
+  { value: '50+', label: 'Proyectos' },
+  { value: '30+', label: 'Clientes' },
+  { value: '5+', label: 'Años' },
+  { value: '100%', label: 'Satisfacción' },
+];
+
 export const defaultSiteData: SiteData = {
   projects: [
     {
@@ -400,6 +413,7 @@ export const defaultSiteData: SiteData = {
   },
   hero: defaultHero,
   seo: defaultSeo,
+  stats: defaultStats,
 };
 
 export function slugify(input: string) {
@@ -537,6 +551,19 @@ export function normalizeSeo(value: unknown): SeoGlobal {
   };
 }
 
+function normalizeStats(value: unknown): StatRecord[] {
+  if (Array.isArray(value)) {
+    return value
+      .filter((item): item is Record<string, unknown> => typeof item === 'object' && item !== null)
+      .map((item) => ({
+        value: normalizeString(item.value),
+        label: normalizeString(item.label),
+      }))
+      .filter((s) => s.value && s.label);
+  }
+  return defaultStats;
+}
+
 export function normalizeSiteData(input: unknown): SiteData {
   const source = typeof input === 'object' && input !== null ? (input as Record<string, unknown>) : {};
   const projectsSource = Array.isArray(source.projects) ? source.projects : defaultSiteData.projects;
@@ -561,6 +588,7 @@ export function normalizeSiteData(input: unknown): SiteData {
     },
     hero: normalizeHero(source.hero),
     seo: normalizeSeo(source.seo),
+    stats: normalizeStats(source.stats),
   };
 }
 

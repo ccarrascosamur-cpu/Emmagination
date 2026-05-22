@@ -352,6 +352,7 @@
     <button class="tab active" data-tab="projects">📁 Proyectos</button>
     <button class="tab" data-tab="services">🛠 Servicios</button>
     <button class="tab" data-tab="content">📝 Contenido</button>
+    <button class="tab" data-tab="stats">📊 Stats</button>
     <button class="tab" data-tab="config">⚙ Config</button>
   </div>
 
@@ -394,6 +395,48 @@
         <div class="full"><label>Subtítulo</label><textarea name="subtitle"></textarea></div>
         <div><label>CTA Primario</label><input name="ctaPrimary" /></div>
         <div><label>CTA Secundario</label><input name="ctaSecondary" /></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TAB: STATS -->
+  <div id="tab-stats" class="tab-content">
+    <div class="panel">
+      <span class="panel-title">Números de la barra de estadísticas</span>
+      <p style="color:var(--muted); font-size:13px; margin-bottom:16px;">Edita los 4 valores que aparecen en la barra de stats del home. Formato: valor + etiqueta.</p>
+      <form class="form-grid" id="stats-form">
+        <div>
+          <label>Stat 1 — Valor</label>
+          <input name="stat1Value" placeholder="50+" />
+        </div>
+        <div>
+          <label>Stat 1 — Etiqueta</label>
+          <input name="stat1Label" placeholder="Proyectos" />
+        </div>
+        <div>
+          <label>Stat 2 — Valor</label>
+          <input name="stat2Value" placeholder="30+" />
+        </div>
+        <div>
+          <label>Stat 2 — Etiqueta</label>
+          <input name="stat2Label" placeholder="Clientes" />
+        </div>
+        <div>
+          <label>Stat 3 — Valor</label>
+          <input name="stat3Value" placeholder="5+" />
+        </div>
+        <div>
+          <label>Stat 3 — Etiqueta</label>
+          <input name="stat3Label" placeholder="Años" />
+        </div>
+        <div>
+          <label>Stat 4 — Valor</label>
+          <input name="stat4Value" placeholder="100%" />
+        </div>
+        <div>
+          <label>Stat 4 — Etiqueta</label>
+          <input name="stat4Label" placeholder="Satisfacción" />
+        </div>
       </form>
     </div>
   </div>
