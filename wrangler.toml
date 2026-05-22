@@ -1,4 +1,6 @@
-# Default environment (staging/preview)
+# Worker principal conectado a emmagination.cl
+# IMPORTANTE: Siempre usar "npx wrangler deploy" sin --env
+# El flag --env production deploya a otro worker NO conectado al dominio
 name = "emmagination"
 main = "src/index.ts"
 compatibility_date = "2024-01-01"
@@ -12,18 +14,3 @@ id = "5ab5c5bbce6b47c3aa6fe9ef0d33e1d6"
 
 [ai]
 binding = "AI"
-
-# Production environment
-# Deploy with: wrangler deploy --env production
-[env.production]
-name = "emmagination-production"
-
-[[env.production.kv_namespaces]]
-binding = "SITE_DATA"
-id = "5ab5c5bbce6b47c3aa6fe9ef0d33e1d6"
-
-[env.production.ai]
-binding = "AI"
-
-[env.production.assets]
-directory = "./dist"

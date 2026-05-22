@@ -88,10 +88,7 @@ async function readStoredData(env: Env) {
 
 async function handleApi(request: Request, env: Env) {
   if (request.method === 'GET') {
-    // GET requires auth but without WWW-Authenticate header (we handle login via POST /api/login)
-    if (!isAuthorized(request, env)) {
-      return json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    // GET is public — anyone can read site data
     return json(await readStoredData(env));
   }
 

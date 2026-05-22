@@ -1,32 +1,29 @@
 #!/usr/bin/env node
 /**
- * Script de deploy manual para Cloudflare Workers
+ * Script de deploy para Cloudflare Workers
+ *
+ * IMPORTANTE: El worker principal conectado a emmagination.cl es "emmagination" (default).
+ * NO usar --env production, ya que eso deploya a "emmagination-production" que NO está
+ * conectado al dominio.
  *
  * Uso:
- *   node scripts/deploy.mjs           → Deploy a staging (default)
- *   node scripts/deploy.mjs production → Deploy a production
+ *   node scripts/deploy.mjs  → Deploy a producción (emmagination.cl)
  */
 
 import { execSync } from 'node:child_process';
 
-const env = process.argv[2];
-const isProduction = env === 'production';
-
-console.log(`🚀 Deploying to ${isProduction ? 'PRODUCTION' : 'STAGING'}...\n`);
+console.log(`🚀 Deploying to PRODUCTION (emmagination.cl)...\n`);
 
 // Build
 console.log('📦 Building...');
 execSync('npm run build', { stdio: 'inherit' });
 
-// Deploy
-const command = isProduction
-  ? 'npx wrangler deploy --env production'
-  : 'npx wrangler deploy';
+// Deploy al worker default "emmagination" (conectado a emmagination.cl)
+// NUNCA usar --env production, eso deploya a otro worker no conectado al dominio
+const command = 'npx wrangler deploy';
 
 console.log(`\n🌐 Running: ${command}\n`);
 execSync(command, { stdio: 'inherit' });
 
-console.log(`\n✅ Deployed to ${isProduction ? 'PRODUCTION' : 'STAGING'}!`);
-if (!isProduction) {
-  console.log('💡 To deploy to production, run: node scripts/deploy.mjs production');
-}
+console.log(`\n✅ Deployed to PRODUCTION!`);
+console.log(`🌐 URL: https://emmagination.cl`);

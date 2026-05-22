@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useSiteData } from '../lib/site-data-client';
@@ -11,37 +11,55 @@ function parseStatValue(value: string): { num: number; suffix: string } {
 }
 
 export default function StatsBar() {
-  const { data } = useSiteData();
+  const { data, isRemoteLoaded } = useSiteData();
   const stats = data.stats;
   const sectionRef = useRef<HTMLElement>(null);
   const itemsRef = useRef<(HTMLDivElement | null)[]>([]);
   const valueRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const [isClient, setIsClient] = useState(false);
+
+  // Marcar que estamos en el cliente
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    if (!sectionRef.current) return;
+    if (stats.length === 0) return;
+
+    // Limpiar animaciones previas
     const ctx = gsap.context(() => {
-      itemsRef.current.forEach((item, i) => {
-        if (!item) return;
-        gsap.fromTo(
-          item,
-          { opacity: 0, y: 40 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.8,
-            ease: 'power3.out',
-            delay: i * 0.12,
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: 'top 85%',
-              toggleActions: 'play none none none',
-            },
-          }
-        );
+      ScrollTrigger.getAll().forEach((st) => {
+        if (st.vars.trigger === sectionRef.current) {
+          st.kill();
+        }
       });
 
-      // Animated counters
+      // Resetear elementos para animación
+      itemsRef.current.forEach((item) => {
+        if (item) gsap.set(item, { opacity: 0, y: 40 });
+      });
+
+      // Animación de entrada
+      itemsRef.current.forEach((item, i) => {
+        if (!item) return;
+        gsap.to(item, {
+          opacity: 1,
+          y: 0,
+          duration: 0.8,
+          ease: 'power3.out',
+          delay: i * 0.12,
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 85%',
+            toggleActions: 'play none none none',
+          },
+        });
+      });
+
+      // Contadores animados
       valueRefs.current.forEach((el, i) => {
-        if (!el) return;
+        if (!el || !stats[i]) return;
         const { num, suffix } = parseStatValue(stats[i].value);
         const proxy = { val: 0 };
         gsap.to(proxy, {
@@ -64,6 +82,15 @@ export default function StatsBar() {
     return () => ctx.revert();
   }, [stats]);
 
+  // Durante SSR y antes de que React hidrate, mostrar los stats sin animación
+  // para evitar hydration mismatch. Después del cliente, mostrar los valores correctos.
+  const displayStats = isClient && isRemoteLoaded ? stats : [
+    { value: '\u00A0', label: '\u00A0' },
+    { value: '\u00A0', label: '\u00A0' },
+    { value: '\u00A0', label: '\u00A0' },
+    { value: '\u00A0', label: '\u00A0' },
+  ];
+
   return (
     <section
       ref={sectionRef}
@@ -75,11 +102,12 @@ export default function StatsBar() {
         style={{ maxWidth: '1440px', padding: '40px 4vw' }}
       >
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12 relative">
-          {stats.map((stat, index) => (
+          {displayStats.map((stat, index) => (
             <div
               key={`stat-${index}`}
               ref={(el) => { itemsRef.current[index] = el; }}
-              className="text-center relative opacity-0"
+              className="text-center relative"
+              style={{ opacity: isClient ? 0 : 1 }}
             >
               <div
                 ref={(el) => { valueRefs.current[index] = el; }}
@@ -89,9 +117,10 @@ export default function StatsBar() {
                   fontSize: 'clamp(28px, 3vw, 42px)',
                   fontWeight: 500,
                   letterSpacing: '-1px',
+                  minHeight: 'clamp(28px, 3vw, 42px)',
                 }}
               >
-                {stat.value}
+                {isClient && isRemoteLoaded ? stat.value : '\u00A0'}
               </div>
               <div
                 className="text-white/40 mt-1"
@@ -100,9 +129,10 @@ export default function StatsBar() {
                   fontSize: '0.75rem',
                   textTransform: 'uppercase',
                   letterSpacing: '1.5px',
+                  minHeight: '0.75rem',
                 }}
               >
-                {stat.label}
+                {isClient && isRemoteLoaded ? stat.label : '\u00A0'}
               </div>
             </div>
           ))}
