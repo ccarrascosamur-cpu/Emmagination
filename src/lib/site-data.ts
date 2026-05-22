@@ -19,6 +19,11 @@ export interface ProjectRecord {
   solution: string;
   results: string[];
   gallery: string[];
+  // Campos para cards del home
+  tags?: string;           // ej: "ECOMMERCE · SHOPIFY PLUS"
+  metric?: string;         // ej: "+65% tráfico orgánico"
+  metricLabel?: string;    // ej: "+45% conversión"
+  color?: string;          // ej: "#1a3a1a" (fondo oscuro del card)
 }
 
 export interface ServiceFaq {
@@ -261,6 +266,10 @@ export const defaultSiteData: SiteData = {
         'Rediseño e-commerce con foco en catálogo, claridad comercial y una experiencia de compra más limpia.',
       url: 'https://www.portalzen.cl',
       services: ['Shopify', 'E-commerce', 'Branding'],
+      tags: 'ECOMMERCE · SHOPIFY PLUS',
+      metric: '+65% tráfico orgánico',
+      metricLabel: '+45% conversión',
+      color: '#1a2e1a',
       offset: 0,
       featured: true,
       seoTitle: 'Caso Portal Zen | E-commerce Shopify y Branding',
@@ -291,6 +300,10 @@ export const defaultSiteData: SiteData = {
         'Proyecto e-commerce orientado a identidad de marca, legibilidad de producto y una experiencia de compra más natural.',
       url: 'https://www.sagradamadre.cl',
       services: ['Diseño web', 'Shopify', 'Branding'],
+      tags: 'BRANDING · WEB · CRO',
+      metric: '+40% tiempo en sitio',
+      metricLabel: '+28% CVR',
+      color: '#2a1a1a',
       offset: 60,
       featured: true,
       seoTitle: 'Caso Sagrada Madre | Diseño Web y Branding E-commerce',
@@ -321,6 +334,10 @@ export const defaultSiteData: SiteData = {
         'Landing page corporativa construida para comunicar con más claridad y reforzar una imagen de marca más sólida.',
       url: 'https://www.fegar.cl',
       services: ['Landing page', 'Branding', 'Logo'],
+      tags: 'CORPORATIVO · WEB',
+      metric: 'Leads calificados desde día 1',
+      metricLabel: 'Presencia B2B',
+      color: '#1a1a2e',
       offset: 0,
       featured: true,
       seoTitle: 'Caso Fegar | Landing Page Corporativa y Branding',
@@ -352,6 +369,10 @@ export const defaultSiteData: SiteData = {
         'Sitio institucional con gestión de contenidos para noticias, comunicaciones y presencia del club.',
       url: 'https://www.inglesrugbyclub.cl',
       services: ['Web institucional', 'Panel admin', 'Noticias'],
+      tags: 'IDENTIDAD · WEB INSTITUCIONAL',
+      metric: 'Sitio autoadministrable 100%',
+      metricLabel: 'Gestión interna',
+      color: '#1a2a2a',
       offset: 60,
       featured: true,
       seoTitle: 'Caso Inglés Rugby Club | Web Institucional con Panel',
@@ -454,6 +475,10 @@ export function normalizeProject(value: unknown, index = 0): ProjectRecord {
     gallery: normalizeStringArray(source.gallery).length > 0
       ? normalizeStringArray(source.gallery)
       : fallback.gallery,
+    tags: normalizeString(source.tags, fallback.tags ?? ''),
+    metric: normalizeString(source.metric, fallback.metric ?? ''),
+    metricLabel: normalizeString(source.metricLabel, fallback.metricLabel ?? ''),
+    color: normalizeString(source.color, fallback.color ?? ''),
   };
 }
 

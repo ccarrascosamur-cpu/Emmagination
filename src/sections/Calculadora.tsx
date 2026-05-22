@@ -3,8 +3,6 @@ import { useGSAPReveal } from '../hooks/useGSAP';
 
 // UF aproximada en CLP (puedes actualizar este valor)
 const UF_CLP = 37000;
-const USD_CLP = 920;
-const UF_USD = Math.round(UF_CLP / USD_CLP); // ~40 USD por UF
 
 interface Opt {
   icon: string;
@@ -73,8 +71,6 @@ const STEPS: StepData[] = [
 interface CalcResult {
   low: number;
   high: number;
-  usd_low: number;
-  usd_high: number;
   clp_low: number;
   clp_high: number;
 }
@@ -87,8 +83,7 @@ function calcRange(answers: number[]): CalcResult {
   return {
     low,
     high,
-    usd_low: Math.round(low * UF_USD),
-    usd_high: Math.round(high * UF_USD),
+
     clp_low: Math.round(low * UF_CLP),
     clp_high: Math.round(high * UF_CLP),
   };
@@ -235,9 +230,6 @@ export default function Calculadora() {
             </div>
             <div className="calc-res-clp">
               {formatCLP(result?.clp_low || 0)} – {formatCLP(result?.clp_high || 0)} CLP
-            </div>
-            <div className="calc-res-usd">
-              Aprox. USD {result?.usd_low.toLocaleString()} – {result?.usd_high.toLocaleString()}
             </div>
 
             <div className="calc-breakdown">

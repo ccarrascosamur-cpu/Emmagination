@@ -173,6 +173,10 @@ window.editProject = function(id) {
   f.gallery.value = joinLines(p.gallery);
   f.seoTitle.value = p.seoTitle || '';
   f.seoDescription.value = p.seoDescription || '';
+  f.tags.value = p.tags || '';
+  f.metric.value = p.metric || '';
+  f.metricLabel.value = p.metricLabel || '';
+  f.color.value = p.color || '';
 
   $('#btn-delete-project').style.display = 'inline-flex';
   openModal('modal-project');
@@ -299,6 +303,10 @@ function initProjectForm() {
       gallery: splitLines(f.gallery.value),
       seoTitle: f.seoTitle.value.trim(),
       seoDescription: f.seoDescription.value.trim(),
+      tags: f.tags.value.trim(),
+      metric: f.metric.value.trim(),
+      metricLabel: f.metricLabel.value.trim(),
+      color: f.color.value.trim(),
       offset: 0,
       pdf: '',
     };
