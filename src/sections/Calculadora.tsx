@@ -1,33 +1,31 @@
 import { useState } from 'react';
 import { useGSAPReveal } from '../hooks/useGSAP';
 
-// UF aproximada en CLP (puedes actualizar este valor)
-const UF_CLP = 37000;
+// ── Precios base en CLP por tipo de proyecto ───────────────────────────
+const BASE_CLP: Record<string, number> = {
+  'Diseño Web': 350_000,
+  'eCommerce / Shopify': 750_000,
+  'Branding completo': 300_000,
+  'Proyecto integral': 1_250_000,
+  'Contenido Visual': 280_000,
+};
 
-interface Opt {
-  icon: string;
-  t: string;
-  sub: string;
-  val: number;
-}
+// ── Rangos de referencia visibles ──────────────────────────────────────
+const PRICE_RANGES = [
+  { label: 'Landing page', range: '$350.000 – $700.000' },
+  { label: 'Sitio corporativo', range: '$700.000 – $2.000.000' },
+  { label: 'Shopify / eCommerce', range: '$1.500.000 – $4.000.000' },
+  { label: 'Branding completo', range: '$600.000 – $2.000.000' },
+  { label: 'Fotografía sesión', range: '$280.000 – $1.200.000' },
+  { label: 'Video corporativo', range: '$500.000 – $2.500.000' },
+  { label: 'Pack foto + video', range: '$900.000 – $2.800.000' },
+  { label: 'Plan mensual RRSS', range: '$400.000 – $900.000/mes' },
+  { label: 'SEO técnico', range: '$400.000 – $1.200.000' },
+  { label: 'Proyecto integral', range: '$2.500.000 – $6.000.000' },
+];
 
-interface StepData {
-  q: string;
-  hint: string;
-  opts: Opt[];
-}
-
-const STEPS: StepData[] = [
-  {
-    q: '¿Qué tipo de proyecto necesitas?',
-    hint: 'Selecciona el servicio principal',
-    opts: [
-      { icon: '🌐', t: 'Diseño Web', sub: 'Sitio corporativo o landing page', val: 1 },
-      { icon: '◈', t: 'Branding completo', sub: 'Logo + identidad + guía de marca', val: 1.3 },
-      { icon: '📦', t: 'Proyecto integral', sub: 'Web + Branding + SEO', val: 2 },
-      { icon: '🛒', t: 'eCommerce / Shopify', sub: 'Tienda online completa', val: 3.5 },
-    ],
-  },
+// ── Pasos para proyectos web/branding ──────────────────────────────────
+const WEB_STEPS = [
   {
     q: '¿Cuántas páginas necesitas?',
     hint: 'Aproximado, se puede ajustar en el brief',
@@ -68,24 +66,90 @@ const STEPS: StepData[] = [
   },
 ];
 
+// ── Pasos para contenido visual ────────────────────────────────────────
+const CONTENT_STEPS = [
+  {
+    q: '¿Qué tipo de contenido necesitas?',
+    hint: 'Puedes combinar foto y video en una sesión',
+    opts: [
+      { icon: '📷', t: 'Solo fotografía', sub: 'Producto, marca o equipo', val: 1 },
+      { icon: '🎬', t: 'Solo video', sub: 'Reel, corporativo o spot', val: 1.4 },
+      { icon: '📷🎬', t: 'Pack foto + video', sub: 'Sesión completa en un día', val: 1.8 },
+      { icon: '📅', t: 'Plan mensual RRSS', sub: 'Contenido recurrente para redes', val: 2.2 },
+    ],
+  },
+  {
+    q: '¿Cuántas piezas necesitas?',
+    hint: 'Afecta el tiempo de sesión y edición',
+    opts: [
+      { icon: '🗂️', t: 'Pack básico', sub: '5–10 fotos / 1 video corto', val: 1 },
+      { icon: '📦', t: 'Pack estándar', sub: '20–40 fotos / 2–3 videos', val: 1.5 },
+      { icon: '🏆', t: 'Pack completo', sub: '60+ fotos / 5+ videos editados', val: 2.2 },
+    ],
+  },
+  {
+    q: '¿Requiere locación especial o modelo?',
+    hint: 'Influye en la logística y producción',
+    opts: [
+      { icon: '🏠', t: 'Estudio o locación simple', sub: 'Sin desplazamiento especial', val: 1 },
+      { icon: '🌆', t: 'Locación exterior Santiago', sub: 'Desplazamiento incluido', val: 1.3 },
+      { icon: '🧍', t: 'Con modelo o actor', sub: 'Casting + producción completa', val: 1.6 },
+    ],
+  },
+  {
+    q: '¿Cuándo lo necesitas listo?',
+    hint: 'El plazo afecta la planificación del equipo',
+    opts: [
+      { icon: '🗓️', t: 'Sin apuro (2–4 semanas)', sub: 'Proceso completo y detallado', val: 0.9 },
+      { icon: '📅', t: 'Normal (1 semana)', sub: 'Plazo estándar de producción', val: 1 },
+      { icon: '⚡', t: 'Urgente (2–3 días)', sub: 'Prioridad máxima', val: 1.3 },
+    ],
+  },
+];
+
+// ── Paso 1 común ───────────────────────────────────────────────────────
+const STEP_1 = {
+  q: '¿Qué tipo de proyecto necesitas?',
+  hint: 'Selecciona el servicio principal',
+  opts: [
+    { icon: '🌐', t: 'Diseño Web', sub: 'Sitio corporativo o landing page', val: 1 },
+    { icon: '◈', t: 'Branding completo', sub: 'Logo + identidad + guía de marca', val: 1.3 },
+    { icon: '📦', t: 'Proyecto integral', sub: 'Web + Branding + SEO', val: 2 },
+    { icon: '🛒', t: 'eCommerce / Shopify', sub: 'Tienda online completa', val: 3.5 },
+    { icon: '🎬', t: 'Contenido Visual', sub: 'Fotografía, video y producción audiovisual', val: 1.1 },
+  ],
+};
+
+interface Opt {
+  icon: string;
+  t: string;
+  sub: string;
+  val: number;
+}
+
+interface StepData {
+  q: string;
+  hint: string;
+  opts: Opt[];
+}
+
 interface CalcResult {
   low: number;
   high: number;
-  clp_low: number;
-  clp_high: number;
+  display_low: string;
+  display_high: string;
 }
 
-function calcRange(answers: number[]): CalcResult {
+function calcRange(answers: number[], tipoLabel: string): CalcResult {
+  const base = BASE_CLP[tipoLabel] || 350_000;
   const mult = answers.reduce((a, v) => a * v, 1);
-  // Base más realista: 8 UF para un sitio web básico
-  const low = Math.round(8 * mult);
-  const high = Math.round(8 * mult * 1.35);
+  const low = Math.round((base * mult) / 10_000) * 10_000;
+  const high = Math.round((base * mult * 1.45) / 10_000) * 10_000;
   return {
     low,
     high,
-
-    clp_low: Math.round(low * UF_CLP),
-    clp_high: Math.round(high * UF_CLP),
+    display_low: `$${low.toLocaleString('es-CL')}`,
+    display_high: `$${high.toLocaleString('es-CL')}`,
   };
 }
 
@@ -99,16 +163,24 @@ export default function Calculadora() {
 
   const ref = useGSAPReveal('.calc-wrap', { y: 50, stagger: 0 });
 
-  const total = STEPS.length;
-  const progress = done ? 100 : (step / total) * 100;
-  const result: CalcResult | null = done ? calcRange(answers) : null;
+  // Determinar qué flujo de pasos usar
+  const tipoLabel = STEP_1.opts.find((o) => o.val === answers[0])?.t || 'Diseño Web';
+  const isContentVisual = tipoLabel === 'Contenido Visual';
+
+  const progress = done ? 100 : (step / 5) * 100;
+  const result: CalcResult | null = done ? calcRange(answers, tipoLabel) : null;
 
   const next = () => {
     if (selected === null) return;
     const newAns = [...answers, selected];
     setAnswers(newAns);
     setSelected(null);
-    if (step + 1 >= total) setDone(true);
+
+    // Si estamos en paso 0 (selección de tipo), determinamos cuántos pasos quedan
+    const selectedType = STEP_1.opts.find((o) => o.val === selected)?.t || '';
+    const remainingSteps = selectedType === 'Contenido Visual' ? CONTENT_STEPS.length : WEB_STEPS.length;
+
+    if (step >= remainingSteps) setDone(true);
     else setStep((s) => s + 1);
   };
 
@@ -137,11 +209,14 @@ export default function Calculadora() {
         body: JSON.stringify({
           email,
           subject: 'Nueva cotización desde emmagination.cl',
-          answers: STEPS.map((s, i) => ({
-            question: s.q,
-            answer: s.opts.find((o) => o.val === answers[i])?.t || '—',
-          })),
-          range: result ? `${result.low}–${result.high} UF` : '',
+          tipo_proyecto: tipoLabel,
+          answers: answers.map((a, i) => {
+            const allSteps = [STEP_1, ...(isContentVisual ? CONTENT_STEPS : WEB_STEPS)];
+            const stepData = allSteps[i];
+            const opt = stepData?.opts.find((o) => o.val === a);
+            return { question: stepData?.q, answer: opt?.t };
+          }),
+          range: result ? `${result.display_low} – ${result.display_high}` : '',
         }),
       });
     } catch {
@@ -150,11 +225,18 @@ export default function Calculadora() {
     setSent(true);
   };
 
-  const formatCLP = (n: number) =>
-    '$' + n.toLocaleString('es-CL').replace(/,/g, '.');
+  // Obtener el paso actual a mostrar
+  const getCurrentStep = (): StepData => {
+    if (step === 0) return STEP_1;
+    const subSteps = isContentVisual ? CONTENT_STEPS : WEB_STEPS;
+    return subSteps[step - 1] || subSteps[subSteps.length - 1];
+  };
+
+  const currentStep = getCurrentStep();
 
   return (
     <section id="cotizar" className="sec-calc" ref={ref}>
+      {/* Tabla de referencia de precios */}
       <div className="calc-header">
         <div className="sec-label" style={{ justifyContent: 'center' }}>
           Calculadora
@@ -164,9 +246,40 @@ export default function Calculadora() {
           <br />
           <em>tu proyecto?</em>
         </h2>
-        <p className="sec-sub" style={{ margin: '0 auto 0 auto', textAlign: 'center' }}>
-          Responde 5 preguntas y obtén un rango de inversión estimado al instante.
+        <p className="sec-sub" style={{ margin: '0 auto 2rem auto', textAlign: 'center' }}>
+          Responde unas preguntas y obtén un rango de inversión estimado al instante.
         </p>
+      </div>
+
+      {/* Tabla de rangos */}
+      <div className="calc-ref-table" style={{ maxWidth: 700, margin: '0 auto 2.5rem' }}>
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: '0.5rem',
+          }}
+        >
+          {PRICE_RANGES.map((item) => (
+            <div
+              key={item.label}
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                padding: '0.5rem 0.85rem',
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(168,85,247,0.08)',
+                borderRadius: 8,
+              }}
+            >
+              <span style={{ fontSize: '0.78rem', color: '#9E9CC8' }}>{item.label}</span>
+              <span style={{ fontSize: '0.78rem', color: '#A855F7', fontWeight: 600 }}>
+                {item.range}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
       <div className="calc-wrap">
@@ -178,13 +291,13 @@ export default function Calculadora() {
         {!done ? (
           <div className="calc-body">
             <div className="calc-step-label">
-              Paso {step + 1} de {total}
+              Paso {step + 1} de 5
             </div>
-            <div className="calc-question">{STEPS[step].q}</div>
-            <div className="calc-hint">{STEPS[step].hint}</div>
+            <div className="calc-question">{currentStep.q}</div>
+            <div className="calc-hint">{currentStep.hint}</div>
 
             <div className="calc-opts">
-              {STEPS[step].opts.map((o) => (
+              {currentStep.opts.map((o) => (
                 <button
                   key={o.t}
                   className={`calc-opt${selected === o.val ? ' calc-opt-sel' : ''}`}
@@ -215,7 +328,7 @@ export default function Calculadora() {
                 onClick={next}
                 disabled={selected === null}
               >
-                {step + 1 === total ? 'Ver resultado →' : 'Siguiente →'}
+                {step === 4 ? 'Ver resultado →' : 'Siguiente →'}
               </button>
             </div>
           </div>
@@ -226,25 +339,23 @@ export default function Calculadora() {
               Inversión estimada para tu proyecto
             </div>
             <div className="calc-res-range">
-              {result?.low}–{result?.high} UF
+              {result?.display_low} – {result?.display_high}
             </div>
-            <div className="calc-res-clp">
-              {formatCLP(result?.clp_low || 0)} – {formatCLP(result?.clp_high || 0)} CLP
-            </div>
+            <div className="calc-res-clp">CLP · Chile</div>
 
             <div className="calc-breakdown">
-              {[
-                ['Tipo de proyecto', STEPS[0].opts.find((o) => o.val === answers[0])?.t],
-                ['Alcance', STEPS[1].opts.find((o) => o.val === answers[1])?.t],
-                ['Panel admin', STEPS[2].opts.find((o) => o.val === answers[2])?.t],
-                ['Contenido visual', STEPS[3].opts.find((o) => o.val === answers[3])?.t],
-                ['Plazo', STEPS[4].opts.find((o) => o.val === answers[4])?.t],
-              ].map(([l, v]) => (
-                <div key={l} className="calc-br-item">
-                  <div className="calc-br-label">{l}</div>
-                  <div className="calc-br-val">{v || '—'}</div>
-                </div>
-              ))}
+              {(() => {
+                const allSteps = [STEP_1, ...(isContentVisual ? CONTENT_STEPS : WEB_STEPS)];
+                return allSteps.map((s, i) => {
+                  const opt = s.opts.find((o) => o.val === answers[i]);
+                  return (
+                    <div key={i} className="calc-br-item">
+                      <div className="calc-br-label">{s.q}</div>
+                      <div className="calc-br-val">{opt?.t || '—'}</div>
+                    </div>
+                  );
+                });
+              })()}
             </div>
 
             <p className="calc-res-note">
