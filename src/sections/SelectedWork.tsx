@@ -191,17 +191,7 @@ export default function SelectedWork() {
                       background: `linear-gradient(to top, rgba(17,16,40,0.55) 0%, rgba(17,16,40,0.05) 40%, transparent 70%)`,
                     }}
                   />
-                  {/* Número de proyecto sutil */}
-                  <span
-                    className="absolute top-4 left-4 text-white/10 font-black select-none pointer-events-none"
-                    style={{
-                      fontFamily: 'var(--font-heading)',
-                      fontSize: isFeatured ? '4rem' : '2.5rem',
-                      lineHeight: 1,
-                    }}
-                  >
-                    {String(index + 1).padStart(2, '0')}
-                  </span>
+
                   {/* Top-right arrow on hover */}
                   <div
                     className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-400 transform translate-y-2 group-hover:translate-y-0"
@@ -345,6 +335,18 @@ export default function SelectedWork() {
                       </span>
                     ))}
                   </div>
+
+                  {/* Número de proyecto — esquina inferior derecha de la tarjeta */}
+                  <span
+                    className="absolute bottom-3 right-4 text-white/[0.07] font-black select-none pointer-events-none"
+                    style={{
+                      fontFamily: 'var(--font-heading)',
+                      fontSize: '2.2rem',
+                      lineHeight: 1,
+                    }}
+                  >
+                    {String(index + 1).padStart(2, '0')}
+                  </span>
                 </div>
 
                 {/* Bottom accent line */}
