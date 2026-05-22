@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Sparkles } from 'lucide-react';
 import { useSiteData } from '../lib/site-data-client';
 
 interface HeroProps {
@@ -285,31 +285,36 @@ export default function Hero({ lenisRef }: HeroProps) {
       <div
         ref={contentRef}
         className="relative flex flex-col items-center justify-center text-center px-4 sm:px-8"
-        style={{ zIndex: 2, maxWidth: '900px', willChange: 'transform' }}
+        style={{ zIndex: 2, maxWidth: '1000px', willChange: 'transform' }}
       >
-        {/* Badge */}
+        {/* Badge estilo referencia */}
         <div
           ref={badgeRef}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm mb-8 opacity-0"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border mb-8 opacity-0"
+          style={{
+            background: 'rgba(124, 58, 237, 0.08)',
+            borderColor: 'rgba(168, 85, 247, 0.25)',
+          }}
         >
+          <Sparkles size={14} className="text-[#A855F7]" />
           <span
-            className="text-white/70 text-sm"
-            style={{ fontFamily: 'var(--font-body)' }}
+            className="text-[#A855F7] text-xs font-bold uppercase tracking-[0.2em]"
+            style={{ fontFamily: 'var(--font-mono)' }}
           >
             {hero.badge}
           </span>
         </div>
 
-        {/* Title con hover effect — H1 con texto visible para SEO */}
+        {/* Title con estilo de referencia — H1 con texto visible para SEO */}
         <h1
           ref={titleRef}
-          className="hero-title text-white leading-none"
+          className="hero-title text-white uppercase"
           style={{
             fontFamily: 'var(--font-heading)',
-            fontSize: 'clamp(42px, 9vw, 84px)',
-            fontWeight: 700,
-            letterSpacing: '-3px',
-            lineHeight: 1.05,
+            fontSize: 'clamp(36px, 7.5vw, 80px)',
+            fontWeight: 900,
+            letterSpacing: '-2px',
+            lineHeight: 0.95,
           }}
           aria-label={`${hero.titleLine1} ${hero.titleLine2} ${hero.titleLine3}`}
         >
@@ -320,21 +325,23 @@ export default function Hero({ lenisRef }: HeroProps) {
           </span>
           <span className="hero-line block" style={{ overflow: 'hidden', paddingBottom: '0.06em' }}>
             <span
-              className="line-inner block"
+              className="line-inner block hero-stroke-text"
               style={{
                 transform: 'translateY(108%)',
-                background: 'linear-gradient(135deg, #A78BFA 0%, #C084FC 50%, #E879F9 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                transition: 'transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease',
+                transition: 'transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease, -webkit-text-stroke 0.3s ease',
               }}
             >
               {hero.titleLine2}
             </span>
           </span>
           <span className="hero-line block" style={{ overflow: 'hidden', paddingBottom: '0.06em' }}>
-            <span className="line-inner block" style={{ transform: 'translateY(108%)', transition: 'transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease' }}>
+            <span
+              className="line-inner block"
+              style={{
+                transform: 'translateY(108%)',
+                transition: 'transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease',
+              }}
+            >
               {hero.titleLine3}
             </span>
           </span>
@@ -343,12 +350,13 @@ export default function Hero({ lenisRef }: HeroProps) {
         {/* Subtitle */}
         <p
           ref={subtitleRef}
-          className="text-white/50 mt-6 max-w-lg opacity-0"
+          className="mt-8 max-w-xl opacity-0"
           style={{
             fontFamily: 'var(--font-body)',
-            fontSize: 'clamp(16px, 1.6vw, 18px)',
-            lineHeight: 1.7,
+            fontSize: 'clamp(15px, 1.5vw, 17px)',
+            lineHeight: 1.75,
             fontWeight: 300,
+            color: '#9E9CC8',
           }}
         >
           {hero.subtitle}
@@ -368,8 +376,11 @@ export default function Hero({ lenisRef }: HeroProps) {
           </button>
           <button
             onClick={scrollToWork}
-            className="group inline-flex items-center gap-2 px-8 py-3.5 border border-white/20 rounded-full text-white text-sm hover:bg-white/10 transition-all duration-300"
-            style={{ fontFamily: 'var(--font-body)' }}
+            className="group inline-flex items-center gap-2 px-8 py-3.5 border rounded-full text-white text-sm hover:bg-white/10 transition-all duration-300"
+            style={{
+              fontFamily: 'var(--font-body)',
+              borderColor: 'rgba(168, 85, 247, 0.3)',
+            }}
           >
             {hero.ctaSecondary}
             <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />

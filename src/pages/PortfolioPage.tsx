@@ -230,7 +230,7 @@ export default function PortfolioPage() {
               style={{
                 fontFamily: 'var(--font-heading)',
                 fontSize: 'clamp(56px, 10vw, 140px)',
-                fontWeight: 700,
+                fontWeight: 900,
                 letterSpacing: '-3px',
                 lineHeight: 0.95,
               }}
@@ -365,7 +365,7 @@ export default function PortfolioPage() {
                       className="text-white text-xl transition-colors duration-300"
                       style={{
                         fontFamily: 'var(--font-heading)',
-                        fontWeight: 600,
+                        fontWeight: 700,
                       }}
                     >
                       {project.title}

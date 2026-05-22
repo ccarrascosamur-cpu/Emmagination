@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ArrowUpRight } from 'lucide-react';
 import { useSiteData } from '../lib/site-data-client';
 
 gsap.registerPlugin(ScrollTrigger);
@@ -61,6 +61,19 @@ export default function SelectedWork() {
         background: '#111028',
       }}
     >
+      {/* Decorative orb */}
+      <div
+        className="absolute rounded-full pointer-events-none"
+        style={{
+          width: '600px',
+          height: '600px',
+          background: 'radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%)',
+          filter: 'blur(100px)',
+          top: '10%',
+          right: '-15%',
+        }}
+      />
+
       <div className="mx-auto relative" style={{ maxWidth: '1440px', padding: '0 4vw' }}>
         {/* Section Header */}
         <div ref={headerRef} className="mb-16 opacity-0">
@@ -70,7 +83,7 @@ export default function SelectedWork() {
             style={{
               fontFamily: 'var(--font-heading)',
               fontSize: 'clamp(2.2rem, 5vw, 4rem)',
-              fontWeight: 800,
+              fontWeight: 900,
               letterSpacing: '-0.03em',
               lineHeight: 1.08,
               marginBottom: '1rem',
@@ -165,6 +178,16 @@ export default function SelectedWork() {
                     background: `linear-gradient(to top, ${project.color || '#161435'} 0%, transparent 60%)`,
                   }}
                 />
+                {/* Hover arrow */}
+                <div
+                  className="absolute top-4 right-4 w-9 h-9 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0"
+                  style={{
+                    background: 'rgba(168, 85, 247, 0.9)',
+                    backdropFilter: 'blur(8px)',
+                  }}
+                >
+                  <ArrowUpRight size={16} className="text-white" />
+                </div>
               </div>
 
               {/* Content */}

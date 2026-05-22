@@ -93,9 +93,9 @@ export const SITE_DATA_STORAGE_KEY = 'emmagination-site-data';
 
 export const defaultHero: HeroContent = {
   badge: 'Agencia de diseño web, branding y SEO en Chile',
-  titleLine1: 'Diseño Web,',
-  titleLine2: 'Branding y SEO',
-  titleLine3: 'en Chile',
+  titleLine1: 'Diseño web que',
+  titleLine2: 'convierte visitas',
+  titleLine3: 'en clientes.',
   taglineLine1: 'Deja de ser un logo.',
   taglineLine2: 'Pasa a ser una marca.',
   subtitle:

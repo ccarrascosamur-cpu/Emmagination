@@ -206,6 +206,18 @@
   color: #ffffff !important;
   -webkit-text-fill-color: #ffffff !important;
 }
+
+/* Stroke text effect — estilo referencia */
+.hero-stroke-text {
+  -webkit-text-stroke: 1.5px rgba(255, 255, 255, 0.35);
+  color: transparent;
+  transition: -webkit-text-stroke 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+}
+.hero-line:hover .hero-stroke-text {
+  -webkit-text-stroke: 1.5px rgba(168, 85, 247, 0.9);
+  color: transparent;
+  text-shadow: 0 0 40px rgba(168, 85, 247, 0.3);
+}
 .hero-orb {
   position: absolute;
   border-radius: 50%;
