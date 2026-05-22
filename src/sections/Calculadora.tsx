@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useGSAPReveal } from '../hooks/useGSAP';
 
-const BASE_UF = 20;
+// UF aproximada en CLP (puedes actualizar este valor)
+const UF_CLP = 37000;
+const USD_CLP = 920;
+const UF_USD = Math.round(UF_CLP / USD_CLP); // ~40 USD por UF
 
 interface Opt {
   icon: string;
@@ -22,9 +25,9 @@ const STEPS: StepData[] = [
     hint: 'Selecciona el servicio principal',
     opts: [
       { icon: '🌐', t: 'Diseño Web', sub: 'Sitio corporativo o landing page', val: 1 },
-      { icon: '🛒', t: 'eCommerce / Shopify', sub: 'Tienda online completa', val: 2 },
-      { icon: '◈', t: 'Branding completo', sub: 'Logo + identidad + guía de marca', val: 1.2 },
-      { icon: '📦', t: 'Proyecto integral', sub: 'Web + Branding + SEO', val: 2.5 },
+      { icon: '◈', t: 'Branding completo', sub: 'Logo + identidad + guía de marca', val: 1.3 },
+      { icon: '📦', t: 'Proyecto integral', sub: 'Web + Branding + SEO', val: 2 },
+      { icon: '🛒', t: 'eCommerce / Shopify', sub: 'Tienda online completa', val: 3.5 },
     ],
   },
   {
@@ -32,27 +35,37 @@ const STEPS: StepData[] = [
     hint: 'Aproximado, se puede ajustar en el brief',
     opts: [
       { icon: '📄', t: '1–3 páginas', sub: 'Landing page o sitio simple', val: 1 },
-      { icon: '📑', t: '4–8 páginas', sub: 'Sitio corporativo estándar', val: 1.5 },
-      { icon: '📚', t: '9–20 páginas', sub: 'Sitio mediano con secciones', val: 2 },
-      { icon: '🏢', t: '+20 páginas o tienda', sub: 'Sitio grande o eCommerce', val: 3 },
+      { icon: '📑', t: '4–8 páginas', sub: 'Sitio corporativo estándar', val: 1.3 },
+      { icon: '📚', t: '9–20 páginas', sub: 'Sitio mediano con secciones', val: 1.6 },
+      { icon: '🏢', t: '+20 páginas o tienda', sub: 'Sitio grande o eCommerce', val: 2 },
     ],
   },
   {
     q: '¿Necesitas panel autoadministrable?',
     hint: 'Para editar contenido sin programar',
     opts: [
-      { icon: '✅', t: 'Sí, lo necesito', sub: 'Panel CMS para editar todo', val: 1.3 },
-      { icon: '🔧', t: 'Solo ediciones básicas', sub: 'Nos envías los cambios', val: 1 },
-      { icon: '🚫', t: 'No es necesario', sub: 'Sitio estático sin CMS', val: 0.9 },
+      { icon: '🚫', t: 'No es necesario', sub: 'Sitio estático sin CMS', val: 1 },
+      { icon: '🔧', t: 'Solo ediciones básicas', sub: 'Nos envías los cambios', val: 1.1 },
+      { icon: '✅', t: 'Sí, lo necesito', sub: 'Panel CMS para editar todo', val: 1.4 },
+    ],
+  },
+  {
+    q: '¿Necesitas contenido visual?',
+    hint: 'Fotografía, video o motion graphics',
+    opts: [
+      { icon: '🚫', t: 'No, ya tengo todo', sub: 'Entregas fotos/videos tú', val: 1 },
+      { icon: '📸', t: 'Fotografía de producto', sub: 'Sesión profesional de fotos', val: 1.3 },
+      { icon: '🎬', t: 'Video corporativo / reels', sub: 'Edición + filmación básica', val: 1.8 },
+      { icon: '✨', t: 'Pack completo foto + video', sub: 'Sesión + reels + motion', val: 2.5 },
     ],
   },
   {
     q: '¿Cuándo lo necesitas listo?',
     hint: 'El plazo afecta la planificación del equipo',
     opts: [
-      { icon: '⚡', t: 'Urgente (2–3 semanas)', sub: 'Prioridad máxima', val: 1.4 },
-      { icon: '📅', t: 'Normal (1–2 meses)', sub: 'Plazo estándar de producción', val: 1 },
       { icon: '🗓️', t: 'Sin apuro (2–4 meses)', sub: 'Proceso completo y detallado', val: 0.9 },
+      { icon: '📅', t: 'Normal (1–2 meses)', sub: 'Plazo estándar de producción', val: 1 },
+      { icon: '⚡', t: 'Urgente (2–3 semanas)', sub: 'Prioridad máxima', val: 1.3 },
     ],
   },
 ];
@@ -62,17 +75,22 @@ interface CalcResult {
   high: number;
   usd_low: number;
   usd_high: number;
+  clp_low: number;
+  clp_high: number;
 }
 
 function calcRange(answers: number[]): CalcResult {
   const mult = answers.reduce((a, v) => a * v, 1);
-  const low = Math.round(BASE_UF * mult);
-  const high = Math.round(BASE_UF * mult * 1.4);
+  // Base más realista: 8 UF para un sitio web básico
+  const low = Math.round(8 * mult);
+  const high = Math.round(8 * mult * 1.35);
   return {
     low,
     high,
-    usd_low: Math.round(low * 40),
-    usd_high: Math.round(high * 40),
+    usd_low: Math.round(low * UF_USD),
+    usd_high: Math.round(high * UF_USD),
+    clp_low: Math.round(low * UF_CLP),
+    clp_high: Math.round(high * UF_CLP),
   };
 }
 
@@ -132,10 +150,13 @@ export default function Calculadora() {
         }),
       });
     } catch {
-      // silently fail — visual success is enough for now
+      // silently fail
     }
     setSent(true);
   };
+
+  const formatCLP = (n: number) =>
+    '$' + n.toLocaleString('es-CL').replace(/,/g, '.');
 
   return (
     <section id="cotizar" className="sec-calc" ref={ref}>
@@ -149,7 +170,7 @@ export default function Calculadora() {
           <em>tu proyecto?</em>
         </h2>
         <p className="sec-sub" style={{ margin: '0 auto 0 auto', textAlign: 'center' }}>
-          Responde 4 preguntas y obtén un rango de inversión estimado al instante.
+          Responde 5 preguntas y obtén un rango de inversión estimado al instante.
         </p>
       </div>
 
@@ -212,6 +233,9 @@ export default function Calculadora() {
             <div className="calc-res-range">
               {result?.low}–{result?.high} UF
             </div>
+            <div className="calc-res-clp">
+              {formatCLP(result?.clp_low || 0)} – {formatCLP(result?.clp_high || 0)} CLP
+            </div>
             <div className="calc-res-usd">
               Aprox. USD {result?.usd_low.toLocaleString()} – {result?.usd_high.toLocaleString()}
             </div>
@@ -221,7 +245,8 @@ export default function Calculadora() {
                 ['Tipo de proyecto', STEPS[0].opts.find((o) => o.val === answers[0])?.t],
                 ['Alcance', STEPS[1].opts.find((o) => o.val === answers[1])?.t],
                 ['Panel admin', STEPS[2].opts.find((o) => o.val === answers[2])?.t],
-                ['Plazo', STEPS[3].opts.find((o) => o.val === answers[3])?.t],
+                ['Contenido visual', STEPS[3].opts.find((o) => o.val === answers[3])?.t],
+                ['Plazo', STEPS[4].opts.find((o) => o.val === answers[4])?.t],
               ].map(([l, v]) => (
                 <div key={l} className="calc-br-item">
                   <div className="calc-br-label">{l}</div>

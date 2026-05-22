@@ -687,6 +687,12 @@
   background-clip: text;
   margin: 0.5rem 0 0.25rem;
 }
+.calc-res-clp {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #9E9CC8;
+  margin-bottom: 0.25rem;
+}
 .calc-res-usd {
   font-size: 0.8rem;
   color: #5C5A8A;
