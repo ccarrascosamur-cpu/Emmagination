@@ -88,23 +88,23 @@ export default function Navigation({ lenisRef }: NavigationProps) {
               handleLogoClick();
             }
           }}
-          className="flex items-center gap-3"
+          className="flex items-center gap-2.5"
         >
           <img
             src="/images/isotipo.png"
             alt="EMMAGINATION"
-            className="h-9 w-auto object-contain"
+            className="h-8 w-auto object-contain shrink-0"
           />
-          <div className="hidden sm:flex flex-col items-start leading-none">
+          <div className="hidden sm:flex flex-col items-start justify-center leading-none pt-[1px]">
             <span
-              className="text-white text-[17px] font-bold tracking-[0.11em] uppercase"
-              style={{ fontFamily: 'var(--font-heading)' }}
+              className="text-white text-[16px] font-bold uppercase"
+              style={{ fontFamily: 'var(--font-heading)', letterSpacing: '0.105em', lineHeight: 1 }}
             >
               EMMAGINATION
             </span>
             <div
-              className="mt-1 flex items-center gap-1.5 text-white/40 text-[8px] uppercase"
-              style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.16em', lineHeight: 1 }}
+              className="mt-[4px] flex items-center gap-[5px] text-white/40 text-[7.5px] uppercase"
+              style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.13em', lineHeight: 1, whiteSpace: 'nowrap' }}
             >
               <span>Web Design</span>
               <span className="text-white/20">·</span>
