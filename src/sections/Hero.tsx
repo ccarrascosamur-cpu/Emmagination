@@ -110,13 +110,10 @@ export default function Hero({ lenisRef }: HeroProps) {
   // GSAP entrance animations
   useIsomorphicLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const lines = titleRef.current?.querySelectorAll('.line-inner') ?? [];
-
       gsap.set([badgeRef.current, subtitleRef.current, ctaRef.current], {
         opacity: 0,
         y: 18,
       });
-      gsap.set(lines, { yPercent: 108 });
 
       const tl = gsap.timeline({
         defaults: { ease: 'power3.out' },
@@ -128,23 +125,13 @@ export default function Hero({ lenisRef }: HeroProps) {
         duration: 0.45,
       })
         .to(
-          lines,
-          {
-            yPercent: 0,
-            duration: 0.86,
-            stagger: 0.08,
-            ease: 'power4.out',
-          },
-          '-=0.16'
-        )
-        .to(
           subtitleRef.current,
           {
             opacity: 1,
             y: 0,
             duration: 0.5,
           },
-          '-=0.48'
+          '-=0.12'
         )
         .to(
           ctaRef.current,
@@ -153,7 +140,7 @@ export default function Hero({ lenisRef }: HeroProps) {
             y: 0,
             duration: 0.45,
           },
-          '-=0.34'
+          '-=0.22'
         );
 
       // Continuous ambient animation for orbs
@@ -346,7 +333,7 @@ export default function Hero({ lenisRef }: HeroProps) {
           aria-label={`${hero.titleLine1} ${hero.titleLine2} ${hero.titleLine3}`}
         >
           <span className="hero-line block" style={{ overflow: 'hidden', paddingBottom: '0.06em' }}>
-            <span className="line-inner block" style={{ transform: 'translateY(108%)', transition: 'transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease' }}>
+            <span className="line-inner block" style={{ transition: 'transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease' }}>
               {hero.titleLine1}
             </span>
           </span>
@@ -354,7 +341,6 @@ export default function Hero({ lenisRef }: HeroProps) {
             <span
               className="line-inner block hero-stroke-text"
               style={{
-                transform: 'translateY(108%)',
                 transition: 'transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease, -webkit-text-stroke 0.3s ease',
               }}
             >
@@ -365,7 +351,6 @@ export default function Hero({ lenisRef }: HeroProps) {
             <span
               className="line-inner block"
               style={{
-                transform: 'translateY(108%)',
                 transition: 'transform 0.3s ease, text-shadow 0.3s ease, color 0.3s ease',
               }}
             >
