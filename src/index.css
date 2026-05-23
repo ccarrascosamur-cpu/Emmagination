@@ -303,50 +303,33 @@
   to { transform: translateX(-50%); }
 }
 
-/* ---- Bento Grid Compact (SelectedWork) ---- */
-.bento-grid-compact {
+/* ---- Bento Grid Work (SelectedWork) — alternating large/small ---- */
+.bento-work-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.25rem;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 1.5rem;
 }
-.bento-featured {
-  grid-column: span 2;
-  grid-row: span 1;
+.bento-work-grid .bento-large {
+  grid-column: span 7;
 }
-.bento-item {
-  grid-column: span 1;
-  grid-row: span 1;
-}
-/* Si hay 4+ items, el 4to ocupa 2 columnas para mantener balance */
-.bento-grid-compact .proj-card:nth-child(4) {
-  grid-column: span 2;
-}
-/* Si hay 5+ items, todos vuelven a span 1 */
-.bento-grid-compact .proj-card:nth-child(5),
-.bento-grid-compact .proj-card:nth-child(6) {
-  grid-column: span 1;
+.bento-work-grid .bento-small {
+  grid-column: span 5;
 }
 @media (max-width: 1024px) {
-  .bento-grid-compact {
+  .bento-work-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  .bento-featured,
-  .bento-item,
-  .bento-grid-compact .proj-card:nth-child(4),
-  .bento-grid-compact .proj-card:nth-child(5),
-  .bento-grid-compact .proj-card:nth-child(6) {
+  .bento-work-grid .bento-large,
+  .bento-work-grid .bento-small {
     grid-column: span 1;
   }
 }
 @media (max-width: 640px) {
-  .bento-grid-compact {
+  .bento-work-grid {
     grid-template-columns: 1fr;
   }
-  .bento-featured,
-  .bento-item,
-  .bento-grid-compact .proj-card:nth-child(4),
-  .bento-grid-compact .proj-card:nth-child(5),
-  .bento-grid-compact .proj-card:nth-child(6) {
+  .bento-work-grid .bento-large,
+  .bento-work-grid .bento-small {
     grid-column: span 1;
   }
 }

@@ -7,7 +7,7 @@ import { useSiteData } from '../lib/site-data-client';
 
 gsap.registerPlugin(ScrollTrigger);
 
-// Laptop mockup con estilo referencia + colores corporativos
+// Laptop mockup con colores corporativos
 function LaptopMockup({ image, alt, url }: { image: string; alt: string; url: string }) {
   const domain = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
 
@@ -120,6 +120,12 @@ export default function SelectedWork() {
 
   const featuredProjects = data.projects.filter((p) => p.featured).slice(0, 4);
 
+  // Determinar tamaño por posición: 0=grande, 1=chico, 2=chico, 3=grande
+  const getSizeClass = (index: number) => {
+    if (index === 0 || index === 3) return 'bento-large';
+    return 'bento-small';
+  };
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -226,169 +232,194 @@ export default function SelectedWork() {
           </p>
         </div>
 
-        {/* Projects Grid — 2 columns with laptop mockup */}
+        {/* Bento Grid — Alternating large/small */}
         <div
           ref={gridRef}
-          className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-14"
+          className="bento-work-grid"
         >
-          {featuredProjects.map((project, index) => (
-            <Link
-              key={project.id}
-              to={`/proyectos/${project.slug}`}
-              className="proj-card group"
-              style={{
-                display: 'block',
-                textDecoration: 'none',
-                color: 'inherit',
-              }}
-            >
-              {/* Laptop Mockup */}
-              <div className="relative">
-                <LaptopMockup
-                  image={project.image}
-                  alt={project.title}
-                  url={project.url}
-                />
-                {/* Hover overlay on laptop */}
+          {featuredProjects.map((project, index) => {
+            const isLarge = index === 0 || index === 3;
+
+            return (
+              <Link
+                key={project.id}
+                to={`/proyectos/${project.slug}`}
+                className={`proj-card group ${getSizeClass(index)}`}
+                style={{
+                  display: 'block',
+                  textDecoration: 'none',
+                  color: 'inherit',
+                  position: 'relative',
+                }}
+              >
+                {/* Card container with border */}
                 <div
-                  className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-10"
-                  style={{ top: '2%', bottom: '8%', left: '4%', right: '4%' }}
+                  className="rounded-2xl overflow-hidden h-full"
+                  style={{
+                    background: '#111028',
+                    border: '1px solid rgba(168,85,247,0.1)',
+                    transition: 'border-color 0.4s, box-shadow 0.4s',
+                  }}
+                  onMouseEnter={(e) => {
+                    const el = e.currentTarget;
+                    el.style.borderColor = 'rgba(168,85,247,0.25)';
+                    el.style.boxShadow = '0 24px 60px rgba(124,58,237,0.12)';
+                  }}
+                  onMouseLeave={(e) => {
+                    const el = e.currentTarget;
+                    el.style.borderColor = 'rgba(168,85,247,0.1)';
+                    el.style.boxShadow = 'none';
+                  }}
                 >
-                  <div
-                    className="flex items-center gap-2 px-6 py-3 rounded-full text-white text-sm font-medium transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500"
-                    style={{
-                      background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
-                      boxShadow: '0 8px 32px rgba(124,58,237,0.4)',
-                    }}
-                  >
-                    <ArrowUpRight size={16} />
-                    Ver caso
+                  {/* Laptop Mockup */}
+                  <div className="relative p-3 pb-0">
+                    <LaptopMockup
+                      image={project.image}
+                      alt={project.title}
+                      url={project.url}
+                    />
+                    {/* Hover overlay */}
+                    <div
+                      className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-10"
+                      style={{ top: '3%', bottom: '12%', left: '5%', right: '5%' }}
+                    >
+                      <div
+                        className="flex items-center gap-2 px-6 py-3 rounded-full text-white text-sm font-medium transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500"
+                        style={{
+                          background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+                          boxShadow: '0 8px 32px rgba(124,58,237,0.4)',
+                        }}
+                      >
+                        <ArrowUpRight size={16} />
+                        Ver caso
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
 
-              {/* Project Info */}
-              <div className="mt-7 px-1">
-                {/* Tags row */}
-                <div className="flex items-center justify-between mb-3">
-                  <span
-                    style={{
-                      fontSize: '0.65rem',
-                      fontWeight: 700,
-                      letterSpacing: '0.14em',
-                      textTransform: 'uppercase',
-                      color: '#A855F7',
-                    }}
-                  >
-                    {project.tags || project.category}
-                  </span>
-                  <span
-                    style={{
-                      fontFamily: 'var(--font-mono)',
-                      fontSize: '0.65rem',
-                      color: 'rgba(255,255,255,0.25)',
-                    }}
-                  >
-                    {project.year}
-                  </span>
-                </div>
+                  {/* Project Info */}
+                  <div className="p-5 pt-6">
+                    {/* Tags row */}
+                    <div className="flex items-center justify-between mb-3">
+                      <span
+                        style={{
+                          fontSize: '0.65rem',
+                          fontWeight: 700,
+                          letterSpacing: '0.14em',
+                          textTransform: 'uppercase',
+                          color: '#A855F7',
+                        }}
+                      >
+                        {project.tags || project.category}
+                      </span>
+                      <span
+                        style={{
+                          fontFamily: 'var(--font-mono)',
+                          fontSize: '0.65rem',
+                          color: 'rgba(255,255,255,0.25)',
+                        }}
+                      >
+                        {project.year}
+                      </span>
+                    </div>
 
-                {/* Title */}
-                <h3
-                  style={{
-                    fontFamily: 'var(--font-heading)',
-                    fontSize: '1.25rem',
-                    fontWeight: 800,
-                    color: '#F4F3FF',
-                    letterSpacing: '-0.02em',
-                    lineHeight: 1.2,
-                    marginBottom: '0.5rem',
-                  }}
-                >
-                  {project.title}
-                </h3>
-
-                {/* Excerpt */}
-                <p
-                  style={{
-                    fontFamily: 'var(--font-body)',
-                    fontSize: '0.85rem',
-                    color: '#9E9CC8',
-                    lineHeight: 1.65,
-                    marginBottom: '1rem',
-                  }}
-                >
-                  {project.excerpt}
-                </p>
-
-                {/* Metrics */}
-                <div className="flex flex-wrap gap-2">
-                  {project.metric && (
-                    <span
+                    {/* Title */}
+                    <h3
                       style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        color: '#06D6A0',
-                        background: 'rgba(6,214,160,0.08)',
-                        border: '1px solid rgba(6,214,160,0.18)',
-                        borderRadius: 100,
-                        padding: '0.25rem 0.7rem',
+                        fontFamily: 'var(--font-heading)',
+                        fontSize: isLarge ? '1.35rem' : '1.15rem',
+                        fontWeight: 800,
+                        color: '#F4F3FF',
+                        letterSpacing: '-0.02em',
+                        lineHeight: 1.2,
+                        marginBottom: '0.5rem',
                       }}
                     >
-                      ▲ {project.metric}
-                    </span>
-                  )}
-                  {project.metricLabel && (
-                    <span
-                      style={{
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        color: '#06D6A0',
-                        background: 'rgba(6,214,160,0.08)',
-                        border: '1px solid rgba(6,214,160,0.18)',
-                        borderRadius: 100,
-                        padding: '0.25rem 0.7rem',
-                      }}
-                    >
-                      ▲ {project.metricLabel}
-                    </span>
-                  )}
-                </div>
+                      {project.title}
+                    </h3>
 
-                {/* Services tags */}
-                <div className="flex flex-wrap gap-1.5 mt-3">
-                  {project.services.slice(0, 3).map((service, i) => (
-                    <span
-                      key={i}
+                    {/* Excerpt */}
+                    <p
                       style={{
-                        fontSize: '0.65rem',
-                        fontWeight: 600,
-                        color: '#5C5A8A',
-                        background: 'rgba(168, 85, 247, 0.05)',
-                        border: '1px solid rgba(168, 85, 247, 0.1)',
-                        borderRadius: 100,
-                        padding: '0.2rem 0.6rem',
+                        fontFamily: 'var(--font-body)',
+                        fontSize: '0.85rem',
+                        color: '#9E9CC8',
+                        lineHeight: 1.65,
+                        marginBottom: '1rem',
                       }}
                     >
-                      {service}
-                    </span>
-                  ))}
+                      {project.excerpt}
+                    </p>
+
+                    {/* Metrics */}
+                    <div className="flex flex-wrap gap-2">
+                      {project.metric && (
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            color: '#06D6A0',
+                            background: 'rgba(6,214,160,0.08)',
+                            border: '1px solid rgba(6,214,160,0.18)',
+                            borderRadius: 100,
+                            padding: '0.25rem 0.7rem',
+                          }}
+                        >
+                          ▲ {project.metric}
+                        </span>
+                      )}
+                      {project.metricLabel && (
+                        <span
+                          style={{
+                            fontSize: '0.72rem',
+                            fontWeight: 700,
+                            color: '#06D6A0',
+                            background: 'rgba(6,214,160,0.08)',
+                            border: '1px solid rgba(6,214,160,0.18)',
+                            borderRadius: 100,
+                            padding: '0.25rem 0.7rem',
+                          }}
+                        >
+                          ▲ {project.metricLabel}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Services tags */}
+                    <div className="flex flex-wrap gap-1.5 mt-3">
+                      {project.services.slice(0, 3).map((service, i) => (
+                        <span
+                          key={i}
+                          style={{
+                            fontSize: '0.65rem',
+                            fontWeight: 600,
+                            color: '#5C5A8A',
+                            background: 'rgba(168, 85, 247, 0.05)',
+                            border: '1px solid rgba(168, 85, 247, 0.1)',
+                            borderRadius: 100,
+                            padding: '0.2rem 0.6rem',
+                          }}
+                        >
+                          {service}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
                 {/* Número de proyecto — esquina inferior derecha */}
                 <span
-                  className="absolute bottom-3 right-4 text-white/[0.06] font-black select-none pointer-events-none"
+                  className="absolute bottom-4 right-5 text-white/[0.06] font-black select-none pointer-events-none"
                   style={{
                     fontFamily: 'var(--font-heading)',
-                    fontSize: '2rem',
+                    fontSize: '2.2rem',
                     lineHeight: 1,
                   }}
                 >
                   {String(index + 1).padStart(2, '0')}
                 </span>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
 
         {/* CTA */}
