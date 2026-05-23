@@ -7,6 +7,7 @@ let state = null;
 let editingProjectId = null;
 let editingServiceSlug = null;
 let isProjectScrollImageUploading = false;
+let draggedProjectId = null;
 
 // ── UTILS ──
 const $ = (sel) => document.querySelector(sel);
@@ -171,8 +172,9 @@ function renderProjects() {
   if (!state.projects?.length) { list.innerHTML = '<p style="color:var(--muted)">No hay proyectos</p>'; return; }
 
   list.innerHTML = state.projects.map(p => `
-    <div class="project-card" data-id="${p.id}">
+    <div class="project-card" data-id="${p.id}" draggable="true">
       <div style="position:relative;" onclick="editProject(${p.id})">
+        <div class="drag-handle">↕ Arrastrar para ordenar</div>
         ${p.featured ? '<span class="badge-featured">⭐ Destacado</span>' : ''}
         <img
           src="${p.image || p.portfolioScrollImage || ''}"
@@ -191,6 +193,68 @@ function renderProjects() {
       </div>
     </div>
   `).join('');
+
+  initProjectSorting();
+}
+
+function moveProject(projectId, targetProjectId, placeAfter) {
+  const fromIndex = state.projects.findIndex((project) => project.id === projectId);
+  const targetIndex = state.projects.findIndex((project) => project.id === targetProjectId);
+  if (fromIndex === -1 || targetIndex === -1 || fromIndex === targetIndex) return;
+
+  const [moved] = state.projects.splice(fromIndex, 1);
+  const adjustedTargetIndex = state.projects.findIndex((project) => project.id === targetProjectId);
+  const insertionIndex = placeAfter ? adjustedTargetIndex + 1 : adjustedTargetIndex;
+  state.projects.splice(insertionIndex, 0, moved);
+}
+
+function initProjectSorting() {
+  const cards = Array.from($$('#project-list .project-card'));
+
+  cards.forEach((card) => {
+    card.addEventListener('dragstart', (event) => {
+      draggedProjectId = Number(card.dataset.id);
+      card.classList.add('dragging');
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move';
+        event.dataTransfer.setData('text/plain', String(draggedProjectId));
+      }
+    });
+
+    card.addEventListener('dragover', (event) => {
+      event.preventDefault();
+      if (!draggedProjectId || draggedProjectId === Number(card.dataset.id)) return;
+      card.classList.add('drag-over');
+      if (event.dataTransfer) {
+        event.dataTransfer.dropEffect = 'move';
+      }
+    });
+
+    card.addEventListener('dragleave', () => {
+      card.classList.remove('drag-over');
+    });
+
+    card.addEventListener('drop', (event) => {
+      event.preventDefault();
+      card.classList.remove('drag-over');
+      const targetProjectId = Number(card.dataset.id);
+      if (!draggedProjectId || !targetProjectId || draggedProjectId === targetProjectId) return;
+
+      const rect = card.getBoundingClientRect();
+      const placeAfter = event.clientY > rect.top + rect.height / 2;
+      moveProject(draggedProjectId, targetProjectId, placeAfter);
+      draggedProjectId = null;
+      renderProjects();
+      showStatus('Orden actualizado. Presiona "Guardar cambios" para persistir.', 'ok');
+    });
+
+    card.addEventListener('dragend', () => {
+      draggedProjectId = null;
+      cards.forEach((item) => {
+        item.classList.remove('dragging', 'drag-over');
+      });
+    });
+  });
 }
 
 window.toggleFeatured = async function(id, event) {
