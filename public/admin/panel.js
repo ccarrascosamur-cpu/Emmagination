@@ -12,7 +12,7 @@ const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
 function slugify(v) {
-  return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+  return String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 function splitLines(v) { return String(v || '').split('\n').map(s => s.trim()).filter(Boolean); }
@@ -155,6 +155,12 @@ window.editProject = function(id) {
   if (!p) return;
 
   $('#modal-project-title').textContent = 'Editar proyecto';
+  fillProjectForm(p);
+  $('#btn-delete-project').style.display = 'inline-flex';
+  openModal('modal-project');
+};
+
+function fillProjectForm(p) {
   const f = $('#project-form');
   f.title.value = p.title || '';
   f.slug.value = p.slug || '';
@@ -177,17 +183,15 @@ window.editProject = function(id) {
   f.metric.value = p.metric || '';
   f.metricLabel.value = p.metricLabel || '';
   f.color.value = p.color || '';
+}
 
-  $('#btn-delete-project').style.display = 'inline-flex';
-  openModal('modal-project');
-};
-
+// ── EXTRACT FROM URL (modal mejorado) ──
 function initProjectForm() {
-  // Extract from URL
   $('#btn-extract-project').addEventListener('click', () => {
     $('#extract-form').reset();
     $('#extract-loading').style.display = 'none';
-    $('#extract-preview').style.display = 'none';
+    $('#extract-result').style.display = 'none';
+    $('#extract-submit-row').style.display = 'flex';
     openModal('modal-extract');
   });
 
@@ -197,7 +201,8 @@ function initProjectForm() {
     if (!url) return;
 
     $('#extract-loading').style.display = 'block';
-    $('#extract-preview').style.display = 'none';
+    $('#extract-result').style.display = 'none';
+    $('#extract-submit-row').style.display = 'none';
 
     try {
       const auth = getAuthHeader();
@@ -211,65 +216,18 @@ function initProjectForm() {
       if (!res.ok) {
         showStatus('Error: ' + (data.error || 'Falló la extracción'), 'error');
         $('#extract-loading').style.display = 'none';
+        $('#extract-submit-row').style.display = 'flex';
         return;
       }
 
-      // Show preview
       const p = data.project;
-      $('#extract-preview').innerHTML = `
-        <div class="extract-preview-item">
-          <div class="extract-label">Título</div>
-          <div class="extract-value">${escapeHtml(p.title)}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Cliente</div>
-          <div class="extract-value">${escapeHtml(p.client)}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Categoría</div>
-          <div class="extract-value">${escapeHtml(p.category)}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Descripción</div>
-          <div class="extract-value">${escapeHtml(p.description)}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Servicios</div>
-          <div class="extract-value">${p.services.map(s => escapeHtml(s)).join(', ')}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Desafío</div>
-          <div class="extract-value">${escapeHtml(p.challenge)}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Solución</div>
-          <div class="extract-value">${escapeHtml(p.solution)}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Resultados</div>
-          <div class="extract-value">${p.results.map(r => '• ' + escapeHtml(r)).join('<br>')}</div>
-        </div>
-      `;
-      $('#extract-preview').style.display = 'block';
+      renderExtractResult(p, data.aiUsed);
       $('#extract-loading').style.display = 'none';
-
-      // Add confirm button
-      const confirmBtn = document.createElement('button');
-      confirmBtn.type = 'button';
-      confirmBtn.className = 'btn btn-success';
-      confirmBtn.textContent = '✅ Agregar este proyecto';
-      confirmBtn.style.marginTop = '16px';
-      confirmBtn.onclick = () => {
-        state.projects.unshift(p);
-        renderProjects();
-        closeModal('modal-extract');
-        showStatus('Proyecto agregado desde URL. Guarda para persistir.', 'ok');
-      };
-      $('#extract-preview').appendChild(confirmBtn);
 
     } catch (err) {
       showStatus('Error: ' + err.message, 'error');
       $('#extract-loading').style.display = 'none';
+      $('#extract-submit-row').style.display = 'flex';
     }
   });
 
@@ -341,6 +299,138 @@ function initProjectForm() {
     this.dataset.touched = 'true';
   });
 }
+
+function renderExtractResult(p, aiUsed) {
+  const resultEl = $('#extract-result');
+
+  const services = Array.isArray(p.services) ? p.services.join(', ') : '';
+  const results = Array.isArray(p.results) ? p.results : [];
+
+  resultEl.innerHTML = `
+    <div style="margin-bottom:16px;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+        <span style="font-size:13px; font-weight:600; color:var(--text);">Vista previa del proyecto</span>
+        ${aiUsed
+          ? '<span style="font-size:11px; background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.1)); border:1px solid rgba(124,58,237,0.3); color:#c4b5fd; padding:3px 10px; border-radius:999px; font-weight:600;">✨ Generado con IA</span>'
+          : '<span style="font-size:11px; background:rgba(255,255,255,0.05); border:1px solid var(--line); color:var(--muted); padding:3px 10px; border-radius:999px;">Extracción básica</span>'
+        }
+      </div>
+
+      <div style="position:relative; border-radius:14px; overflow:hidden; margin-bottom:16px; background:rgba(255,255,255,0.03); border:1px solid var(--line);">
+        <img id="extract-screenshot"
+          src="${escapeHtml(p.image || '')}"
+          alt="Screenshot del sitio"
+          style="width:100%; height:200px; object-fit:cover; display:block;"
+          onerror="this.parentElement.style.display='none'"
+        />
+        <div style="position:absolute; bottom:0; left:0; right:0; padding:10px 14px; background:linear-gradient(to top, rgba(10,12,20,0.9), transparent);">
+          <span style="font-size:12px; color:rgba(255,255,255,0.7);">📸 Screenshot automático via thum.io</span>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
+        <div class="extract-preview-item">
+          <div class="extract-label">Título / Marca</div>
+          <div class="extract-value" style="font-weight:600;">${escapeHtml(p.title || '—')}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Categoría</div>
+          <div class="extract-value">${escapeHtml(p.category || '—')}</div>
+        </div>
+        <div class="extract-preview-item" style="grid-column:1/-1;">
+          <div class="extract-label">Descripción</div>
+          <div class="extract-value">${escapeHtml(p.description || '—')}</div>
+        </div>
+        <div class="extract-preview-item" style="grid-column:1/-1;">
+          <div class="extract-label">Excerpt (grilla)</div>
+          <div class="extract-value" style="color:var(--muted);">${escapeHtml(p.excerpt || '—')}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Servicios</div>
+          <div class="extract-value">${escapeHtml(services || '—')}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Tags (card)</div>
+          <div class="extract-value" style="font-family:monospace; font-size:12px; color:#a78bfa;">${escapeHtml(p.tags || '—')}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Métrica principal</div>
+          <div class="extract-value" style="color:#4ade80; font-weight:600;">${escapeHtml(p.metric || '—')}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Métrica secundaria</div>
+          <div class="extract-value" style="color:#4ade80;">${escapeHtml(p.metricLabel || '—')}</div>
+        </div>
+        <div class="extract-preview-item" style="grid-column:1/-1;">
+          <div class="extract-label">Desafío</div>
+          <div class="extract-value">${escapeHtml(p.challenge || '—')}</div>
+        </div>
+        <div class="extract-preview-item" style="grid-column:1/-1;">
+          <div class="extract-label">Solución</div>
+          <div class="extract-value">${escapeHtml(p.solution || '—')}</div>
+        </div>
+        <div class="extract-preview-item" style="grid-column:1/-1;">
+          <div class="extract-label">Resultados</div>
+          <div class="extract-value">${results.length ? results.map(r => '• ' + escapeHtml(r)).join('<br>') : '—'}</div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Color del card</div>
+          <div class="extract-value" style="display:flex; align-items:center; gap:8px;">
+            <span style="display:inline-block; width:16px; height:16px; border-radius:4px; background:${escapeHtml(p.color || '#1a1a2e')}; border:1px solid rgba(255,255,255,0.2);"></span>
+            ${escapeHtml(p.color || '—')}
+          </div>
+        </div>
+        <div class="extract-preview-item">
+          <div class="extract-label">Año</div>
+          <div class="extract-value">${escapeHtml(p.year || '—')}</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+        <button type="button" class="btn btn-success" style="flex:1; min-width:180px;" id="btn-extract-edit-add">
+          ✏️ Revisar y agregar
+        </button>
+        <button type="button" class="btn btn-primary" style="flex:1; min-width:140px;" id="btn-extract-quick-add">
+          ⚡ Agregar directo
+        </button>
+        <button type="button" class="btn btn-secondary" onclick="resetExtractModal()">
+          ↩ Analizar otro
+        </button>
+      </div>
+    </div>
+  `;
+
+  resultEl.style.display = 'block';
+
+  // "Revisar y agregar" → cierra modal, abre form pre-llenado
+  document.getElementById('btn-extract-edit-add').onclick = () => {
+    editingProjectId = null;
+    $('#modal-project-title').textContent = 'Agregar proyecto (revisar campos)';
+    fillProjectForm(p);
+    // mark slug as touched so it doesn't get auto-overwritten
+    $('#project-form').elements.namedItem('slug').dataset.touched = 'true';
+    $('#btn-delete-project').style.display = 'none';
+    closeModal('modal-extract');
+    openModal('modal-project');
+  };
+
+  // "Agregar directo" → agrega inmediatamente
+  document.getElementById('btn-extract-quick-add').onclick = () => {
+    const newId = Math.max(0, ...state.projects.map(pr => pr.id || 0)) + 1;
+    const project = { ...p, id: newId };
+    state.projects.unshift(project);
+    renderProjects();
+    closeModal('modal-extract');
+    showStatus('✅ Proyecto agregado. Guarda para persistir.', 'ok');
+  };
+}
+
+window.resetExtractModal = function() {
+  $('#extract-form').reset();
+  $('#extract-result').style.display = 'none';
+  $('#extract-loading').style.display = 'none';
+  $('#extract-submit-row').style.display = 'flex';
+};
 
 // ── SERVICES ──
 function renderServices() {

@@ -477,33 +477,42 @@
 
 <!-- MODAL: EXTRACT FROM URL -->
 <div id="modal-extract" class="modal-overlay">
-  <div class="modal">
+  <div class="modal" style="max-width:700px;">
     <div class="modal-header">
-      <h2>✨ Agregar proyecto desde URL</h2>
+      <div>
+        <h2>✨ Agregar proyecto desde URL</h2>
+        <p style="color:var(--muted); font-size:13px; margin-top:4px;">La IA analiza el sitio, genera todos los campos y captura un screenshot.</p>
+      </div>
       <button class="modal-close" onclick="closeModal('modal-extract')">&times;</button>
     </div>
     <form id="extract-form">
-      <label>URL del sitio web</label>
-      <input name="url" type="url" placeholder="https://ejemplo.cl" required style="margin-bottom:16px;" />
-      <p class="hint">La IA analizará el sitio y generará automáticamente el contenido del proyecto.</p>
-      <div id="extract-loading" style="display:none; text-align:center; padding:20px;">
-        <div style="font-size:32px; animation:spin 1s linear infinite;">⏳</div>
-        <p style="color:var(--muted); margin-top:12px;">Analizando sitio con IA...</p>
-      </div>
-      <div id="extract-preview" style="display:none; margin-top:16px;"></div>
-      <div style="display:flex; gap:12px; margin-top:20px;">
-        <button type="submit" class="btn btn-success">Analizar</button>
-        <button type="button" class="btn btn-secondary" onclick="closeModal('modal-extract')">Cancelar</button>
+      <div style="display:flex; gap:10px; align-items:flex-end;">
+        <div style="flex:1;">
+          <label>URL del sitio web</label>
+          <input name="url" type="url" placeholder="https://ejemplo.cl" required />
+        </div>
+        <div id="extract-submit-row" style="display:flex; gap:8px; padding-bottom:2px;">
+          <button type="submit" class="btn btn-success">🔍 Analizar</button>
+          <button type="button" class="btn btn-secondary" onclick="closeModal('modal-extract')">Cancelar</button>
+        </div>
       </div>
     </form>
+
+    <div id="extract-loading" style="display:none; text-align:center; padding:32px 20px;">
+      <div style="font-size:40px; animation:spin 1.2s linear infinite; display:inline-block;">⚙️</div>
+      <p style="color:var(--muted); margin-top:14px; font-size:14px;">Analizando sitio con IA y generando campos...</p>
+      <p style="color:rgba(240,242,250,0.35); margin-top:6px; font-size:12px;">Esto puede tomar 10-20 segundos</p>
+    </div>
+
+    <div id="extract-result" style="display:none; margin-top:16px; overflow:auto; max-height:calc(90vh - 180px);"></div>
   </div>
 </div>
 <style>
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-  .extract-preview-item { padding:10px 0; border-bottom:1px solid var(--line); }
+  .extract-preview-item { padding:10px 12px; border-bottom:1px solid var(--line); }
   .extract-preview-item:last-child { border-bottom:none; }
-  .extract-label { font-size:11px; text-transform:uppercase; color:var(--muted); letter-spacing:0.05em; }
-  .extract-value { font-size:14px; margin-top:4px; }
+  .extract-label { font-size:11px; text-transform:uppercase; color:var(--muted); letter-spacing:0.06em; margin-bottom:3px; }
+  .extract-value { font-size:14px; line-height:1.5; }
 </style>
 
 <!-- MODAL: PROJECT FORM -->

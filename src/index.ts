@@ -156,10 +156,86 @@ async function handleLogin(request: Request, env: Env) {
 function slugifyWorker(input: string): string {
   return input
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[̀-ͯ]/g, '')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
+}
+
+function extractSiteMeta(html: string) {
+  const match = (re: RegExp): string => { const m = html.match(re); return m ? (m[1] ?? '').trim() : ''; };
+
+  const title =
+    match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']*)["'][^>]*>/i) ||
+    match(/<meta[^>]*content=["']([^"']*)["'][^>]*property=["']og:title["'][^>]*>/i) ||
+    match(/<title[^>]*>([^<]*)<\/title>/i);
+
+  const description =
+    match(/<meta[^>]*property=["']og:description["'][^>]*content=["']([^"']*)["'][^>]*>/i) ||
+    match(/<meta[^>]*content=["']([^"']*)["'][^>]*property=["']og:description["'][^>]*>/i) ||
+    match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i) ||
+    match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']description["'][^>]*>/i);
+
+  const ogImage =
+    match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']*)["'][^>]*>/i) ||
+    match(/<meta[^>]*content=["']([^"']*)["'][^>]*property=["']og:image["'][^>]*>/i);
+
+  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const bodyText = bodyMatch
+    ? bodyMatch[1]
+        .replace(/<script[\s\S]*?<\/script>/gi, '')
+        .replace(/<style[\s\S]*?<\/style>/gi, '')
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 3000)
+    : '';
+
+  return { title, description, ogImage, bodyText };
+}
+
+async function generateProjectWithAI(
+  ai: NonNullable<Env['AI']>,
+  url: string,
+  title: string,
+  description: string,
+  bodyText: string,
+): Promise<Record<string, unknown>> {
+  const prompt = `Eres un experto en agencias de diseno web chilenas. Analiza este sitio web y genera datos para un portafolio de proyectos. Responde SOLO con JSON valido, sin texto adicional, sin markdown, sin bloques de codigo.
+
+URL: ${url}
+Titulo: ${title}
+Descripcion: ${description}
+Contenido visible: ${bodyText.slice(0, 2000)}
+
+Genera exactamente este JSON (todos los campos son obligatorios):
+{
+  "title": "nombre comercial o de marca del sitio sin sufijos como Home o Inicio",
+  "client": "mismo que title",
+  "category": "una de: E-commerce, Landing Page, Sitio Corporativo, Web Institucional, Blog, Tienda Online",
+  "description": "1-2 oraciones sobre que hace el negocio y para que industria o rubro",
+  "excerpt": "frase corta de maximo 90 caracteres para la grilla del portafolio",
+  "services": ["Diseno web", "servicio2", "servicio3"],
+  "challenge": "descripcion del desafio principal que enfrentaba este tipo de negocio en su presencia digital 1-2 oraciones",
+  "solution": "descripcion de la solucion digital implementada enfocada en diseno UX y posicionamiento 1-2 oraciones",
+  "results": ["Resultado concreto 1", "Resultado concreto 2", "Resultado concreto 3"],
+  "tags": "CATEGORIA TECNOLOGIA max 30 chars mayusculas ejemplo ECOMMERCE SHOPIFY",
+  "metric": "+XX% descripcion corta de metrica principal ejemplo +65% trafico organico",
+  "metricLabel": "+YY% descripcion corta de metrica secundaria ejemplo +45% conversion",
+  "color": "color hex oscuro que represente la identidad visual del rubro ejemplo #1a2e1a para naturaleza #1a1a2e para tech",
+  "seoTitle": "Caso Marca Servicio principal y Servicio secundario",
+  "seoDescription": "descripcion SEO del caso de estudio de 140-160 caracteres"
+}`;
+
+  try {
+    const result = await ai.run('@cf/meta/llama-3.1-8b-instruct', { prompt });
+    const raw = result.response || '';
+    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return {};
+    return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+  } catch {
+    return {};
+  }
 }
 
 async function handleExtract(request: Request, env: Env) {
@@ -167,7 +243,6 @@ async function handleExtract(request: Request, env: Env) {
     return new Response('Method Not Allowed', { status: 405, headers: { Allow: 'POST' } });
   }
 
-  // Auth check
   if (!isAuthorized(request, env)) {
     return json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -185,7 +260,7 @@ async function handleExtract(request: Request, env: Env) {
   }
 
   try {
-    // 1. Fetch the website HTML
+    // 1. Fetch site HTML
     const siteResponse = await fetch(targetUrl, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -195,67 +270,95 @@ async function handleExtract(request: Request, env: Env) {
     });
 
     if (!siteResponse.ok) {
-      return json({ error: `Could not fetch URL: ${siteResponse.status} ${siteResponse.statusText}` }, { status: 502 });
+      return json({ error: `No se pudo acceder al sitio: ${siteResponse.status} ${siteResponse.statusText}` }, { status: 502 });
     }
 
     const html = await siteResponse.text();
-
     if (!html || html.length < 100) {
-      return json({ error: 'URL returned empty or invalid content' }, { status: 502 });
+      return json({ error: 'El sitio devolvio contenido vacio o invalido' }, { status: 502 });
     }
 
-    // Extract basic metadata
-    const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-    const title = titleMatch ? titleMatch[1].trim() : '';
+    // 2. Extract metadata
+    const { title, description, ogImage, bodyText } = extractSiteMeta(html);
 
-    const descMatch = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']*)["'][^>]*>/i) ||
-                      html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*name=["']description["'][^>]*>/i);
-    const description = descMatch ? descMatch[1].trim() : '';
+    // 3. Screenshot via thum.io (free, no API key needed, caches automatically)
+    const screenshotUrl = `https://image.thum.io/get/width/1200/crop/630/${encodeURIComponent(targetUrl)}`;
 
-    const ogImageMatch = html.match(/<meta[^>]*property=["']og:image["'][^>]*content=["']([^"']*)["'][^>]*>/i) ||
-                          html.match(/<meta[^>]*content=["']([^"']*)["'][^>]*property=["']og:image["'][^>]*>/i);
-    const ogImage = ogImageMatch ? ogImageMatch[1].trim() : '';
-
-    // 2. Build project object from extracted metadata
-    const project = {
+    // 4. Build base project
+    const baseProject: Record<string, unknown> = {
       id: Date.now(),
       slug: slugifyWorker(title || 'proyecto'),
-      title: title || 'Proyecto sin título',
+      title: title || 'Proyecto sin titulo',
       client: title || '',
       category: 'Web',
       year: String(new Date().getFullYear()),
-      image: ogImage || '/images/isotipo.png',
+      image: screenshotUrl,
       url: targetUrl,
       description: description || '',
-      excerpt: description || '',
-      services: ['Diseño web'],
+      excerpt: (description || '').slice(0, 90),
+      services: ['Diseno web'],
       featured: false,
       offset: 0,
       challenge: '',
       solution: '',
       results: [],
-      gallery: ogImage ? [ogImage] : [],
+      gallery: [screenshotUrl],
       seoTitle: title || '',
       seoDescription: description || '',
       pdf: '',
+      tags: '',
+      metric: '',
+      metricLabel: '',
+      color: '#1a1a2e',
     };
 
-    return json({ project, rawHtml: { title, description, ogImage, htmlLength: html.length } });
+    // 5. Enhance with AI if available
+    if (env.AI && (title || bodyText)) {
+      const aiData = await generateProjectWithAI(env.AI, targetUrl, title, description, bodyText);
+
+      if (aiData && typeof aiData === 'object') {
+        const str = (key: string) =>
+          typeof aiData[key] === 'string' ? (aiData[key] as string).trim() : '';
+        const arr = (key: string) =>
+          Array.isArray(aiData[key]) ? (aiData[key] as string[]) : [];
+
+        if (str('title')) {
+          baseProject.title = str('title');
+          baseProject.client = str('title');
+          baseProject.slug = slugifyWorker(str('title'));
+        }
+        if (str('category')) baseProject.category = str('category');
+        if (str('description')) baseProject.description = str('description');
+        if (str('excerpt')) baseProject.excerpt = str('excerpt');
+        if (arr('services').length) baseProject.services = arr('services');
+        if (str('challenge')) baseProject.challenge = str('challenge');
+        if (str('solution')) baseProject.solution = str('solution');
+        if (arr('results').length) baseProject.results = arr('results');
+        if (str('tags')) baseProject.tags = str('tags');
+        if (str('metric')) baseProject.metric = str('metric');
+        if (str('metricLabel')) baseProject.metricLabel = str('metricLabel');
+        if (str('color')) baseProject.color = str('color');
+        if (str('seoTitle')) baseProject.seoTitle = str('seoTitle');
+        if (str('seoDescription')) baseProject.seoDescription = str('seoDescription');
+      }
+    }
+
+    return json({ project: baseProject, screenshotUrl, aiUsed: !!env.AI });
 
   } catch (e: unknown) {
-    const message = e instanceof Error ? e.message : 'Extraction failed';
+    const message = e instanceof Error ? e.message : 'Error en la extraccion';
     return json({ error: message }, { status: 500 });
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  SEO AUDIT — Análisis 100% propio, sin APIs externas (no rate limits)
+//  SEO AUDIT — Analisis 100% propio, sin APIs externas (no rate limits)
 // ═══════════════════════════════════════════════════════════════════════════
 
-// Calcular scores de rendimiento basados en TTFB y tamaño de página
+// Calcular scores de rendimiento basados en TTFB y tamaño de pagina
 function calcPerformanceScore(responseTime: number, htmlLength: number): number {
-  let score = 65; // base más generosa
-  // TTFB scoring (menos penalización)
+  let score = 65; // base mas generosa
+  // TTFB scoring (menos penalizacion)
   if (responseTime < 200) score += 20;
   else if (responseTime < 500) score += 15;
   else if (responseTime < 800) score += 10;
@@ -271,7 +374,7 @@ function calcPerformanceScore(responseTime: number, htmlLength: number): number 
 }
 
 function calcSeoScore(meta: any): number {
-  let score = 55; // base más generosa
+  let score = 55; // base mas generosa
   if (meta.title?.ok) score += 12;
   if (meta.description?.ok) score += 12;
   if (meta.headings?.h1ok) score += 8;
@@ -286,7 +389,7 @@ function calcSeoScore(meta: any): number {
 }
 
 function calcAccessibilityScore(meta: any): number {
-  let score = 60; // base más generosa
+  let score = 60; // base mas generosa
   if (meta.imgsNoAlt?.ok) score += 15;
   if (meta.viewport?.present) score += 10;
   if (meta.headings?.h1 > 0) score += 10;
@@ -295,14 +398,14 @@ function calcAccessibilityScore(meta: any): number {
 }
 
 function calcBestPracticesScore(srv: any, meta: any): number {
-  let score = 55; // base más generosa
+  let score = 55; // base mas generosa
   if (srv?.https) score += 10;
   if (srv?.hsts) score += 5;
   if (srv?.xContentType) score += 5;
   if (srv?.xFrame) score += 5;
   if (srv?.compression) score += 10;
   if (meta?.viewport?.present) score += 5;
-  // HTTPS es crítico pero no penalizamos tanto si falta lo demás
+  // HTTPS es critico pero no penalizamos tanto si falta lo demas
   return Math.min(100, score);
 }
 
@@ -459,7 +562,7 @@ async function handleSeoAudit(request: Request, _env: Env) {
   // 2. Calcular scores propios (sin depender de APIs externas)
   const responseTime = (srv as any).responseTime || 0;
 
-  // Obtenemos htmlLength con un fetch rápido
+  // Obtenemos htmlLength con un fetch rapido
   let actualHtmlLength = 0;
   try {
     const res = await fetch(targetUrl, {
@@ -475,7 +578,7 @@ async function handleSeoAudit(request: Request, _env: Env) {
   const accScore = calcAccessibilityScore(meta);
   const bpScore = calcBestPracticesScore(srv, meta);
 
-  // 3. Intentar PageSpeed como bonus (no crítico)
+  // 3. Intentar PageSpeed como bonus (no critico)
   let pagespeedMobile = null;
   let pagespeedDesktop = null;
   try {
@@ -632,7 +735,7 @@ export default {
       return handleExtract(request, env);
     }
 
-    // SEO AUDIT — público, sin auth
+    // SEO AUDIT — publico, sin auth
     if (url.pathname === '/api/seo-audit') {
       return handleSeoAudit(request, env);
     }
