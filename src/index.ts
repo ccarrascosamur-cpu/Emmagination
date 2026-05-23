@@ -4,8 +4,9 @@ const STORAGE_KEY = 'site-data';
 const BUILD_TIMESTAMP = new Date().toISOString();
 
 interface WorkerKVNamespace {
+  get(key: string): Promise<string | null>;
   get(key: string, type: 'json'): Promise<unknown | null>;
-  put(key: string, value: string): Promise<void>;
+  put(key: string, value: string | ArrayBuffer, options?: { metadata?: Record<string, unknown> }): Promise<void>;
 }
 
 export interface Env {
@@ -17,7 +18,7 @@ export interface Env {
   SITE_ADMIN_PASSWORD?: string;
   GEMINI_API_KEY?: string;
   AI?: {
-    run: (model: string, inputs: { prompt: string }) => Promise<{ response?: string }>;
+    run: (model: string, inputs: Record<string, unknown>) => Promise<{ response?: string }>;
   };
 }
 
@@ -219,57 +220,104 @@ async function generateProjectWithAI(
   bodyText: string,
 ): Promise<Record<string, unknown>> {
   const siteDomain = new URL(url).hostname.replace('www.', '');
-  const context = [
-    `URL: ${siteDomain}`,
-    title && `Titulo del sitio: ${title}`,
-    description && `Meta descripcion: ${description}`,
-    bodyText && `Texto visible: ${bodyText.slice(0, 1000)}`,
-  ].filter(Boolean).join('\n');
 
-  const prompt = `[INST] Eres un redactor de portafolios de agencias de diseno web. Genera un JSON con datos del proyecto para este sitio web. RESPONDE SOLO EL JSON, sin explicaciones.
+  const userMessage = `Analiza este sitio web y devuelve un JSON de portafolio.
 
-Datos del sitio:
-${context}
+Sitio: ${siteDomain}
+Título: ${title || '(desconocido)'}
+Descripción meta: ${description || '(ninguna)'}
+Texto visible: ${bodyText.slice(0, 1000) || '(ninguno)'}
 
-Responde exactamente con este JSON rellenado (reemplaza cada valor segun el sitio):
-{
-"title": "Nombre de la marca o negocio (sin guiones ni sufijos como Home)",
-"category": "Sitio Corporativo",
-"description": "Descripcion de 2 oraciones sobre que hace este negocio y en que rubro trabaja.",
-"excerpt": "Frase corta de maximo 80 caracteres.",
-"services": ["Diseno web", "Branding"],
-"challenge": "El cliente necesitaba una presencia digital solida para destacar en su rubro.",
-"solution": "Disenamos un sitio moderno enfocado en mostrar su trabajo y generar contactos.",
-"results": ["Presencia digital profesional", "Mayor visibilidad en su industria", "Sitio optimizado para captacion de clientes"],
-"tags": "WEB · BRANDING",
-"metric": "+XX% visibilidad",
-"metricLabel": "+YY% contactos",
-"color": "#1a1a2e",
-"seoTitle": "Caso Marca | Diseno Web",
-"seoDescription": "Descripcion SEO del caso de estudio de aproximadamente 150 caracteres."
-} [/INST]`;
+Devuelve SOLO este JSON (en español) con valores reales del sitio, sin explicaciones:
+{"title":"Nombre de la marca sin sufijos","category":"Sitio Corporativo","description":"Dos oraciones sobre qué hace este negocio y en qué industria trabaja.","excerpt":"Frase corta máximo 80 caracteres.","services":["Diseño web","Branding"],"challenge":"Cuál era el desafío digital específico del cliente basado en su industria.","solution":"Cómo se diseñó el sitio para resolver ese desafío.","results":["Resultado concreto 1","Resultado concreto 2","Resultado concreto 3"],"tags":"WEB · BRANDING","metric":"+XX% visibilidad","metricLabel":"+YY% contactos","color":"#1a1a2e","seoTitle":"Marca | Diseño Web","seoDescription":"Descripción SEO de aproximadamente 150 caracteres."}`;
 
   const tryParse = (raw: string): Record<string, unknown> => {
-    const match = raw.match(/\{[\s\S]*\}/);
-    if (!match) return {};
-    try { return JSON.parse(match[0]) as Record<string, unknown>; } catch { return {}; }
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (!m) return {};
+    try { return JSON.parse(m[0]) as Record<string, unknown>; } catch { return {}; }
   };
 
-  try {
-    const result = await ai.run('@hf/mistral/mistral-7b-instruct-v0.2', { prompt });
-    const parsed = tryParse(result.response || '');
-    if (Object.keys(parsed).length > 2) return parsed;
-    // fallback to llama
-    const result2 = await ai.run('@cf/meta/llama-3.1-8b-instruct', { prompt });
-    return tryParse(result2.response || '');
-  } catch {
+  const models = [
+    '@cf/meta/llama-3.1-8b-instruct',
+    '@cf/meta/llama-3-8b-instruct',
+  ];
+
+  for (const model of models) {
     try {
-      const result2 = await ai.run('@cf/meta/llama-3.1-8b-instruct', { prompt });
-      return tryParse(result2.response || '');
+      const result = await ai.run(model, {
+        messages: [
+          { role: 'system', content: 'Eres un redactor de portafolios para una agencia de diseño web. Responde ÚNICAMENTE con un objeto JSON válido, sin texto adicional ni bloques de código.' },
+          { role: 'user', content: userMessage },
+        ],
+        max_tokens: 1000,
+      });
+      const parsed = tryParse(result.response || '');
+      if (Object.keys(parsed).length > 4) return parsed;
     } catch {
-      return {};
+      // try next model
     }
   }
+
+  return {};
+}
+
+async function handleUploadImage(request: Request, env: Env): Promise<Response> {
+  if (request.method !== 'POST') return new Response('Method Not Allowed', { status: 405 });
+  if (!isAuthorized(request, env)) return json({ error: 'Unauthorized' }, { status: 401 });
+  if (!env.SITE_DATA) return json({ error: 'KV no disponible' }, { status: 503 });
+
+  let formData: FormData;
+  try { formData = await request.formData(); } catch { return json({ error: 'FormData inválido' }, { status: 400 }); }
+
+  const file = formData.get('image') as File | null;
+  if (!file || typeof file === 'string') return json({ error: 'Campo "image" requerido' }, { status: 400 });
+
+  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+  if (!allowed.includes(file.type)) return json({ error: 'Tipo no permitido (jpg/png/webp/gif)' }, { status: 400 });
+  if (file.size > 5 * 1024 * 1024) return json({ error: 'Imagen demasiado grande (máx 5 MB)' }, { status: 400 });
+
+  const key = `${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+  const buffer = await file.arrayBuffer();
+  const bytes = new Uint8Array(buffer);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  const payload = JSON.stringify({
+    contentType: file.type,
+    data: btoa(binary),
+  });
+  await env.SITE_DATA.put(`image:${key}`, payload);
+
+  return json({ url: `/api/image/${key}` });
+}
+
+async function handleGetImage(key: string, env: Env): Promise<Response> {
+  if (!env.SITE_DATA) return new Response('Not Found', { status: 404 });
+  const raw = await env.SITE_DATA.get(`image:${key}`);
+  if (!raw) return new Response('Not Found', { status: 404 });
+
+  let stored: { contentType?: string; data?: string } | null = null;
+  try {
+    stored = JSON.parse(raw) as { contentType?: string; data?: string };
+  } catch {
+    return new Response('Invalid image data', { status: 500 });
+  }
+
+  if (!stored?.data) return new Response('Not Found', { status: 404 });
+
+  const binary = atob(stored.data);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new Response(bytes, {
+    headers: {
+      'Content-Type': stored.contentType || 'image/jpeg',
+      'Cache-Control': 'public, max-age=31536000, immutable',
+    },
+  });
 }
 
 async function handleExtract(request: Request, env: Env) {
@@ -313,12 +361,11 @@ async function handleExtract(request: Request, env: Env) {
     }
 
     // 2. Extract metadata
-    const { title, description, bodyText } = extractSiteMeta(html);
+    const { title, description, ogImage, bodyText } = extractSiteMeta(html);
 
-    // 3. Screenshot: og:image si existe (más fiel), sino thum.io con delay para SPAs/videos
-    const { ogImage } = extractSiteMeta(html);
+    // 3. Screenshot: og:image si existe (más fiel), sino thum.io con noanimate+delay para SPAs/videos
     const screenshotUrl = ogImage ||
-      `https://image.thum.io/get/width/1200/crop/630/allowJPG/delay/3/${targetUrl}`;
+      `https://image.thum.io/get/width/1200/crop/675/allowJPG/noanimate/wait/3/${targetUrl}`;
 
     // 4. Build base project
     const baseProject: Record<string, unknown> = {
@@ -772,6 +819,14 @@ export default {
 
     if (url.pathname === '/api/extract') {
       return handleExtract(request, env);
+    }
+
+    if (url.pathname === '/api/upload-image') {
+      return handleUploadImage(request, env);
+    }
+
+    if (url.pathname.startsWith('/api/image/')) {
+      return handleGetImage(url.pathname.slice('/api/image/'.length), env);
     }
 
     // SEO AUDIT — publico, sin auth
