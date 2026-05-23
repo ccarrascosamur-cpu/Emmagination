@@ -88,12 +88,12 @@ export default function Navigation({ lenisRef }: NavigationProps) {
               handleLogoClick();
             }
           }}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2.5"
         >
           <img
             src="/images/isotipo.png"
             alt="EMMAGINATION"
-            className="h-7 w-auto object-contain shrink-0 opacity-95"
+            className="h-10 w-auto object-contain shrink-0 opacity-95"
           />
           <div className="hidden sm:flex flex-col items-start justify-center leading-none pt-[1px]">
             <span
