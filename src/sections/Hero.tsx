@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useSiteData } from '../lib/site-data-client';
@@ -6,6 +6,9 @@ import { useSiteData } from '../lib/site-data-client';
 interface HeroProps {
   lenisRef: React.MutableRefObject<any>;
 }
+
+const useIsomorphicLayoutEffect =
+  typeof window !== 'undefined' ? useLayoutEffect : useEffect;
 
 export default function Hero({ lenisRef }: HeroProps) {
   const { data } = useSiteData();
@@ -105,58 +108,82 @@ export default function Hero({ lenisRef }: HeroProps) {
   }, []);
 
   // GSAP entrance animations
-  useEffect(() => {
-    const tl = gsap.timeline({ delay: 0.3 });
+  useIsomorphicLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      const lines = titleRef.current?.querySelectorAll('.line-inner') ?? [];
 
-    tl.fromTo(
-      badgeRef.current,
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }
-    )
-      .fromTo(
-        titleRef.current ? titleRef.current.querySelectorAll('.line-inner') : [],
-        { y: '108%' },
-        { y: '0%', stagger: 0.12, ease: 'power4.out', duration: 1.1 },
-        '-=0.4'
-      )
-      .fromTo(
-        subtitleRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 1, ease: 'power3.out' },
-        '-=0.6'
-      )
-      .fromTo(
-        ctaRef.current,
-        { opacity: 0, y: 20 },
-        { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' },
-        '-=0.4'
-      );
+      gsap.set([badgeRef.current, subtitleRef.current, ctaRef.current], {
+        opacity: 0,
+        y: 18,
+      });
+      gsap.set(lines, { yPercent: 108 });
 
-    // Continuous ambient animation for orbs
-    const ambientTl = gsap.timeline({ repeat: -1, yoyo: true });
-    ambientTl.to(orb1Ref.current, {
-      x: '+=30',
-      y: '-=20',
-      duration: 5,
-      ease: 'sine.inOut',
-    }, 0);
-    ambientTl.to(orb2Ref.current, {
-      x: '-=25',
-      y: '+=25',
-      duration: 7,
-      ease: 'sine.inOut',
-    }, 0);
-    ambientTl.to(orb3Ref.current, {
-      x: '+=20',
-      y: '+=30',
-      duration: 6,
-      ease: 'sine.inOut',
-    }, 0);
+      const tl = gsap.timeline({
+        defaults: { ease: 'power3.out' },
+      });
 
-    return () => {
-      tl.kill();
-      ambientTl.kill();
-    };
+      tl.to(badgeRef.current, {
+        opacity: 1,
+        y: 0,
+        duration: 0.45,
+      })
+        .to(
+          lines,
+          {
+            yPercent: 0,
+            duration: 0.86,
+            stagger: 0.08,
+            ease: 'power4.out',
+          },
+          '-=0.16'
+        )
+        .to(
+          subtitleRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+          },
+          '-=0.48'
+        )
+        .to(
+          ctaRef.current,
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.45,
+          },
+          '-=0.34'
+        );
+
+      // Continuous ambient animation for orbs
+      const ambientTl = gsap.timeline({ repeat: -1, yoyo: true });
+      ambientTl.to(orb1Ref.current, {
+        x: '+=30',
+        y: '-=20',
+        duration: 5,
+        ease: 'sine.inOut',
+      }, 0);
+      ambientTl.to(orb2Ref.current, {
+        x: '-=25',
+        y: '+=25',
+        duration: 7,
+        ease: 'sine.inOut',
+      }, 0);
+      ambientTl.to(orb3Ref.current, {
+        x: '+=20',
+        y: '+=30',
+        duration: 6,
+        ease: 'sine.inOut',
+      }, 0);
+
+      return () => {
+        tl.kill();
+        ambientTl.kill();
+      };
+    }, heroRef);
+
+    return () => ctx.revert();
   }, []);
 
   const scrollToWork = () => {

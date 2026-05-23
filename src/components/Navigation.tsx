@@ -88,26 +88,30 @@ export default function Navigation({ lenisRef }: NavigationProps) {
               handleLogoClick();
             }
           }}
-          className="flex items-center gap-2.5"
+          className="flex items-center gap-3"
         >
           <img
             src="/images/isotipo.png"
             alt="EMMAGINATION"
             className="h-9 w-auto object-contain"
           />
-          <div className="hidden sm:flex flex-col leading-none">
+          <div className="hidden sm:flex flex-col items-start leading-none">
             <span
-              className="text-white text-[17px] font-bold tracking-[0.14em] uppercase"
+              className="text-white text-[17px] font-bold tracking-[0.11em] uppercase"
               style={{ fontFamily: 'var(--font-heading)' }}
             >
               EMMAGINATION
             </span>
-            <span
-              className="text-white/40 text-[8.5px] tracking-[0.22em] uppercase mt-0.5"
-              style={{ fontFamily: 'var(--font-mono)', width: '100%', textAlign: 'justify', textAlignLast: 'justify', lineHeight: 1 }}
+            <div
+              className="mt-1 flex items-center gap-1.5 text-white/40 text-[8px] uppercase"
+              style={{ fontFamily: 'var(--font-mono)', letterSpacing: '0.16em', lineHeight: 1 }}
             >
-              Web Design · Branding · Digital
-            </span>
+              <span>Web Design</span>
+              <span className="text-white/20">·</span>
+              <span>Branding</span>
+              <span className="text-white/20">·</span>
+              <span>Digital</span>
+            </div>
           </div>
           {/* Texto del logo visible solo en mobile */}
           <span
