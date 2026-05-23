@@ -258,7 +258,7 @@ export default function ProjectCasePage() {
       <div ref={contentRef}>
         {/* Info Grid: Cliente / Desafío / Solución */}
         <section className="case-section opacity-0" style={{ padding: '60px 0 30px' }}>
-          <div className="mx-auto" style={{ maxWidth: '1280px', padding: '0 4vw' }}>
+          <div className="mx-auto w-full" style={{ maxWidth: '1280px', padding: '0 4vw' }}>
             <div className="grid gap-5 lg:grid-cols-3">
               {/* Cliente */}
               <article
@@ -332,10 +332,10 @@ export default function ProjectCasePage() {
         {/* Servicios + Resultados */}
         <section className="case-section opacity-0" style={{ padding: '30px 0' }}>
           <div
-            className="mx-auto rounded-2xl p-8 lg:p-10"
+            className="mx-auto w-full rounded-2xl p-8 lg:p-10"
             style={{
               maxWidth: '1280px',
-              margin: '0 4vw',
+              padding: '0 4vw',
               background: '#111028',
               border: '1px solid rgba(168, 85, 247, 0.12)',
             }}
@@ -399,7 +399,7 @@ export default function ProjectCasePage() {
         {/* Galería */}
         {displayProject.gallery.length > 0 && (
           <section className="case-section opacity-0" style={{ padding: '30px 0 80px' }}>
-            <div className="mx-auto" style={{ maxWidth: '1280px', padding: '0 4vw' }}>
+            <div className="mx-auto w-full" style={{ maxWidth: '1280px', padding: '0 4vw' }}>
               <span
                 className="text-xs font-bold uppercase tracking-[0.15em]"
                 style={{ fontFamily: 'var(--font-mono)', color: '#A855F7' }}
