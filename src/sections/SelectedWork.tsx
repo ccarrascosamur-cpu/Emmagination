@@ -352,11 +352,11 @@ export default function SelectedWork() {
                     />
                     {/* Hover overlay */}
                     <div
-                      className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-10"
+                      className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-10 pointer-events-none"
                       style={{ top: '3%', bottom: '12%', left: '5%', right: '5%' }}
                     >
                       <div
-                        className="flex items-center gap-2 px-6 py-3 rounded-full text-white text-sm font-medium transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500"
+                        className="pointer-events-auto flex items-center gap-2 px-6 py-3 rounded-full text-white text-sm font-medium transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500"
                         style={{
                           background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
                           boxShadow: '0 8px 32px rgba(124,58,237,0.4)',

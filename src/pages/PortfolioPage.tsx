@@ -401,10 +401,10 @@ export default function PortfolioPage() {
                   />
 
                   {/* Hover overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10">
+                  <div className="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10 pointer-events-none">
                     <Link
                       to={`/proyectos/${project.slug}`}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
+                      className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
                       style={{ fontFamily: 'var(--font-body)', transitionDelay: '0ms' }}
                     >
                       Caso
@@ -412,7 +412,7 @@ export default function PortfolioPage() {
                     {project.pdf && (
                       <button
                         onClick={(e) => { e.stopPropagation(); openProject(project); }}
-                        className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
+                        className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
                         style={{ fontFamily: 'var(--font-body)', transitionDelay: '80ms' }}
                       >
                         <Eye size={16} />
@@ -424,7 +424,7 @@ export default function PortfolioPage() {
                       target="_blank"
                       rel="noopener noreferrer"
                       onClick={(e) => e.stopPropagation()}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
+                      className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
                       style={{ fontFamily: 'var(--font-body)', transitionDelay: '160ms' }}
                     >
                       <ExternalLink size={16} />
