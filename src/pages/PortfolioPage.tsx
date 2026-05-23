@@ -2,9 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ExternalLink, Eye, ArrowLeft } from 'lucide-react';
-import type { Project } from '../data/projects';
-import ProjectPreviewModal from '../components/ProjectPreviewModal';
+import { ExternalLink, ArrowLeft } from 'lucide-react';
 import Footer from '../sections/Footer';
 import SEO from '../components/SEO';
 import { portfolioSeo } from '../lib/route-seo';
@@ -182,8 +180,6 @@ export default function PortfolioPage() {
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
 
   const [activeFilter, setActiveFilter] = useState('Todos');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const categories = getProjectCategories(data.projects);
 
@@ -191,16 +187,6 @@ export default function PortfolioPage() {
     activeFilter === 'Todos'
       ? data.projects
       : data.projects.filter((p) => p.category === activeFilter);
-
-  const openProject = (project: Project) => {
-    setSelectedProject(project);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setTimeout(() => setSelectedProject(null), 300);
-  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -399,42 +385,36 @@ export default function PortfolioPage() {
                     scrollImage={project.portfolioScrollImage}
                     alt={project.title}
                   />
-
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10 pointer-events-none">
-                    <Link
-                      to={`/proyectos/${project.slug}`}
-                      className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
-                      style={{ fontFamily: 'var(--font-body)', transitionDelay: '0ms' }}
-                    >
-                      Caso
-                    </Link>
-                    {project.pdf && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); openProject(project); }}
-                        className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
-                        style={{ fontFamily: 'var(--font-body)', transitionDelay: '80ms' }}
-                      >
-                        <Eye size={16} />
-                        Ver PDF
-                      </button>
-                    )}
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="pointer-events-auto flex items-center gap-2 px-5 py-2.5 bg-white/95 backdrop-blur-sm rounded-full text-black text-sm font-medium transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 hover:bg-[#7C3AED] hover:text-white"
-                      style={{ fontFamily: 'var(--font-body)', transitionDelay: '160ms' }}
-                    >
-                      <ExternalLink size={16} />
-                      Visitar
-                    </a>
-                  </div>
                 </div>
 
                 {/* Project Info */}
                 <div className="mt-10 px-2">
+                  <div className="mb-5 flex flex-wrap gap-3">
+                    <Link
+                      to={`/proyectos/${project.slug}`}
+                      className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-medium text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#7C3AED]/20"
+                      style={{
+                        fontFamily: 'var(--font-body)',
+                        background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 100%)',
+                      }}
+                    >
+                      Caso
+                    </Link>
+                    <a
+                      href={project.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium text-white/78 transition-all duration-300 hover:bg-white/6 hover:text-white"
+                      style={{
+                        fontFamily: 'var(--font-body)',
+                        borderColor: 'rgba(255,255,255,0.12)',
+                        background: 'rgba(255,255,255,0.03)',
+                      }}
+                    >
+                      <ExternalLink size={16} />
+                      Visitar sitio
+                    </a>
+                  </div>
                   <div className="flex items-baseline justify-between mb-2">
                     <h3
                       className="text-white text-xl transition-colors duration-300"
@@ -485,12 +465,6 @@ export default function PortfolioPage() {
       </section>
 
       <Footer />
-
-      <ProjectPreviewModal
-        project={selectedProject}
-        isOpen={isModalOpen}
-        onClose={closeModal}
-      />
     </main>
   );
 }

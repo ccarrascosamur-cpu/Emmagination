@@ -312,13 +312,11 @@ export default function SelectedWork() {
             const isLarge = index === 0 || index === 3;
 
             return (
-              <Link
+              <article
                 key={project.id}
-                to={`/proyectos/${project.slug}`}
                 className={`proj-card group ${getSizeClass(index)}`}
                 style={{
                   display: 'block',
-                  textDecoration: 'none',
                   color: 'inherit',
                   position: 'relative',
                 }}
@@ -350,26 +348,37 @@ export default function SelectedWork() {
                       alt={project.title}
                       url={project.url}
                     />
-                    {/* Hover overlay */}
-                    <div
-                      className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-10 pointer-events-none"
-                      style={{ top: '3%', bottom: '12%', left: '5%', right: '5%' }}
-                    >
-                      <div
-                        className="pointer-events-auto flex items-center gap-2 px-6 py-3 rounded-full text-white text-sm font-medium transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500"
-                        style={{
-                          background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
-                          boxShadow: '0 8px 32px rgba(124,58,237,0.4)',
-                        }}
-                      >
-                        <ArrowUpRight size={16} />
-                        Ver caso
-                      </div>
-                    </div>
                   </div>
 
                   {/* Project Info */}
                   <div className="p-5 pt-6">
+                    <div className="flex flex-wrap gap-2.5 mb-4">
+                      <Link
+                        to={`/proyectos/${project.slug}`}
+                        className="inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white transition-all duration-300 hover:shadow-lg hover:shadow-[#7C3AED]/20"
+                        style={{
+                          fontFamily: 'var(--font-body)',
+                          background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+                        }}
+                      >
+                        <ArrowUpRight size={16} />
+                        Caso
+                      </Link>
+                      <a
+                        href={project.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full border px-5 py-2.5 text-sm font-medium text-white/78 transition-all duration-300 hover:bg-white/6 hover:text-white"
+                        style={{
+                          fontFamily: 'var(--font-body)',
+                          borderColor: 'rgba(255,255,255,0.12)',
+                          background: 'rgba(255,255,255,0.03)',
+                        }}
+                      >
+                        <ArrowUpRight size={16} />
+                        Visitar sitio
+                      </a>
+                    </div>
                     {/* Tags row */}
                     <div className="flex items-center justify-between mb-3">
                       <span
@@ -489,7 +498,7 @@ export default function SelectedWork() {
                 >
                   {String(index + 1).padStart(2, '0')}
                 </span>
-              </Link>
+              </article>
             );
           })}
         </div>
