@@ -1,6 +1,7 @@
 import { defaultSiteData, getProjectBySlug, getServiceBySlug } from './site-data';
 import {
   DEFAULT_OG_IMAGE,
+  DEFAULT_LANGUAGE,
   DEFAULT_LOCALE,
   SITE_NAME,
   absoluteUrl,
@@ -8,6 +9,7 @@ import {
   buildLocalBusinessSchema,
   buildOrganizationSchema,
   buildWebsiteSchema,
+  getAlternateLocales,
 } from './seo';
 const projects = defaultSiteData.projects;
 const services = defaultSiteData.services;
@@ -254,6 +256,8 @@ export function renderSeoHead(seo: RouteSeoData) {
   const type = seo.type ?? 'website';
   const robots = seo.robots ?? 'index, follow';
   const schema = seo.schema ?? [];
+  const alternateLocales = getAlternateLocales(seo.canonicalPath);
+  const twitterHandle = defaultSiteData.seo.twitterHandle || '@emmagination';
 
   const tags = [
     `<title>${escapeHtml(seo.title)}</title>`,
@@ -269,14 +273,24 @@ export function renderSeoHead(seo: RouteSeoData) {
     `<meta property="og:description" content="${escapeHtml(seo.description)}">`,
     `<meta property="og:url" content="${escapeHtml(canonicalUrl)}">`,
     `<meta property="og:image" content="${escapeHtml(imageUrl)}">`,
+    '<meta property="og:image:width" content="1200">',
+    '<meta property="og:image:height" content="630">',
     `<meta property="og:image:alt" content="${escapeHtml(seo.title)}">`,
     '<meta name="twitter:card" content="summary_large_image">',
     `<meta name="twitter:title" content="${escapeHtml(seo.title)}">`,
     `<meta name="twitter:description" content="${escapeHtml(seo.description)}">`,
+    `<meta name="twitter:site" content="${escapeHtml(twitterHandle)}">`,
     `<meta name="twitter:url" content="${escapeHtml(canonicalUrl)}">`,
     `<meta name="twitter:image" content="${escapeHtml(imageUrl)}">`,
     `<meta name="twitter:image:alt" content="${escapeHtml(seo.title)}">`,
+    `<meta name="language" content="${escapeHtml(DEFAULT_LANGUAGE)}">`,
   ];
+
+  for (const alternate of alternateLocales) {
+    tags.push(
+      `<link rel="alternate" hreflang="${escapeHtml(alternate.hrefLang)}" href="${escapeHtml(alternate.href)}">`,
+    );
+  }
 
   for (const item of schema) {
     tags.push(`<script type="application/ld+json">${jsonLd(item)}</script>`);

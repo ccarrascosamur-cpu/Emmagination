@@ -1,6 +1,8 @@
 {
   "name": "EMMAGINATION - Diseño Web, Branding y SEO en Chile",
   "short_name": "EMMAGINATION",
+  "start_url": "/",
+  "scope": "/",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -15,5 +17,6 @@
   ],
   "theme_color": "#050505",
   "background_color": "#050505",
-  "display": "standalone"
+  "display": "standalone",
+  "lang": "es-CL"
 }

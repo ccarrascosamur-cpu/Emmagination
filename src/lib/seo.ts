@@ -2,10 +2,20 @@ export const SITE_NAME = 'EMMAGINATION';
 export const SITE_URL = 'https://emmagination.cl';
 export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/isotipo.png`;
 export const DEFAULT_LOCALE = 'es_CL';
+export const DEFAULT_LANGUAGE = 'es-CL';
 export const GOOGLE_BUSINESS_PROFILE_URL = 'https://share.google/SI0GjDkMkZa63cVnL';
 
 export function absoluteUrl(path = '/') {
   return new URL(path, SITE_URL).toString();
+}
+
+export function getAlternateLocales(path = '/') {
+  const url = absoluteUrl(path);
+  return [
+    { hrefLang: 'es-CL', href: url },
+    { hrefLang: 'es', href: url },
+    { hrefLang: 'x-default', href: url },
+  ];
 }
 
 export function buildOrganizationSchema(config?: {
@@ -70,14 +80,6 @@ export function buildWebsiteSchema() {
     inLanguage: 'es-CL',
     description:
       'Sitio oficial de EMMAGINATION, agencia de diseño web, branding y experiencias digitales en Chile.',
-    potentialAction: {
-      '@type': 'SearchAction',
-      target: {
-        '@type': 'EntryPoint',
-        urlTemplate: `${SITE_URL}/portafolio?q={search_term_string}`,
-      },
-      'query-input': 'required name=search_term_string',
-    },
   };
 }
 

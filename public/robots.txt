@@ -3,11 +3,11 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
-# Crawl-delay para bots agresivos
 User-agent: AhrefsBot
 Crawl-delay: 2
 
 User-agent: SemrushBot
 Crawl-delay: 2
 
+Host: emmagination.cl
 Sitemap: https://emmagination.cl/sitemap.xml

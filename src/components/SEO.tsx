@@ -1,5 +1,10 @@
 import { useEffect } from 'react';
-import { DEFAULT_LOCALE, SITE_NAME, absoluteUrl } from '../lib/seo';
+import {
+  DEFAULT_LOCALE,
+  SITE_NAME,
+  absoluteUrl,
+  getAlternateLocales,
+} from '../lib/seo';
 import { useSiteData } from '../lib/site-data-client';
 
 interface SEOProps {
@@ -99,6 +104,24 @@ export default function SEO({
       document.head.appendChild(canonicalLink);
     }
     canonicalLink.setAttribute('href', canonicalUrl);
+
+    const alternateLinks = getAlternateLocales(canonicalPath);
+    const alternateSelectors = ['es-CL', 'es', 'x-default'];
+
+    alternateSelectors.forEach((hrefLang) => {
+      const existing = document.querySelector(`link[rel="alternate"][hreflang="${hrefLang}"]`);
+      if (existing) {
+        existing.remove();
+      }
+    });
+
+    alternateLinks.forEach(({ hrefLang, href }) => {
+      const link = document.createElement('link');
+      link.setAttribute('rel', 'alternate');
+      link.setAttribute('hreflang', hrefLang);
+      link.setAttribute('href', href);
+      document.head.appendChild(link);
+    });
 
     const schemaScriptId = 'seo-structured-data';
     const existingSchema = document.getElementById(schemaScriptId);

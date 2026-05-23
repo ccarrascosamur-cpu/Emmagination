@@ -16,6 +16,7 @@ const routes = getPrerenderRoutes();
 for (const route of routes) {
   const { appHtml, headHtml } = render(route.url);
   const html = template
+    .replace(/<!--app-seo-fallback-start-->[\s\S]*?<!--app-seo-fallback-end-->/, '')
     .replace('<!--app-head-->', headHtml)
     .replace('<!--app-html-->', appHtml);
 
@@ -42,5 +43,22 @@ ${routes
 `;
 
 await writeFile(path.join(distDir, 'sitemap.xml'), sitemap, 'utf8');
+
+const robots = `User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+
+User-agent: AhrefsBot
+Crawl-delay: 2
+
+User-agent: SemrushBot
+Crawl-delay: 2
+
+Host: emmagination.cl
+Sitemap: https://emmagination.cl/sitemap.xml
+`;
+
+await writeFile(path.join(distDir, 'robots.txt'), robots, 'utf8');
 
 await rm(serverDir, { recursive: true, force: true });
