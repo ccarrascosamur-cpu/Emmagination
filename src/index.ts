@@ -201,40 +201,39 @@ async function generateProjectWithAI(
   description: string,
   bodyText: string,
 ): Promise<Record<string, unknown>> {
-  const prompt = `Eres un experto en agencias de diseno web chilenas. Analiza este sitio web y genera datos para un portafolio de proyectos. Responde SOLO con JSON valido, sin texto adicional, sin markdown, sin bloques de codigo.
+  // Keep context short so the model responds fast and stays within token limits
+  const context = [
+    title && `Titulo: ${title}`,
+    description && `Descripcion: ${description}`,
+    bodyText && `Contenido: ${bodyText.slice(0, 1200)}`,
+  ].filter(Boolean).join('\n');
 
+  const prompt = `Analiza este sitio web chileno y responde UNICAMENTE con un objeto JSON valido. Sin texto extra, sin markdown.
+
+${context}
 URL: ${url}
-Titulo: ${title}
-Descripcion: ${description}
-Contenido visible: ${bodyText.slice(0, 2000)}
 
-Genera exactamente este JSON (todos los campos son obligatorios):
-{
-  "title": "nombre comercial o de marca del sitio sin sufijos como Home o Inicio",
-  "client": "mismo que title",
-  "category": "una de: E-commerce, Landing Page, Sitio Corporativo, Web Institucional, Blog, Tienda Online",
-  "description": "1-2 oraciones sobre que hace el negocio y para que industria o rubro",
-  "excerpt": "frase corta de maximo 90 caracteres para la grilla del portafolio",
-  "services": ["Diseno web", "servicio2", "servicio3"],
-  "challenge": "descripcion del desafio principal que enfrentaba este tipo de negocio en su presencia digital 1-2 oraciones",
-  "solution": "descripcion de la solucion digital implementada enfocada en diseno UX y posicionamiento 1-2 oraciones",
-  "results": ["Resultado concreto 1", "Resultado concreto 2", "Resultado concreto 3"],
-  "tags": "CATEGORIA TECNOLOGIA max 30 chars mayusculas ejemplo ECOMMERCE SHOPIFY",
-  "metric": "+XX% descripcion corta de metrica principal ejemplo +65% trafico organico",
-  "metricLabel": "+YY% descripcion corta de metrica secundaria ejemplo +45% conversion",
-  "color": "color hex oscuro que represente la identidad visual del rubro ejemplo #1a2e1a para naturaleza #1a1a2e para tech",
-  "seoTitle": "Caso Marca Servicio principal y Servicio secundario",
-  "seoDescription": "descripcion SEO del caso de estudio de 140-160 caracteres"
-}`;
+JSON requerido:
+{"title":"marca sin sufijos","category":"E-commerce|Landing Page|Sitio Corporativo|Web Institucional","description":"2 oraciones que explican el negocio y su rubro","excerpt":"maximo 80 chars para una grilla","services":["servicio1","servicio2"],"challenge":"problema digital que tenia el cliente en 1 oracion","solution":"solucion implementada en 1 oracion","results":["logro 1","logro 2","logro 3"],"tags":"ETIQUETA · ETIQUETA2","metric":"+XX% metrica","metricLabel":"+YY% metrica2","color":"#hexoscuro","seoTitle":"Caso Marca | Servicio","seoDescription":"descripcion seo 150 chars"}`;
 
   try {
-    const result = await ai.run('@cf/meta/llama-3.1-8b-instruct', { prompt });
+    const result = await ai.run('@hf/mistral/mistral-7b-instruct-v0.2', { prompt });
     const raw = result.response || '';
-    const jsonMatch = raw.match(/\{[\s\S]*\}/);
+    // Extract first valid JSON object from response
+    const jsonMatch = raw.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/s) || raw.match(/\{[\s\S]*?\}/);
     if (!jsonMatch) return {};
     return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
   } catch {
-    return {};
+    // Fallback: try llama if mistral fails
+    try {
+      const result2 = await ai.run('@cf/meta/llama-3.1-8b-instruct', { prompt });
+      const raw2 = result2.response || '';
+      const jsonMatch2 = raw2.match(/\{[\s\S]*\}/);
+      if (!jsonMatch2) return {};
+      return JSON.parse(jsonMatch2[0]) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
   }
 }
 
@@ -281,8 +280,8 @@ async function handleExtract(request: Request, env: Env) {
     // 2. Extract metadata
     const { title, description, bodyText } = extractSiteMeta(html);
 
-    // 3. Screenshot via thum.io (free, no API key needed, caches automatically)
-    const screenshotUrl = `https://image.thum.io/get/width/1200/crop/630/${encodeURIComponent(targetUrl)}`;
+    // 3. Screenshot via thum.io — URL must NOT be encoded, just appended
+    const screenshotUrl = `https://image.thum.io/get/width/1200/crop/630/${targetUrl}`;
 
     // 4. Build base project
     const baseProject: Record<string, unknown> = {
@@ -328,8 +327,11 @@ async function handleExtract(request: Request, env: Env) {
           baseProject.slug = slugifyWorker(str('title'));
         }
         if (str('category')) baseProject.category = str('category');
+        // Use AI description if generated, else keep the og:description fallback already set
         if (str('description')) baseProject.description = str('description');
         if (str('excerpt')) baseProject.excerpt = str('excerpt');
+        // Guarantee excerpt always has something even if AI skipped it
+        if (!baseProject.excerpt) baseProject.excerpt = (baseProject.description as string || description || '').slice(0, 88);
         if (arr('services').length) baseProject.services = arr('services');
         if (str('challenge')) baseProject.challenge = str('challenge');
         if (str('solution')) baseProject.solution = str('solution');
