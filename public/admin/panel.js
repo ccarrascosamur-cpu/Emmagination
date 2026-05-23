@@ -174,7 +174,12 @@ function renderProjects() {
     <div class="project-card" data-id="${p.id}">
       <div style="position:relative;" onclick="editProject(${p.id})">
         ${p.featured ? '<span class="badge-featured">⭐ Destacado</span>' : ''}
-        <img src="${p.image || ''}" alt="" onerror="this.style.display='none'" />
+        <img
+          src="${p.image || p.portfolioScrollImage || ''}"
+          alt=""
+          onerror="if (this.dataset.fallback && this.src !== this.dataset.fallback) { this.src = this.dataset.fallback; return; } this.style.display='none';"
+          data-fallback="${p.portfolioScrollImage || ''}"
+        />
         <h3>${escapeHtml(p.title)}</h3>
         <div class="meta">${escapeHtml(p.category || '')} · ${p.year || ''}</div>
       </div>

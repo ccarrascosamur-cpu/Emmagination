@@ -19,6 +19,11 @@
       --danger: #ef4444;
     }
     * { box-sizing: border-box; margin: 0; }
+    html, body {
+      min-height: 100%;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
     body {
       font-family: Inter, system-ui, -apple-system, sans-serif;
       background: var(--bg);
@@ -90,7 +95,7 @@
     }
 
     /* ── APP ── */
-    .app { max-width: 1200px; margin: 0 auto; padding: 24px; }
+    .app { max-width: 1200px; margin: 0 auto; padding: 24px 24px 140px; }
     .app-header {
       display: flex;
       align-items: center;
