@@ -279,7 +279,7 @@ async function handleExtract(request: Request, env: Env) {
     }
 
     // 2. Extract metadata
-    const { title, description, ogImage, bodyText } = extractSiteMeta(html);
+    const { title, description, bodyText } = extractSiteMeta(html);
 
     // 3. Screenshot via thum.io (free, no API key needed, caches automatically)
     const screenshotUrl = `https://image.thum.io/get/width/1200/crop/630/${encodeURIComponent(targetUrl)}`;
