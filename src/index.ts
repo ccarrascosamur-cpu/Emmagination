@@ -162,8 +162,23 @@ function slugifyWorker(input: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
+function decodeHtmlEntities(str: string): string {
+  return str
+    .replace(/&amp;/gi, '&')
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#039;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .trim();
+}
+
 function extractSiteMeta(html: string) {
-  const match = (re: RegExp): string => { const m = html.match(re); return m ? (m[1] ?? '').trim() : ''; };
+  const match = (re: RegExp): string => {
+    const m = html.match(re);
+    return m ? decodeHtmlEntities(m[1] ?? '') : '';
+  };
 
   const title =
     match(/<meta[^>]*property=["']og:title["'][^>]*content=["']([^"']*)["'][^>]*>/i) ||
@@ -182,13 +197,15 @@ function extractSiteMeta(html: string) {
 
   const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
   const bodyText = bodyMatch
-    ? bodyMatch[1]
-        .replace(/<script[\s\S]*?<\/script>/gi, '')
-        .replace(/<style[\s\S]*?<\/style>/gi, '')
-        .replace(/<[^>]+>/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim()
-        .slice(0, 3000)
+    ? decodeHtmlEntities(
+        bodyMatch[1]
+          .replace(/<script[\s\S]*?<\/script>/gi, '')
+          .replace(/<style[\s\S]*?<\/style>/gi, '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+          .slice(0, 3000)
+      )
     : '';
 
   return { title, description, ogImage, bodyText };
@@ -201,36 +218,54 @@ async function generateProjectWithAI(
   description: string,
   bodyText: string,
 ): Promise<Record<string, unknown>> {
-  // Keep context short so the model responds fast and stays within token limits
+  const siteDomain = new URL(url).hostname.replace('www.', '');
   const context = [
-    title && `Titulo: ${title}`,
-    description && `Descripcion: ${description}`,
-    bodyText && `Contenido: ${bodyText.slice(0, 1200)}`,
+    `URL: ${siteDomain}`,
+    title && `Titulo del sitio: ${title}`,
+    description && `Meta descripcion: ${description}`,
+    bodyText && `Texto visible: ${bodyText.slice(0, 1000)}`,
   ].filter(Boolean).join('\n');
 
-  const prompt = `Analiza este sitio web chileno y responde UNICAMENTE con un objeto JSON valido. Sin texto extra, sin markdown.
+  const prompt = `[INST] Eres un redactor de portafolios de agencias de diseno web. Genera un JSON con datos del proyecto para este sitio web. RESPONDE SOLO EL JSON, sin explicaciones.
 
+Datos del sitio:
 ${context}
-URL: ${url}
 
-JSON requerido:
-{"title":"marca sin sufijos","category":"E-commerce|Landing Page|Sitio Corporativo|Web Institucional","description":"2 oraciones que explican el negocio y su rubro","excerpt":"maximo 80 chars para una grilla","services":["servicio1","servicio2"],"challenge":"problema digital que tenia el cliente en 1 oracion","solution":"solucion implementada en 1 oracion","results":["logro 1","logro 2","logro 3"],"tags":"ETIQUETA · ETIQUETA2","metric":"+XX% metrica","metricLabel":"+YY% metrica2","color":"#hexoscuro","seoTitle":"Caso Marca | Servicio","seoDescription":"descripcion seo 150 chars"}`;
+Responde exactamente con este JSON rellenado (reemplaza cada valor segun el sitio):
+{
+"title": "Nombre de la marca o negocio (sin guiones ni sufijos como Home)",
+"category": "Sitio Corporativo",
+"description": "Descripcion de 2 oraciones sobre que hace este negocio y en que rubro trabaja.",
+"excerpt": "Frase corta de maximo 80 caracteres.",
+"services": ["Diseno web", "Branding"],
+"challenge": "El cliente necesitaba una presencia digital solida para destacar en su rubro.",
+"solution": "Disenamos un sitio moderno enfocado en mostrar su trabajo y generar contactos.",
+"results": ["Presencia digital profesional", "Mayor visibilidad en su industria", "Sitio optimizado para captacion de clientes"],
+"tags": "WEB · BRANDING",
+"metric": "+XX% visibilidad",
+"metricLabel": "+YY% contactos",
+"color": "#1a1a2e",
+"seoTitle": "Caso Marca | Diseno Web",
+"seoDescription": "Descripcion SEO del caso de estudio de aproximadamente 150 caracteres."
+} [/INST]`;
+
+  const tryParse = (raw: string): Record<string, unknown> => {
+    const match = raw.match(/\{[\s\S]*\}/);
+    if (!match) return {};
+    try { return JSON.parse(match[0]) as Record<string, unknown>; } catch { return {}; }
+  };
 
   try {
     const result = await ai.run('@hf/mistral/mistral-7b-instruct-v0.2', { prompt });
-    const raw = result.response || '';
-    // Extract first valid JSON object from response
-    const jsonMatch = raw.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/s) || raw.match(/\{[\s\S]*?\}/);
-    if (!jsonMatch) return {};
-    return JSON.parse(jsonMatch[0]) as Record<string, unknown>;
+    const parsed = tryParse(result.response || '');
+    if (Object.keys(parsed).length > 2) return parsed;
+    // fallback to llama
+    const result2 = await ai.run('@cf/meta/llama-3.1-8b-instruct', { prompt });
+    return tryParse(result2.response || '');
   } catch {
-    // Fallback: try llama if mistral fails
     try {
       const result2 = await ai.run('@cf/meta/llama-3.1-8b-instruct', { prompt });
-      const raw2 = result2.response || '';
-      const jsonMatch2 = raw2.match(/\{[\s\S]*\}/);
-      if (!jsonMatch2) return {};
-      return JSON.parse(jsonMatch2[0]) as Record<string, unknown>;
+      return tryParse(result2.response || '');
     } catch {
       return {};
     }
@@ -280,8 +315,10 @@ async function handleExtract(request: Request, env: Env) {
     // 2. Extract metadata
     const { title, description, bodyText } = extractSiteMeta(html);
 
-    // 3. Screenshot via thum.io — URL must NOT be encoded, just appended
-    const screenshotUrl = `https://image.thum.io/get/width/1200/crop/630/${targetUrl}`;
+    // 3. Screenshot: og:image si existe (más fiel), sino thum.io con delay para SPAs/videos
+    const { ogImage } = extractSiteMeta(html);
+    const screenshotUrl = ogImage ||
+      `https://image.thum.io/get/width/1200/crop/630/allowJPG/delay/3/${targetUrl}`;
 
     // 4. Build base project
     const baseProject: Record<string, unknown> = {
