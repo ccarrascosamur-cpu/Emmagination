@@ -536,6 +536,14 @@
         </select>
       </div>
       <div class="full"><label>Imagen principal *</label><input name="image" placeholder="/images/project-nombre.jpg" required /></div>
+      <div class="full">
+        <label>Screenshot largo para hover del portafolio</label>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <input name="portfolioScrollImage" placeholder="/images/project-scroll.webp o URL externa" style="flex:1;" />
+          <button type="button" id="btn-upload-project-scroll-image" class="btn btn-secondary" style="white-space:nowrap; padding:10px 14px; font-size:13px;">📁 Subir</button>
+        </div>
+        <p class="hint">Usa idealmente WebP vertical y largo. En móvil queda fijo; en desktop hace scroll al hover.</p>
+      </div>
       <div class="full"><label>URL del proyecto</label><input name="url" placeholder="https://..." /></div>
       <div class="full"><label>Descripción corta *</label><textarea name="description" required></textarea></div>
       <div class="full"><label>Excerpt (para la grilla)</label><textarea name="excerpt"></textarea></div>

@@ -6,6 +6,7 @@ export interface ProjectRecord {
   category: string;
   year: string;
   image: string;
+  portfolioScrollImage?: string;
   pdf?: string;
   description: string;
   excerpt: string;
@@ -470,6 +471,10 @@ export function normalizeProject(value: unknown, index = 0): ProjectRecord {
     category: normalizeString(source.category, fallback.category),
     year: normalizeString(source.year, fallback.year),
     image: normalizeString(source.image, fallback.image),
+    portfolioScrollImage: normalizeString(
+      source.portfolioScrollImage,
+      fallback.portfolioScrollImage ?? '',
+    ),
     pdf: normalizeString(source.pdf, fallback.pdf ?? ''),
     description: normalizeString(source.description, fallback.description),
     excerpt: normalizeString(source.excerpt, fallback.excerpt),

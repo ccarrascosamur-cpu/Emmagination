@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -8,8 +8,52 @@ import { useSiteData } from '../lib/site-data-client';
 gsap.registerPlugin(ScrollTrigger);
 
 // Laptop mockup con colores corporativos
-function LaptopMockup({ image, alt, url }: { image: string; alt: string; url: string }) {
+function LaptopMockup({
+  image,
+  scrollImage,
+  alt,
+  url,
+}: {
+  image: string;
+  scrollImage?: string;
+  alt: string;
+  url: string;
+}) {
   const domain = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const displayImage = scrollImage || image;
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    const measure = () => {
+      const viewport = viewportRef.current;
+      const img = imgRef.current;
+      if (!viewport || !img) return;
+      const overflow = Math.max(0, img.scrollHeight - viewport.clientHeight);
+      setScrollOffset(overflow);
+    };
+
+    updateViewport();
+    measure();
+
+    window.addEventListener('resize', updateViewport);
+    window.addEventListener('resize', measure);
+
+    return () => {
+      window.removeEventListener('resize', updateViewport);
+      window.removeEventListener('resize', measure);
+    };
+  }, [displayImage]);
+
+  const shouldScroll = Boolean(scrollImage) && isDesktop && scrollOffset > 12;
+  const transitionDuration = `${Math.min(7.5, Math.max(2.8, scrollOffset / 120))}s`;
 
   return (
     <div className="relative w-full">
@@ -40,6 +84,8 @@ function LaptopMockup({ image, alt, url }: { image: string; alt: string; url: st
               background: '#000',
               border: '1px solid rgba(168,85,247,0.08)',
             }}
+            onMouseEnter={() => shouldScroll && setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
           >
             {/* Browser bar */}
             <div
@@ -65,14 +111,39 @@ function LaptopMockup({ image, alt, url }: { image: string; alt: string; url: st
                 </div>
               </div>
             </div>
-            {/* Project image */}
-            <img
-              src={image}
-              alt={alt}
-              className="w-full object-cover"
+            <div
+              ref={viewportRef}
+              className="relative w-full overflow-hidden"
               style={{ aspectRatio: '16/10' }}
-              loading="lazy"
-            />
+            >
+              {scrollImage ? (
+                <img
+                  ref={imgRef}
+                  src={displayImage}
+                  alt={alt}
+                  className="block w-full"
+                  style={{
+                    transform: shouldScroll && isHovered ? `translateY(-${scrollOffset}px)` : 'translateY(0px)',
+                    transition: shouldScroll ? `transform ${transitionDuration} ease-in-out` : 'none',
+                  }}
+                  loading="lazy"
+                  onLoad={() => {
+                    const viewport = viewportRef.current;
+                    const img = imgRef.current;
+                    if (!viewport || !img) return;
+                    const overflow = Math.max(0, img.scrollHeight - viewport.clientHeight);
+                    setScrollOffset(overflow);
+                  }}
+                />
+              ) : (
+                <img
+                  src={image}
+                  alt={alt}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              )}
+            </div>
           </div>
         </div>
         {/* Hinge */}
@@ -275,6 +346,7 @@ export default function SelectedWork() {
                   <div className="relative p-3 pb-0">
                     <LaptopMockup
                       image={project.image}
+                      scrollImage={project.portfolioScrollImage}
                       alt={project.title}
                       url={project.url}
                     />

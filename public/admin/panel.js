@@ -30,6 +30,32 @@ function getAuthHeader() {
   return token ? `Bearer ${token}` : '';
 }
 
+async function uploadImage(file) {
+  const form = new FormData();
+  form.append('image', file);
+  const res = await fetch('/api/upload-image', {
+    method: 'POST',
+    headers: { Authorization: getAuthHeader() },
+    body: form,
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Error al subir imagen');
+  return data.url;
+}
+
+function triggerImageUpload(onUrl) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/jpeg,image/png,image/webp,image/gif';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    const url = await uploadImage(file);
+    onUrl(url);
+  };
+  input.click();
+}
+
 function showStatus(msg, type = '') {
   const bar = $('#status-bar');
   bar.textContent = msg;
@@ -175,6 +201,7 @@ function fillProjectForm(p) {
   f.year.value = p.year || '';
   f.featured.value = String(p.featured ?? false);
   f.image.value = p.image || '';
+  f.portfolioScrollImage.value = p.portfolioScrollImage || '';
   f.url.value = p.url || '';
   f.description.value = p.description || '';
   f.excerpt.value = p.excerpt || '';
@@ -248,6 +275,9 @@ function initProjectForm() {
   $('#project-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target;
+    const existingProject = editingProjectId
+      ? state.projects.find((p) => p.id === editingProjectId)
+      : null;
     const project = {
       id: editingProjectId || (Math.max(0, ...state.projects.map(p => p.id || 0)) + 1),
       title: f.title.value.trim(),
@@ -257,6 +287,7 @@ function initProjectForm() {
       year: f.year.value.trim(),
       featured: f.featured.value === 'true',
       image: f.image.value.trim(),
+      portfolioScrollImage: f.portfolioScrollImage.value.trim(),
       url: f.url.value.trim(),
       description: f.description.value.trim(),
       excerpt: f.excerpt.value.trim(),
@@ -271,8 +302,8 @@ function initProjectForm() {
       metric: f.metric.value.trim(),
       metricLabel: f.metricLabel.value.trim(),
       color: f.color.value.trim(),
-      offset: 0,
-      pdf: '',
+      offset: existingProject?.offset || 0,
+      pdf: existingProject?.pdf || '',
     };
 
     if (editingProjectId) {
@@ -308,6 +339,12 @@ function initProjectForm() {
     } catch (e) {
       showStatus('⚠️ Error al guardar: ' + e.message, 'error');
     }
+  });
+
+  $('#btn-upload-project-scroll-image').addEventListener('click', () => {
+    triggerImageUpload(url => {
+      $('#project-form').elements.namedItem('portfolioScrollImage').value = url;
+    });
   });
 
   // Auto-generate slug from title

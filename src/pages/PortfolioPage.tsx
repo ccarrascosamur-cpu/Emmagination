@@ -14,7 +14,50 @@ import { getProjectCategories } from '../lib/site-data';
 gsap.registerPlugin(ScrollTrigger);
 
 // Laptop mockup component (same as SelectedWork)
-function LaptopMockup({ image, alt }: { image: string; alt: string }) {
+function LaptopMockup({
+  image,
+  scrollImage,
+  alt,
+}: {
+  image: string;
+  scrollImage?: string;
+  alt: string;
+}) {
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [scrollOffset, setScrollOffset] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const displayImage = scrollImage || image;
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setIsDesktop(window.innerWidth >= 768);
+    };
+
+    const measure = () => {
+      const viewport = viewportRef.current;
+      const img = imgRef.current;
+      if (!viewport || !img) return;
+      const overflow = Math.max(0, img.scrollHeight - viewport.clientHeight);
+      setScrollOffset(overflow);
+    };
+
+    updateViewport();
+    measure();
+
+    window.addEventListener('resize', updateViewport);
+    window.addEventListener('resize', measure);
+
+    return () => {
+      window.removeEventListener('resize', updateViewport);
+      window.removeEventListener('resize', measure);
+    };
+  }, [displayImage]);
+
+  const shouldScroll = Boolean(scrollImage) && isDesktop && scrollOffset > 12;
+  const transitionDuration = `${Math.min(7.5, Math.max(2.8, scrollOffset / 120))}s`;
+
   return (
     <div className="relative w-full">
       <div className="relative mx-auto" style={{ maxWidth: '92%' }}>
@@ -35,15 +78,17 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
               style={{ background: 'rgba(255,255,255,0.15)' }}
             />
           </div>
-          <div
-            className="relative rounded-lg overflow-hidden"
-            style={{
-              background: '#000',
-              border: '1px solid rgba(255,255,255,0.06)',
-            }}
-          >
             <div
-              className="flex items-center gap-2 px-3 py-2.5"
+              className="relative rounded-lg overflow-hidden"
+              style={{
+                background: '#000',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}
+              onMouseEnter={() => shouldScroll && setIsHovered(true)}
+              onMouseLeave={() => setIsHovered(false)}
+            >
+              <div
+                className="flex items-center gap-2 px-3 py-2.5"
               style={{ background: '#f0f0f0' }}
             >
               <div className="flex gap-1.5">
@@ -58,15 +103,41 @@ function LaptopMockup({ image, alt }: { image: string; alt: string }) {
                 >
                   https://www.{alt.toLowerCase().replace(/\s/g, '')}.cl
                 </div>
+                </div>
               </div>
-            </div>
-            <img
-              src={image}
-              alt={alt}
-              className="w-full object-cover"
-              style={{ aspectRatio: '16/10' }}
-              loading="lazy"
-            />
+              <div
+                ref={viewportRef}
+                className="relative w-full overflow-hidden"
+                style={{ aspectRatio: '16/10' }}
+              >
+                {scrollImage ? (
+                  <img
+                    ref={imgRef}
+                    src={displayImage}
+                    alt={alt}
+                    className="block w-full"
+                    style={{
+                      transform: shouldScroll && isHovered ? `translateY(-${scrollOffset}px)` : 'translateY(0px)',
+                      transition: shouldScroll ? `transform ${transitionDuration} ease-in-out` : 'none',
+                    }}
+                    loading="lazy"
+                    onLoad={() => {
+                      const viewport = viewportRef.current;
+                      const img = imgRef.current;
+                      if (!viewport || !img) return;
+                      const overflow = Math.max(0, img.scrollHeight - viewport.clientHeight);
+                      setScrollOffset(overflow);
+                    }}
+                  />
+                ) : (
+                  <img
+                    src={image}
+                    alt={alt}
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                )}
+              </div>
           </div>
         </div>
         <div
@@ -323,7 +394,11 @@ export default function PortfolioPage() {
               >
                 {/* Laptop Mockup */}
                 <div className="relative">
-                  <LaptopMockup image={project.image} alt={project.title} />
+                  <LaptopMockup
+                    image={project.image}
+                    scrollImage={project.portfolioScrollImage}
+                    alt={project.title}
+                  />
 
                   {/* Hover overlay */}
                   <div className="absolute inset-0 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-all duration-500 z-10">
