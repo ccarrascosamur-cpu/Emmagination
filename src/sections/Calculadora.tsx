@@ -4,17 +4,17 @@ import { useGSAPReveal } from '../hooks/useGSAP';
 // ── Precios base en CLP por tipo de proyecto ───────────────────────────
 const BASE_CLP: Record<string, number> = {
   'Páginas Web': 350_000,
-  'eCommerce / Shopify': 1_500_000,
-  'SEO Técnico': 400_000,
-  'Contenido Visual': 280_000,
+  'eCommerce / Shopify': 700_000,
+  'SEO Técnico': 300_000,
+  'Contenido Visual': 300_000,
 };
 
 // ── Precios "desde" visibles ───────────────────────────────────────────
 const PRICE_CARDS = [
   { label: 'Páginas Web', from: '$350.000', to: '$2.000.000', desc: 'Landing, corporativo, institucional' },
-  { label: 'eCommerce / Shopify', from: '$1.500.000', to: '$4.000.000', desc: 'Tienda online con panel admin' },
-  { label: 'SEO Técnico', from: '$400.000', to: '$1.200.000', desc: 'Auditoría, optimización, posicionamiento' },
-  { label: 'Contenido Visual', from: '$280.000', to: '$2.800.000', desc: 'Fotografía, video, pack completo' },
+  { label: 'eCommerce / Shopify', from: '$700.000', to: '$4.000.000', desc: 'Tienda online con panel admin' },
+  { label: 'SEO Técnico', from: '$300.000', to: '$1.200.000', desc: 'Auditoría, optimización, posicionamiento' },
+  { label: 'Contenido Visual', from: '$300.000', to: '$2.800.000', desc: 'Fotografía, video, pack completo' },
 ];
 
 // ── Paso 1: selección de tipo ──────────────────────────────────────────
@@ -298,8 +298,13 @@ export default function Calculadora() {
               }}
             >
               <div style={{ fontSize: '0.75rem', color: '#9E9CC8', marginBottom: 4 }}>{item.label}</div>
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#A855F7' }}>
-                {item.from}
+              <div style={{ color: '#A855F7', lineHeight: 1.1 }}>
+                <span style={{ fontSize: '0.62rem', fontWeight: 600, opacity: 0.82, marginRight: 4 }}>
+                  Desde
+                </span>
+                <span style={{ fontSize: '0.85rem', fontWeight: 700 }}>
+                  {item.from}
+                </span>
               </div>
               <div style={{ fontSize: '0.7rem', color: '#5C5A8A', marginTop: 2 }}>{item.desc}</div>
             </div>
