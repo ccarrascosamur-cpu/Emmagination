@@ -191,12 +191,6 @@ export default function SelectedWork() {
 
   const featuredProjects = data.projects.filter((p) => p.featured).slice(0, 7);
 
-  // Determinar tamaño por posición: 0=grande, 1=chico, 2=chico, 3=grande
-  const getSizeClass = (index: number) => {
-    if (index === 0 || index === 3) return 'bento-large';
-    return 'bento-small';
-  };
-
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(
@@ -309,12 +303,10 @@ export default function SelectedWork() {
           className="bento-work-grid"
         >
           {featuredProjects.map((project, index) => {
-            const isLarge = index === 0 || index === 3;
-
             return (
               <article
                 key={project.id}
-                className={`proj-card group ${getSizeClass(index)}`}
+                className="proj-card group"
                 style={{
                   display: 'block',
                   color: 'inherit',
@@ -407,7 +399,7 @@ export default function SelectedWork() {
                     <h3
                       style={{
                         fontFamily: 'var(--font-heading)',
-                        fontSize: isLarge ? '1.35rem' : '1.15rem',
+                        fontSize: '1.2rem',
                         fontWeight: 800,
                         color: '#F4F3FF',
                         letterSpacing: '-0.02em',
