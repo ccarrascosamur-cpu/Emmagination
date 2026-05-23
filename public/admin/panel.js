@@ -140,13 +140,19 @@ function renderProjects() {
   `).join('');
 }
 
-window.toggleFeatured = function(id, event) {
+window.toggleFeatured = async function(id, event) {
   if (event) event.stopPropagation();
   const project = state.projects.find(p => p.id === id);
   if (!project) return;
   project.featured = !project.featured;
   renderProjects();
-  showStatus(project.featured ? '⭐ Proyecto destacado' : 'Proyecto quitado de destacados', 'ok');
+  try {
+    updateStateFromForms();
+    state = await saveData(state);
+    showStatus(project.featured ? '⭐ Proyecto destacado.' : 'Proyecto quitado de destacados.', 'ok');
+  } catch (e) {
+    showStatus('⚠️ Error al guardar: ' + e.message, 'error');
+  }
 };
 
 window.editProject = function(id) {
@@ -276,10 +282,17 @@ function initProjectForm() {
     }
     closeModal('modal-project');
     renderProjects();
-    showStatus('Proyecto guardado. Recuerda guardar todos los cambios.', 'ok');
+    showStatus('Guardando...', '');
+    try {
+      updateStateFromForms();
+      state = await saveData(state);
+      showStatus('✅ Proyecto guardado.', 'ok');
+    } catch (e) {
+      showStatus('⚠️ Error al guardar: ' + e.message, 'error');
+    }
   });
 
-  $('#btn-delete-project').addEventListener('click', () => {
+  $('#btn-delete-project').addEventListener('click', async () => {
     if (!editingProjectId) return;
     const p = state.projects.find(x => x.id === editingProjectId);
     if (!confirm(`¿Eliminar "${p?.title}"?`)) return;
@@ -287,7 +300,14 @@ function initProjectForm() {
     editingProjectId = null;
     closeModal('modal-project');
     renderProjects();
-    showStatus('Proyecto eliminado. Recuerda guardar todos los cambios.', 'ok');
+    showStatus('Guardando...', '');
+    try {
+      updateStateFromForms();
+      state = await saveData(state);
+      showStatus('✅ Proyecto eliminado.', 'ok');
+    } catch (e) {
+      showStatus('⚠️ Error al guardar: ' + e.message, 'error');
+    }
   });
 
   // Auto-generate slug from title
@@ -414,14 +434,21 @@ function renderExtractResult(p, aiUsed) {
     openModal('modal-project');
   };
 
-  // "Agregar directo" → agrega inmediatamente
-  document.getElementById('btn-extract-quick-add').onclick = () => {
+  // "Agregar directo" → agrega y guarda inmediatamente en KV
+  document.getElementById('btn-extract-quick-add').onclick = async () => {
     const newId = Math.max(0, ...state.projects.map(pr => pr.id || 0)) + 1;
     const project = { ...p, id: newId };
     state.projects.unshift(project);
     renderProjects();
     closeModal('modal-extract');
-    showStatus('✅ Proyecto agregado. Guarda para persistir.', 'ok');
+    showStatus('Guardando proyecto...', '');
+    try {
+      updateStateFromForms();
+      state = await saveData(state);
+      showStatus('✅ Proyecto guardado correctamente.', 'ok');
+    } catch (e) {
+      showStatus('⚠️ Proyecto en memoria pero falló el guardado: ' + e.message, 'error');
+    }
   };
 }
 
@@ -507,10 +534,17 @@ function initServiceForm() {
     }
     closeModal('modal-service');
     renderServices();
-    showStatus('Servicio guardado. Recuerda guardar todos los cambios.', 'ok');
+    showStatus('Guardando...', '');
+    try {
+      updateStateFromForms();
+      state = await saveData(state);
+      showStatus('✅ Servicio guardado.', 'ok');
+    } catch (e) {
+      showStatus('⚠️ Error al guardar: ' + e.message, 'error');
+    }
   });
 
-  $('#btn-delete-service').addEventListener('click', () => {
+  $('#btn-delete-service').addEventListener('click', async () => {
     if (!editingServiceSlug) return;
     const s = state.services.find(x => x.slug === editingServiceSlug);
     if (!confirm(`¿Eliminar "${s?.title}"?`)) return;
@@ -518,7 +552,14 @@ function initServiceForm() {
     editingServiceSlug = null;
     closeModal('modal-service');
     renderServices();
-    showStatus('Servicio eliminado. Recuerda guardar todos los cambios.', 'ok');
+    showStatus('Guardando...', '');
+    try {
+      updateStateFromForms();
+      state = await saveData(state);
+      showStatus('✅ Servicio eliminado.', 'ok');
+    } catch (e) {
+      showStatus('⚠️ Error al guardar: ' + e.message, 'error');
+    }
   });
 }
 
