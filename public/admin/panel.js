@@ -245,7 +245,7 @@ function initProjectForm() {
     openModal('modal-project');
   });
 
-  $('#project-form').addEventListener('submit', (e) => {
+  $('#project-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target;
     const project = {
@@ -508,7 +508,7 @@ function initServiceForm() {
     openModal('modal-service');
   });
 
-  $('#service-form').addEventListener('submit', (e) => {
+  $('#service-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     const f = e.target;
     const service = {
