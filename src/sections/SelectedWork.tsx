@@ -7,6 +7,110 @@ import { useSiteData } from '../lib/site-data-client';
 
 gsap.registerPlugin(ScrollTrigger);
 
+// Laptop mockup con estilo referencia + colores corporativos
+function LaptopMockup({ image, alt, url }: { image: string; alt: string; url: string }) {
+  const domain = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
+
+  return (
+    <div className="relative w-full">
+      <div className="relative mx-auto" style={{ maxWidth: '96%' }}>
+        {/* Screen frame */}
+        <div
+          className="relative rounded-t-xl p-2 pb-0"
+          style={{
+            background: 'linear-gradient(180deg, #1c1c2e 0%, #131325 100%)',
+            boxShadow: `
+              0 0 0 1px rgba(168,85,247,0.12),
+              0 20px 60px -10px rgba(0,0,0,0.6),
+              0 40px 80px -20px rgba(0,0,0,0.4)
+            `,
+          }}
+        >
+          {/* Camera dot */}
+          <div className="flex justify-center mb-1.5">
+            <div
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: 'rgba(255,255,255,0.1)' }}
+            />
+          </div>
+          {/* Screen */}
+          <div
+            className="relative rounded-lg overflow-hidden"
+            style={{
+              background: '#000',
+              border: '1px solid rgba(168,85,247,0.08)',
+            }}
+          >
+            {/* Browser bar */}
+            <div
+              className="flex items-center gap-2 px-3 py-2"
+              style={{ background: '#161435' }}
+            >
+              <div className="flex gap-1.5">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#ff5f57] border border-black/10" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#febc2e] border border-black/10" />
+                <div className="w-2.5 h-2.5 rounded-full bg-[#28c840] border border-black/10" />
+              </div>
+              <div className="flex-1 mx-2">
+                <div
+                  className="h-5 rounded-md flex items-center justify-center px-3 text-[10px]"
+                  style={{
+                    background: 'rgba(168, 85, 247, 0.08)',
+                    border: '1px solid rgba(168, 85, 247, 0.12)',
+                    color: '#5C5A8A',
+                    fontFamily: 'var(--font-mono)',
+                  }}
+                >
+                  {domain}
+                </div>
+              </div>
+            </div>
+            {/* Project image */}
+            <img
+              src={image}
+              alt={alt}
+              className="w-full object-cover"
+              style={{ aspectRatio: '16/10' }}
+              loading="lazy"
+            />
+          </div>
+        </div>
+        {/* Hinge */}
+        <div
+          className="h-1.5 mx-auto"
+          style={{
+            maxWidth: '98%',
+            background: 'linear-gradient(180deg, #1a1a2e, #0a0a18)',
+            borderRadius: '0 0 2px 2px',
+          }}
+        />
+        {/* Base */}
+        <div
+          className="relative mx-auto rounded-b-lg"
+          style={{
+            maxWidth: '100%',
+            height: '10px',
+            background: 'linear-gradient(180deg, #1c1c2e 0%, #131325 100%)',
+            boxShadow: `
+              0 4px 20px rgba(0,0,0,0.5),
+              0 0 0 1px rgba(168,85,247,0.08)
+            `,
+          }}
+        >
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-[1.5px] rounded-full bg-white/8" />
+        </div>
+        {/* Shadow */}
+        <div
+          className="absolute -bottom-5 left-1/2 -translate-x-1/2 w-[90%] h-6 rounded-[50%]"
+          style={{
+            background: 'radial-gradient(ellipse, rgba(0,0,0,0.3) 0%, transparent 70%)',
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
 export default function SelectedWork() {
   const sectionRef = useRef<HTMLElement>(null);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -14,8 +118,7 @@ export default function SelectedWork() {
   const ctaRef = useRef<HTMLDivElement>(null);
   const { data } = useSiteData();
 
-  // Tomar todos los proyectos featured (escalable sin deformar)
-  const featuredProjects = data.projects.filter((p) => p.featured);
+  const featuredProjects = data.projects.filter((p) => p.featured).slice(0, 4);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -33,7 +136,7 @@ export default function SelectedWork() {
         gsap.fromTo(cards,
           { opacity: 0, y: 60, scale: 0.97 },
           {
-            opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'power3.out', stagger: 0.1,
+            opacity: 1, y: 0, scale: 1, duration: 0.8, ease: 'power3.out', stagger: 0.12,
             scrollTrigger: { trigger: gridRef.current, start: 'top 80%', toggleActions: 'play none none none' },
           }
         );
@@ -88,7 +191,7 @@ export default function SelectedWork() {
 
       <div className="mx-auto relative" style={{ maxWidth: '1280px', padding: '0 4vw' }}>
         {/* Section Header */}
-        <div ref={headerRef} className="mb-12 opacity-0">
+        <div ref={headerRef} className="mb-14 opacity-0">
           <div className="sec-label">Portafolio</div>
           <h2
             className="text-white uppercase"
@@ -123,249 +226,169 @@ export default function SelectedWork() {
           </p>
         </div>
 
-        {/* Bento Grid — Compacto y escalable */}
+        {/* Projects Grid — 2 columns with laptop mockup */}
         <div
           ref={gridRef}
-          className="bento-grid-compact"
+          className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-14"
         >
-          {featuredProjects.map((project, index) => {
-            // El primer proyecto es "destacado" (más grande), el resto iguales
-            const isFeatured = index === 0;
-
-            return (
-              <Link
-                key={project.id}
-                to={`/proyectos/${project.slug}`}
-                className={`proj-card group ${isFeatured ? 'bento-featured' : 'bento-item'}`}
-                style={{
-                  display: 'block',
-                  textDecoration: 'none',
-                  color: 'inherit',
-                  background: '#111028',
-                  border: '1px solid rgba(168,85,247,0.1)',
-                  borderRadius: '16px',
-                  overflow: 'hidden',
-                  position: 'relative',
-                  transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s, box-shadow 0.4s',
-                }}
-                onMouseEnter={(e) => {
-                  const el = e.currentTarget;
-                  el.style.transform = 'translateY(-6px)';
-                  el.style.borderColor = 'rgba(168,85,247,0.3)';
-                  el.style.boxShadow = '0 24px 60px rgba(124,58,237,0.12)';
-                }}
-                onMouseLeave={(e) => {
-                  const el = e.currentTarget;
-                  el.style.transform = 'translateY(0)';
-                  el.style.borderColor = 'rgba(168,85,247,0.1)';
-                  el.style.boxShadow = 'none';
-                }}
-              >
-                {/* Image area */}
+          {featuredProjects.map((project, index) => (
+            <Link
+              key={project.id}
+              to={`/proyectos/${project.slug}`}
+              className="proj-card group"
+              style={{
+                display: 'block',
+                textDecoration: 'none',
+                color: 'inherit',
+              }}
+            >
+              {/* Laptop Mockup */}
+              <div className="relative">
+                <LaptopMockup
+                  image={project.image}
+                  alt={project.title}
+                  url={project.url}
+                />
+                {/* Hover overlay on laptop */}
                 <div
-                  style={{
-                    position: 'relative',
-                    height: isFeatured ? '240px' : '180px',
-                    overflow: 'hidden',
-                    background: project.color || '#111028',
-                  }}
+                  className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-500 z-10"
+                  style={{ top: '2%', bottom: '8%', left: '4%', right: '4%' }}
                 >
-                  <img
-                    src={project.image}
-                    alt={project.title}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'cover',
-                      opacity: 0.9,
-                      transition: 'transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s',
-                    }}
-                    className="group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  {/* Gradient overlay — sutil, solo para legibilidad de tags */}
                   <div
+                    className="flex items-center gap-2 px-6 py-3 rounded-full text-white text-sm font-medium transform translate-y-3 group-hover:translate-y-0 transition-transform duration-500"
                     style={{
-                      position: 'absolute',
-                      inset: 0,
-                      background: `linear-gradient(to top, rgba(17,16,40,0.55) 0%, rgba(17,16,40,0.05) 40%, transparent 70%)`,
+                      background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #A855F7 100%)',
+                      boxShadow: '0 8px 32px rgba(124,58,237,0.4)',
                     }}
-                  />
-
-                  {/* Top-right arrow on hover */}
-                  <div
-                    className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-all duration-400 transform translate-y-2 group-hover:translate-y-0"
                   >
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center"
-                      style={{
-                        background: 'rgba(168, 85, 247, 0.9)',
-                        backdropFilter: 'blur(12px)',
-                      }}
-                    >
-                      <ArrowUpRight size={16} className="text-white" />
-                    </div>
-                  </div>
-                  {/* Bottom-left: tags on image */}
-                  <div className="absolute bottom-4 left-4 flex gap-2">
-                    <span
-                      style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 700,
-                        letterSpacing: '0.12em',
-                        textTransform: 'uppercase',
-                        color: '#A855F7',
-                        background: 'rgba(10, 8, 24, 0.75)',
-                        backdropFilter: 'blur(8px)',
-                        padding: '0.3rem 0.7rem',
-                        borderRadius: '100px',
-                        border: '1px solid rgba(168,85,247,0.2)',
-                      }}
-                    >
-                      {project.tags || project.category}
-                    </span>
-                    {project.year && (
-                      <span
-                        style={{
-                          fontSize: '0.6rem',
-                          fontWeight: 600,
-                          letterSpacing: '0.1em',
-                          color: 'rgba(255,255,255,0.45)',
-                          background: 'rgba(10, 8, 24, 0.75)',
-                          backdropFilter: 'blur(8px)',
-                          padding: '0.3rem 0.7rem',
-                          borderRadius: '100px',
-                          border: '1px solid rgba(255,255,255,0.06)',
-                        }}
-                      >
-                        {project.year}
-                      </span>
-                    )}
+                    <ArrowUpRight size={16} />
+                    Ver caso
                   </div>
                 </div>
+              </div>
 
-                {/* Content */}
-                <div style={{ padding: isFeatured ? '1.5rem' : '1.25rem' }}>
-                  {/* Title */}
-                  <h3
-                    style={{
-                      fontFamily: 'var(--font-heading)',
-                      fontSize: isFeatured ? '1.3rem' : '1.05rem',
-                      fontWeight: 800,
-                      color: '#F4F3FF',
-                      letterSpacing: '-0.02em',
-                      lineHeight: 1.2,
-                      marginBottom: '0.5rem',
-                      transition: 'color 0.3s',
-                    }}
-                    className="group-hover:text-white"
-                  >
-                    {project.title}
-                  </h3>
-
-                  {/* Excerpt */}
-                  <p
-                    style={{
-                      fontFamily: 'var(--font-body)',
-                      fontSize: '0.82rem',
-                      color: '#9E9CC8',
-                      lineHeight: 1.65,
-                      marginBottom: '1rem',
-                    }}
-                  >
-                    {project.excerpt}
-                  </p>
-
-                  {/* Metrics row */}
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                    {project.metric && (
-                      <span
-                        style={{
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          color: '#06D6A0',
-                          background: 'rgba(6,214,160,0.08)',
-                          border: '1px solid rgba(6,214,160,0.18)',
-                          borderRadius: 100,
-                          padding: '0.25rem 0.7rem',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                        }}
-                      >
-                        <span style={{ fontSize: '0.6rem' }}>▲</span> {project.metric}
-                      </span>
-                    )}
-                    {project.metricLabel && (
-                      <span
-                        style={{
-                          fontSize: '0.7rem',
-                          fontWeight: 700,
-                          color: '#06D6A0',
-                          background: 'rgba(6,214,160,0.08)',
-                          border: '1px solid rgba(6,214,160,0.18)',
-                          borderRadius: 100,
-                          padding: '0.25rem 0.7rem',
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '0.25rem',
-                        }}
-                      >
-                        <span style={{ fontSize: '0.6rem' }}>▲</span> {project.metricLabel}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Services tags */}
-                  <div className="flex flex-wrap gap-1.5 mt-3">
-                    {project.services.slice(0, 3).map((service, i) => (
-                      <span
-                        key={i}
-                        style={{
-                          fontSize: '0.65rem',
-                          fontWeight: 600,
-                          color: '#5C5A8A',
-                          background: 'rgba(168, 85, 247, 0.05)',
-                          border: '1px solid rgba(168, 85, 247, 0.1)',
-                          borderRadius: 100,
-                          padding: '0.2rem 0.6rem',
-                        }}
-                      >
-                        {service}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Número de proyecto — esquina inferior derecha de la tarjeta */}
+              {/* Project Info */}
+              <div className="mt-7 px-1">
+                {/* Tags row */}
+                <div className="flex items-center justify-between mb-3">
                   <span
-                    className="absolute bottom-3 right-4 text-white/[0.07] font-black select-none pointer-events-none"
                     style={{
-                      fontFamily: 'var(--font-heading)',
-                      fontSize: '2.2rem',
-                      lineHeight: 1,
+                      fontSize: '0.65rem',
+                      fontWeight: 700,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: '#A855F7',
                     }}
                   >
-                    {String(index + 1).padStart(2, '0')}
+                    {project.tags || project.category}
+                  </span>
+                  <span
+                    style={{
+                      fontFamily: 'var(--font-mono)',
+                      fontSize: '0.65rem',
+                      color: 'rgba(255,255,255,0.25)',
+                    }}
+                  >
+                    {project.year}
                   </span>
                 </div>
 
-                {/* Bottom accent line */}
-                <div
+                {/* Title */}
+                <h3
                   style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                    height: '2px',
-                    background: 'linear-gradient(90deg, transparent, rgba(168,85,247,0.4), transparent)',
-                    opacity: 0,
-                    transition: 'opacity 0.4s',
+                    fontFamily: 'var(--font-heading)',
+                    fontSize: '1.25rem',
+                    fontWeight: 800,
+                    color: '#F4F3FF',
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1.2,
+                    marginBottom: '0.5rem',
                   }}
-                  className="group-hover:opacity-100"
-                />
-              </Link>
-            );
-          })}
+                >
+                  {project.title}
+                </h3>
+
+                {/* Excerpt */}
+                <p
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    fontSize: '0.85rem',
+                    color: '#9E9CC8',
+                    lineHeight: 1.65,
+                    marginBottom: '1rem',
+                  }}
+                >
+                  {project.excerpt}
+                </p>
+
+                {/* Metrics */}
+                <div className="flex flex-wrap gap-2">
+                  {project.metric && (
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: '#06D6A0',
+                        background: 'rgba(6,214,160,0.08)',
+                        border: '1px solid rgba(6,214,160,0.18)',
+                        borderRadius: 100,
+                        padding: '0.25rem 0.7rem',
+                      }}
+                    >
+                      ▲ {project.metric}
+                    </span>
+                  )}
+                  {project.metricLabel && (
+                    <span
+                      style={{
+                        fontSize: '0.72rem',
+                        fontWeight: 700,
+                        color: '#06D6A0',
+                        background: 'rgba(6,214,160,0.08)',
+                        border: '1px solid rgba(6,214,160,0.18)',
+                        borderRadius: 100,
+                        padding: '0.25rem 0.7rem',
+                      }}
+                    >
+                      ▲ {project.metricLabel}
+                    </span>
+                  )}
+                </div>
+
+                {/* Services tags */}
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {project.services.slice(0, 3).map((service, i) => (
+                    <span
+                      key={i}
+                      style={{
+                        fontSize: '0.65rem',
+                        fontWeight: 600,
+                        color: '#5C5A8A',
+                        background: 'rgba(168, 85, 247, 0.05)',
+                        border: '1px solid rgba(168, 85, 247, 0.1)',
+                        borderRadius: 100,
+                        padding: '0.2rem 0.6rem',
+                      }}
+                    >
+                      {service}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Número de proyecto — esquina inferior derecha */}
+                <span
+                  className="absolute bottom-3 right-4 text-white/[0.06] font-black select-none pointer-events-none"
+                  style={{
+                    fontFamily: 'var(--font-heading)',
+                    fontSize: '2rem',
+                    lineHeight: 1,
+                  }}
+                >
+                  {String(index + 1).padStart(2, '0')}
+                </span>
+              </div>
+            </Link>
+          ))}
         </div>
 
         {/* CTA */}
