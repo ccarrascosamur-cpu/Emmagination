@@ -6,6 +6,7 @@ const AUTH_KEY = 'emmagination-admin-token';
 let state = null;
 let editingProjectId = null;
 let editingServiceSlug = null;
+let isProjectScrollImageUploading = false;
 
 // ── UTILS ──
 const $ = (sel) => document.querySelector(sel);
@@ -43,15 +44,22 @@ async function uploadImage(file) {
   return data.url;
 }
 
-function triggerImageUpload(onUrl) {
+function triggerImageUpload(onStart, onUrl, onError, onComplete) {
   const input = document.createElement('input');
   input.type = 'file';
   input.accept = 'image/jpeg,image/png,image/webp,image/gif';
   input.onchange = async () => {
     const file = input.files[0];
     if (!file) return;
-    const url = await uploadImage(file);
-    onUrl(url);
+    onStart?.(file);
+    try {
+      const url = await uploadImage(file);
+      onUrl(url);
+    } catch (error) {
+      onError?.(error instanceof Error ? error : new Error('Error al subir imagen'));
+    } finally {
+      onComplete?.();
+    }
   };
   input.click();
 }
@@ -61,6 +69,20 @@ function showStatus(msg, type = '') {
   bar.textContent = msg;
   bar.className = 'status-bar show ' + type;
   setTimeout(() => bar.classList.remove('show'), 4000);
+}
+
+function setProjectScrollImageUploading(uploading) {
+  isProjectScrollImageUploading = uploading;
+  const uploadBtn = $('#btn-upload-project-scroll-image');
+  const submitBtn = $('#project-form button[type="submit"]');
+  if (uploadBtn) {
+    uploadBtn.disabled = uploading;
+    uploadBtn.textContent = uploading ? 'Subiendo...' : '📁 Subir';
+  }
+  if (submitBtn) {
+    submitBtn.disabled = uploading;
+    submitBtn.textContent = uploading ? 'Espera la subida...' : 'Guardar proyecto';
+  }
 }
 
 // ── LOGIN ──
@@ -274,6 +296,10 @@ function initProjectForm() {
 
   $('#project-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (isProjectScrollImageUploading) {
+      showStatus('Espera a que termine la subida de la imagen WebP.', 'error');
+      return;
+    }
     const f = e.target;
     const existingProject = editingProjectId
       ? state.projects.find((p) => p.id === editingProjectId)
@@ -342,9 +368,22 @@ function initProjectForm() {
   });
 
   $('#btn-upload-project-scroll-image').addEventListener('click', () => {
-    triggerImageUpload(url => {
-      $('#project-form').elements.namedItem('portfolioScrollImage').value = url;
-    });
+    triggerImageUpload(
+      (file) => {
+        setProjectScrollImageUploading(true);
+        showStatus(`Subiendo ${file.name}...`, '');
+      },
+      (url) => {
+        $('#project-form').elements.namedItem('portfolioScrollImage').value = url;
+        showStatus('✅ Imagen WebP cargada. Ahora puedes guardar el proyecto.', 'ok');
+      },
+      (error) => {
+        showStatus('⚠️ Error al subir imagen: ' + error.message, 'error');
+      },
+      () => {
+        setProjectScrollImageUploading(false);
+      },
+    );
   });
 
   // Auto-generate slug from title
