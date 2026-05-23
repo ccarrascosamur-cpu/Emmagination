@@ -189,7 +189,7 @@ export default function SelectedWork() {
   const ctaRef = useRef<HTMLDivElement>(null);
   const { data } = useSiteData();
 
-  const featuredProjects = data.projects.filter((p) => p.featured).slice(0, 4);
+  const featuredProjects = data.projects.filter((p) => p.featured).slice(0, 6);
 
   // Determinar tamaño por posición: 0=grande, 1=chico, 2=chico, 3=grande
   const getSizeClass = (index: number) => {
