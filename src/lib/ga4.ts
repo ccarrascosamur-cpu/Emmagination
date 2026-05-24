@@ -4,6 +4,7 @@
  */
 
 const GA4_MEASUREMENT_ID = 'G-DWXR0QWQSR';
+const GOOGLE_ADS_CONVERSION_ID = 'AW-18186928399';
 
 interface GA4EventParams {
   [key: string]: string | number | boolean | undefined;
@@ -52,6 +53,7 @@ export function trackPageView(path: string, title?: string) {
 
 /**
  * Track a lead generation event (form submission, WhatsApp click, etc.)
+ * Also sends Google Ads conversion event
  */
 export function trackGenerateLead(
   value?: number,
@@ -63,6 +65,15 @@ export function trackGenerateLead(
     value: value ?? 1,
     lead_source: source ?? 'website',
   });
+  
+  // Send Google Ads conversion event
+  if (typeof window !== 'undefined' && window.gtag) {
+    window.gtag('event', 'conversion', {
+      send_to: `${GOOGLE_ADS_CONVERSION_ID}/generate_lead`,
+      value: value ?? 1,
+      currency,
+    });
+  }
 }
 
 /**
