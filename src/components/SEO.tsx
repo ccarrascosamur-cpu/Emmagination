@@ -6,6 +6,7 @@ import {
   getAlternateLocales,
 } from '../lib/seo';
 import { useSiteData } from '../lib/site-data-client';
+import { trackPageView, isGA4Initialized } from '../lib/ga4';
 
 interface SEOProps {
   title?: string;
@@ -40,6 +41,12 @@ export default function SEO({
   const twitterHandle = seo.twitterHandle || '@emmagination';
   useEffect(() => {
     document.title = title;
+
+    // Track GA4 page view when title updates
+    if (isGA4Initialized()) {
+      const pagePath = canonicalPath;
+      trackPageView(pagePath, title);
+    }
 
     const canonicalUrl = absoluteUrl(canonicalPath);
     const imageUrl = absoluteUrl(image);
@@ -96,6 +103,11 @@ export default function SEO({
     setOrCreateMeta('og:image:width', '1200', 'property');
     setOrCreateMeta('og:image:height', '630', 'property');
     setOrCreateMeta('og:image:alt', title, 'property');
+    setOrCreateMeta('og:image:type', 'image/jpeg', 'property');
+    
+    // Additional SEO meta tags
+    setOrCreateMeta('referrer', 'no-referrer-when-downgrade', 'name');
+    setOrCreateMeta('format-detection', 'telephone=no', 'name');
 
     let canonicalLink = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
     if (!canonicalLink) {

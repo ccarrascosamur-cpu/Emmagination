@@ -14,6 +14,8 @@ import Footer from '../sections/Footer';
 import { useSiteData } from '../lib/site-data-client';
 import { getProjectBySlug } from '../lib/site-data';
 import { buildProjectSeo } from '../lib/route-seo';
+import { useScrollDepth } from '../hooks/useScrollDepth';
+import { trackProjectView } from '../lib/ga4';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -137,6 +139,14 @@ export default function ProjectCasePage() {
   if (!displayProject) {
     return null;
   }
+
+  useEffect(() => {
+    if (displayProject) {
+      trackProjectView(displayProject.title);
+    }
+  }, [displayProject]);
+
+  useScrollDepth();
 
   const heroVisual = displayProject.portfolioScrollImage || displayProject.image;
   const metrics = [displayProject.metric, displayProject.metricLabel].filter(Boolean);

@@ -1,5 +1,6 @@
 import { MessageCircle } from 'lucide-react';
 import { useSiteData } from '../lib/site-data-client';
+import { trackContact, trackGenerateLead } from '../lib/ga4';
 
 export default function WhatsAppButton() {
   const { data } = useSiteData();
@@ -14,6 +15,10 @@ export default function WhatsAppButton() {
       aria-label="Contactar por WhatsApp"
       style={{
         boxShadow: '0 4px 20px rgba(37, 211, 102, 0.4)',
+      }}
+      onClick={() => {
+        trackContact('whatsapp');
+        trackGenerateLead(undefined, 'CLP', 'whatsapp_button');
       }}
     >
       <MessageCircle size={28} />

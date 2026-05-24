@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
 import { ArrowLeft, ArrowRight, MapPin, Star } from 'lucide-react';
 import SEO from '../components/SEO';
@@ -5,6 +6,8 @@ import Footer from '../sections/Footer';
 import { buildServiceSeo } from '../lib/route-seo';
 import { useSiteData } from '../lib/site-data-client';
 import { getServiceBySlug } from '../lib/site-data';
+import { useScrollDepth } from '../hooks/useScrollDepth';
+import { trackServiceView } from '../lib/ga4';
 
 export default function ServicePage() {
   const { slug } = useParams();
@@ -21,6 +24,15 @@ export default function ServicePage() {
   }
 
   const seo = buildServiceSeo(slug);
+  
+  useEffect(() => {
+    if (service) {
+      trackServiceView(service.title);
+    }
+  }, [service]);
+  
+  useScrollDepth();
+  
   const relatedProjects = data.projects.filter((project) =>
     service.relatedProjectIds.includes(project.id),
   );

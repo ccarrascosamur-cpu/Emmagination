@@ -1,22 +1,37 @@
 {
   "name": "EMMAGINATION - Diseño Web, Branding y SEO en Chile",
   "short_name": "EMMAGINATION",
+  "description": "Agencia de diseño web, branding y SEO en Chile. Creamos sitios rápidos, claros y orientados a conversión.",
   "start_url": "/",
   "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#050505",
+  "theme_color": "#050505",
+  "lang": "es-CL",
+  "dir": "ltr",
+  "categories": ["business", "design", "marketing"],
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ],
-  "theme_color": "#050505",
-  "background_color": "#050505",
-  "display": "standalone",
-  "lang": "es-CL"
+  "screenshots": [
+    {
+      "src": "/images/og-default.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "form_factor": "wide",
+      "label": "EMMAGINATION Homepage"
+    }
+  ]
 }

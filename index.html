@@ -19,6 +19,8 @@
     <meta name="language" content="es-CL" />
     <meta name="theme-color" content="#050505" />
     <meta name="version" content="2.0" />
+    <!-- Google Search Console verification -->
+    <meta name="google-site-verification" content="AQUI_TU_CODIGO_DE_VERIFICACION" />
     <link rel="canonical" href="https://emmagination.cl/" />
     <link rel="alternate" hreflang="es-CL" href="https://emmagination.cl/" />
     <link rel="alternate" hreflang="es" href="https://emmagination.cl/" />
@@ -37,17 +39,17 @@
       content="Agencia de diseño web, branding y SEO en Chile. Creamos sitios rápidos, claros y orientados a conversión."
     />
     <meta property="og:url" content="https://emmagination.cl/" />
-    <meta property="og:image" content="https://emmagination.cl/images/isotipo.png" />
+    <meta property="og:image" content="https://emmagination.cl/images/og-default.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="EMMAGINATION" />
+    <meta property="og:image:alt" content="EMMAGINATION - Agencia de diseño web, branding y SEO en Chile" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="EMMAGINATION | Diseño Web, Branding y SEO en Chile" />
     <meta
       name="twitter:description"
       content="Agencia de diseño web, branding y SEO en Chile. Creamos sitios rápidos, claros y orientados a conversión."
     />
-    <meta name="twitter:image" content="https://emmagination.cl/images/isotipo.png" />
+    <meta name="twitter:image" content="https://emmagination.cl/images/og-default.jpg" />
     <meta name="twitter:site" content="@emmagination" />
     <!--app-seo-fallback-end-->
     <!--app-head-->
@@ -69,8 +71,46 @@
         }
       }(window.location))
     </script>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DWXR0QWQSR"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-DWXR0QWQSR', {
+        send_page_view: true,
+        cookie_flags: 'SameSite=None;Secure',
+        custom_map: {
+          'custom_parameter_1': 'page_type'
+        }
+      });
+    </script>
+    <!-- End Google Analytics 4 -->
+    <!-- Meta Pixel Code -->
+    <script>
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1242316337780128');
+      fbq('track', 'PageView');
+    </script>
+    <!-- End Meta Pixel Code -->
   </head>
   <body>
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style="display: none"
+        src="https://www.facebook.com/tr?id=1242316337780128&ev=PageView&noscript=1"
+        alt=""
+      />
+    </noscript>
     <div id="root"><!--app-html--></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

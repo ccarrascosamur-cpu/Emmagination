@@ -1,6 +1,6 @@
 export const SITE_NAME = 'EMMAGINATION';
 export const SITE_URL = 'https://emmagination.cl';
-export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/isotipo.png`;
+export const DEFAULT_OG_IMAGE = `${SITE_URL}/images/og-default.jpg`;
 export const DEFAULT_LOCALE = 'es_CL';
 export const DEFAULT_LANGUAGE = 'es-CL';
 export const GOOGLE_BUSINESS_PROFILE_URL = 'https://share.google/SI0GjDkMkZa63cVnL';
@@ -36,10 +36,16 @@ export function buildOrganizationSchema(config?: {
   return {
     '@context': 'https://schema.org',
     '@type': 'ProfessionalService',
+    '@id': `${SITE_URL}/#organization`,
     name: SITE_NAME,
     url: SITE_URL,
     image: DEFAULT_OG_IMAGE,
-    logo: DEFAULT_OG_IMAGE,
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE_URL}/images/isotipo.png`,
+      width: 1024,
+      height: 1024,
+    },
     description:
       'Agencia de diseño web, branding, Shopify y posicionamiento SEO en Chile.',
     areaServed: {
@@ -60,6 +66,7 @@ export function buildOrganizationSchema(config?: {
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'CL',
+      addressLocality: 'Santiago',
     },
     priceRange: '$$',
     openingHoursSpecification: {
@@ -67,6 +74,11 @@ export function buildOrganizationSchema(config?: {
       dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'],
       opens: '09:00',
       closes: '18:00',
+    },
+    foundingDate: '2019',
+    numberOfEmployees: {
+      '@type': 'QuantitativeValue',
+      value: '5-10',
     },
   };
 }
@@ -118,6 +130,8 @@ export function buildLocalBusinessSchema(config?: {
     address: {
       '@type': 'PostalAddress',
       addressCountry: 'CL',
+      addressLocality: 'Santiago',
+      addressRegion: 'Región Metropolitana',
     },
     geo: {
       '@type': 'GeoCoordinates',
@@ -133,5 +147,6 @@ export function buildLocalBusinessSchema(config?: {
     sameAs: [
       config?.googleBusinessUrl ?? GOOGLE_BUSINESS_PROFILE_URL,
     ].filter(Boolean),
+    hasMap: 'https://www.google.com/maps/search/?api=1&query=EMMAGINATION+Santiago+Chile',
   };
 }

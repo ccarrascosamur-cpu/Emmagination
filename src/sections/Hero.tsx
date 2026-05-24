@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { ArrowRight, Sparkles } from 'lucide-react';
 import { useSiteData } from '../lib/site-data-client';
+import { trackCTAClick, trackGenerateLead } from '../lib/ga4';
 
 interface HeroProps {
   lenisRef: React.MutableRefObject<any>;
@@ -173,15 +174,18 @@ export default function Hero({ lenisRef }: HeroProps) {
     return () => ctx.revert();
   }, []);
 
-  const scrollToWork = () => {
+  const scrollToContact = () => {
+    trackCTAClick('Iniciar proyecto', 'hero');
+    trackGenerateLead(undefined, 'CLP', 'hero_cta_primary');
     if (lenisRef.current) {
-      lenisRef.current.scrollTo('#work', { offset: 0, duration: 1.2 });
+      lenisRef.current.scrollTo('#contact', { offset: 0, duration: 1.2 });
     }
   };
 
-  const scrollToContact = () => {
+  const scrollToWorkTracked = () => {
+    trackCTAClick('Cotizar gratis', 'hero');
     if (lenisRef.current) {
-      lenisRef.current.scrollTo('#contact', { offset: 0, duration: 1.2 });
+      lenisRef.current.scrollTo('#work', { offset: 0, duration: 1.2 });
     }
   };
 
@@ -387,7 +391,7 @@ export default function Hero({ lenisRef }: HeroProps) {
             {hero.ctaPrimary}
           </button>
           <button
-            onClick={scrollToWork}
+            onClick={scrollToWorkTracked}
             className="group inline-flex items-center gap-2 px-8 py-3.5 border rounded-full text-white text-sm hover:bg-white/10 transition-all duration-300"
             style={{
               fontFamily: 'var(--font-body)',

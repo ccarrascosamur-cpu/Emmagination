@@ -1,0 +1,6 @@
+{
+  "name": "Emmagination Portafolio",
+  "description": "Rediseño interactivo y de alto rendimiento para la sección de proyectos de Emmagination, destacando resultados reales y métricas de conversión.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

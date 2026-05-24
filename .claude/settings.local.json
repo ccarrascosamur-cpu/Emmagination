@@ -9,7 +9,15 @@
       "Bash(node -e ' *)",
       "Bash(npm run *)",
       "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts,null,2\\)\\)\")",
-      "Bash(node -e \"const fs=require\\('fs'\\); console.log\\(fs.readFileSync\\('scripts/deploy.mjs','utf8'\\)\\)\")"
+      "Bash(node -e \"const fs=require\\('fs'\\); console.log\\(fs.readFileSync\\('scripts/deploy.mjs','utf8'\\)\\)\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(node scripts/deploy.mjs)",
+      "Bash(git commit -m 'fix: remove unused ogImage variable in handleExtract *)",
+      "Bash(git commit -m 'fix: auto-guardar en KV al agregar, editar o eliminar proyectos y servicios *)",
+      "Bash(curl -s -X POST https://emmagination.cl/api/extract -H \"Content-Type: application/json\" -H \"Authorization: Bearer $\\(printf 'admin:change-me')",
+      "Bash(python -m json.tool)"
     ]
   }
 }

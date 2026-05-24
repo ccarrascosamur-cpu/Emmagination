@@ -2,12 +2,25 @@ User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /api/
+Disallow: /404.html
+Disallow: /*?*
 
+# Crawl-delay for major bots
 User-agent: AhrefsBot
 Crawl-delay: 2
 
 User-agent: SemrushBot
 Crawl-delay: 2
+
+User-agent: MJ12bot
+Crawl-delay: 2
+
+# Allow Google full access
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /images/
 
 Host: emmagination.cl
 Sitemap: https://emmagination.cl/sitemap.xml

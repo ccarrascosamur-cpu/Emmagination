@@ -20,11 +20,17 @@ import Footer from './sections/Footer';
 import PortfolioPage from './pages/PortfolioPage';
 import ServicePage from './pages/ServicePage';
 import ProjectCasePage from './pages/ProjectCasePage';
+import SectionPage from './pages/SectionPage';
+import AdsLandingPage from './pages/AdsLandingPage';
 import { homeSeo } from './lib/route-seo';
+import { initMetaPixel, trackMetaPageView } from './lib/meta-pixel';
+import { trackPageView, isGA4Initialized } from './lib/ga4';
+import { useScrollDepth } from './hooks/useScrollDepth';
 
 gsap.registerPlugin(ScrollTrigger);
 
 function HomePage({ lenisRef }: { lenisRef: React.MutableRefObject<Lenis | null> }) {
+  useScrollDepth();
   return (
     <main>
       <SEO {...homeSeo} />
@@ -108,6 +114,30 @@ export default function App() {
     return () => window.clearTimeout(timeoutId);
   }, [location.hash, location.pathname]);
 
+  useEffect(() => {
+    if (!initMetaPixel()) {
+      return;
+    }
+
+    const pagePath = `${location.pathname}${location.search}`;
+    trackMetaPageView(pagePath);
+  }, [location.pathname, location.search]);
+
+  // GA4 page tracking on route change
+  useEffect(() => {
+    const pagePath = `${location.pathname}${location.search}`;
+    const pageTitle = document.title;
+    
+    // Small delay to ensure title is updated by SEO component
+    const timeoutId = window.setTimeout(() => {
+      if (isGA4Initialized()) {
+        trackPageView(pagePath, document.title || pageTitle);
+      }
+    }, 100);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [location.pathname, location.search]);
+
   return (
     <div className="relative">
       <div
@@ -129,6 +159,8 @@ export default function App() {
         <Route path="/portafolio" element={<PortfolioPage />} />
         <Route path="/servicios/:slug" element={<ServicePage />} />
         <Route path="/proyectos/:slug" element={<ProjectCasePage />} />
+        <Route path="/:sectionId" element={<SectionPage />} />
+        <Route path="/ads/landing" element={<AdsLandingPage />} />
       </Routes>
       <WhatsAppButton />
     </div>

@@ -8,6 +8,7 @@ import SEO from '../components/SEO';
 import { portfolioSeo } from '../lib/route-seo';
 import { useSiteData } from '../lib/site-data-client';
 import { getProjectCategories } from '../lib/site-data';
+import { useScrollDepth } from '../hooks/useScrollDepth';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -174,6 +175,7 @@ function LaptopMockup({
 export default function PortfolioPage() {
   const navigate = useNavigate();
   const { data } = useSiteData();
+  useScrollDepth();
   const pageRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const filtersRef = useRef<HTMLDivElement>(null);

@@ -181,19 +181,34 @@ export function buildProjectSeo(slug: string): RouteSeoData | null {
       buildLocalBusinessSchema(defaultSiteData.config),
       {
         '@context': 'https://schema.org',
-        '@type': 'CreativeWork',
-        name: project.title,
-        headline: project.title,
-        description: project.description,
+        '@type': 'Article',
+        headline: project.seoTitle || project.title,
+        description: project.seoDescription || project.description,
         image: absoluteUrl(project.image),
         url: absoluteUrl(canonicalPath),
-        dateCreated: project.year,
-        about: project.services,
+        datePublished: `${project.year}-01-01`,
+        dateModified: `${project.year}-06-01`,
         author: {
           '@type': 'Organization',
           name: SITE_NAME,
           url: absoluteUrl('/'),
         },
+        publisher: {
+          '@type': 'Organization',
+          name: SITE_NAME,
+          logo: {
+            '@type': 'ImageObject',
+            url: absoluteUrl('/images/isotipo.png'),
+            width: 1024,
+            height: 1024,
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': absoluteUrl(canonicalPath),
+        },
+        about: project.services,
+        articleSection: project.category,
       },
       buildBreadcrumbSchema([
         { name: 'Inicio', url: absoluteUrl('/') },
@@ -203,6 +218,16 @@ export function buildProjectSeo(slug: string): RouteSeoData | null {
     ],
   };
 }
+
+const SECTION_ROUTES = [
+  'servicios',
+  'portafolio',
+  'proceso',
+  'testimonios',
+  'contacto',
+  'cotizar',
+  'auditoria',
+];
 
 export function getPrerenderRoutes() {
   return [
@@ -216,10 +241,91 @@ export function getPrerenderRoutes() {
       url: `/servicios/${service.slug}`,
       file: `servicios/${service.slug}/index.html`,
     })),
+    ...SECTION_ROUTES.map((section) => ({
+      url: `/${section}`,
+      file: `${section}/index.html`,
+    })),
+    { url: '/ads/landing', file: 'ads/landing/index.html' },
   ];
 }
 
+const SECTION_SEO: Record<string, RouteSeoData> = {
+  servicios: {
+    title: 'Servicios de Diseño Web, Branding y SEO en Chile | EMMAGINATION',
+    description: 'Descubre nuestros servicios de diseño web profesional, branding e identidad visual, y SEO técnico en Chile. Soluciones digitales para hacer crecer tu marca.',
+    keywords: 'servicios diseño web chile, branding chile, seo chile, agencia digital servicios',
+    canonicalPath: '/servicios',
+    image: '/images/og-default.jpg',
+    type: 'website',
+    robots: 'index, follow',
+  },
+  portafolio: portfolioSeo,
+  proceso: {
+    title: 'Nuestro Proceso de Diseño Web y Branding | EMMAGINATION',
+    description: 'Conoce nuestro proceso de trabajo: descubrimiento, estrategia, diseño, desarrollo y lanzamiento. Metodología probada para proyectos digitales exitosos.',
+    keywords: 'proceso diseño web, metodología branding, cómo trabaja agencia digital',
+    canonicalPath: '/proceso',
+    image: '/images/og-default.jpg',
+    type: 'website',
+    robots: 'index, follow',
+  },
+  testimonios: {
+    title: 'Testimonios y Opiniones de Clientes | EMMAGINATION',
+    description: 'Lee lo que dicen nuestros clientes sobre nuestros servicios de diseño web, branding y SEO en Chile. Testimonios reales de marcas que confiaron en nosotros.',
+    keywords: 'testimonios agencia diseño web, opiniones branding chile, clientes satisfechos',
+    canonicalPath: '/testimonios',
+    image: '/images/og-default.jpg',
+    type: 'website',
+    robots: 'index, follow',
+  },
+  contacto: {
+    title: 'Contacto - Agencia de Diseño Web y Branding en Chile | EMMAGINATION',
+    description: 'Contáctanos para tu proyecto de diseño web, branding o SEO. Cotización gratuita. Atención personalizada para marcas en Chile.',
+    keywords: 'contacto agencia diseño web chile, cotizar diseño web, contactar branding chile',
+    canonicalPath: '/contacto',
+    image: '/images/og-default.jpg',
+    type: 'website',
+    robots: 'index, follow',
+  },
+  cotizar: {
+    title: 'Cotizar Diseño Web, Branding o SEO | EMMAGINATION',
+    description: 'Obtén una cotización personalizada para tu proyecto de diseño web, branding o SEO en Chile. Calculadora online y atención directa por WhatsApp.',
+    keywords: 'cotizar diseño web chile, presupuesto branding, cuánto cuesta página web chile',
+    canonicalPath: '/cotizar',
+    image: '/images/og-default.jpg',
+    type: 'website',
+    robots: 'index, follow',
+  },
+  auditoria: {
+    title: 'Auditoría SEO Gratuita para tu Sitio Web | EMMAGINATION',
+    description: 'Solicita una auditoría SEO gratuita de tu sitio web. Analizamos velocidad, indexación, contenido y oportunidades de mejora. Sin compromiso.',
+    keywords: 'auditoría seo gratis, análisis web gratuito, revisión seo chile',
+    canonicalPath: '/auditoria',
+    image: '/images/og-default.jpg',
+    type: 'website',
+    robots: 'index, follow',
+  },
+  'ads/landing': {
+    title: 'Diseño Web Profesional en Chile | Cotización Gratuita | EMMAGINATION',
+    description: 'Agencia de diseño web en Chile. Landing pages, sitios corporativos y e-commerce Shopify. Entrega en 2-4 semanas. Cotiza gratis hoy.',
+    keywords: 'diseño web chile, cotizar página web, agencia diseño web, landing page chile',
+    canonicalPath: '/ads/landing',
+    image: '/images/og-default.jpg',
+    type: 'website',
+    robots: 'index, follow',
+  },
+};
+
 export function getRouteSeo(pathname: string): RouteSeoData {
+  // Check for exact section matches first
+  const cleanPath = pathname.replace(/^\//, '').split('/')[0];
+  if (SECTION_SEO[cleanPath]) {
+    return SECTION_SEO[cleanPath];
+  }
+  if (pathname === '/ads/landing' || pathname.startsWith('/ads/landing')) {
+    return SECTION_SEO['ads/landing'];
+  }
+
   if (pathname === '/portafolio' || pathname.startsWith('/portafolio/')) {
     return portfolioSeo;
   }
