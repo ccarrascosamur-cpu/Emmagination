@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
-import { ArrowRight, CheckCircle2, Zap, Target, TrendingUp, Clock, Shield, MessageCircle, Star } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Zap, Target, TrendingUp, Clock, Shield, MessageCircle, Star, Search, BarChart3, FileSearch, ArrowUpRight } from 'lucide-react';
 import SEO from '../components/SEO';
 import { useSiteData } from '../lib/site-data-client';
 import { trackCTAClick, trackGenerateLead, trackContact } from '../lib/ga4';
@@ -234,6 +234,146 @@ export default function AdsLandingPage() {
       </section>
 
       <div ref={contentRef}>
+        {/* ===== AUDITORÍA SEO GRATIS ===== */}
+        <section className="reveal-section" style={{ padding: '80px 0', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'linear-gradient(180deg, rgba(124,58,237,0.08) 0%, transparent 100%)' }}>
+          <div className="mx-auto" style={{ maxWidth: '1200px', padding: '0 4vw' }}>
+            <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] items-center">
+              {/* Left: Text */}
+              <div>
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 text-[#22c55e] text-xs font-bold uppercase tracking-wider mb-6" style={{ fontFamily: 'var(--font-mono)' }}>
+                  <Search size={14} />
+                  100% Gratis
+                </span>
+                <h2
+                  className="text-white"
+                  style={{
+                    fontFamily: 'var(--font-heading)',
+                    fontSize: 'clamp(28px, 4vw, 44px)',
+                    fontWeight: 700,
+                    letterSpacing: '-0.02em',
+                    lineHeight: 1.1,
+                  }}
+                >
+                  Descubre por qué tu sitio no aparece en Google
+                </h2>
+                <p className="mt-5 text-white/60" style={{ fontFamily: 'var(--font-body)', fontSize: '1.05rem', lineHeight: 1.7 }}>
+                  Auditoría SEO gratuita de tu sitio web. Analizamos velocidad, errores técnicos, 
+                  oportunidades de palabras clave y lo que tus competidores están haciendo mejor.
+                </p>
+
+                <div className="mt-8 space-y-4">
+                  {[
+                    { icon: FileSearch, text: 'Análisis técnico completo (velocidad, móvil, indexación)' },
+                    { icon: BarChart3, text: 'Reporte de palabras clave y competencia' },
+                    { icon: ArrowUpRight, text: 'Lista priorizada de acciones para mejorar' },
+                  ].map((item) => (
+                    <div key={item.text} className="flex items-start gap-3">
+                      <item.icon size={20} className="text-[#A855F7] mt-0.5 flex-shrink-0" />
+                      <span className="text-white/70 text-sm" style={{ fontFamily: 'var(--font-body)', lineHeight: 1.6 }}>
+                        {item.text}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <a
+                  href={`https://wa.me/${whatsappNumber}?text=Hola%2C%20vi%20su%20anuncio%20y%20quiero%20solicitar%20la%20auditor%C3%ADa%20SEO%20gratuita%20de%20mi%20sitio%20web`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => {
+                    trackCTAClick('Auditoria SEO Gratis', 'ads_landing');
+                    trackGenerateLead(undefined, 'CLP', 'auditoria_seo_gratis');
+                  }}
+                  className="mt-8 inline-flex items-center gap-2 px-8 py-4 rounded-full text-white text-sm font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-[#22c55e]/20 hover:scale-[1.02]"
+                  style={{
+                    fontFamily: 'var(--font-body)',
+                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%)',
+                  }}
+                >
+                  <MessageCircle size={18} />
+                  Solicitar auditoría gratis
+                  <ArrowRight size={16} />
+                </a>
+
+                <p className="mt-4 text-white/30 text-xs" style={{ fontFamily: 'var(--font-body)' }}>
+                  Sin compromiso. Respuesta en 24-48 horas.
+                </p>
+              </div>
+
+              {/* Right: Visual card */}
+              <div className="relative">
+                <div
+                  className="rounded-3xl border border-white/10 p-8"
+                  style={{
+                    background: 'linear-gradient(160deg, rgba(124,58,237,0.15) 0%, rgba(15,23,42,0.4) 100%)',
+                    backdropFilter: 'blur(10px)',
+                  }}
+                >
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="w-10 h-10 rounded-xl bg-[#22c55e]/20 flex items-center justify-center">
+                      <Search size={20} className="text-[#22c55e]" />
+                    </div>
+                    <div>
+                      <div className="text-white font-semibold text-sm" style={{ fontFamily: 'var(--font-heading)' }}>
+                        Auditoría SEO
+                      </div>
+                      <div className="text-white/40 text-xs" style={{ fontFamily: 'var(--font-body)' }}>
+                        Reporte completo
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    {[
+                      { label: 'Velocidad de carga', status: 'Revisar', color: '#f59e0b' },
+                      { label: 'Optimización móvil', status: 'Revisar', color: '#f59e0b' },
+                      { label: 'Palabras clave', status: 'Revisar', color: '#f59e0b' },
+                      { label: 'Errores técnicos', status: 'Revisar', color: '#f59e0b' },
+                      { label: 'Competencia', status: 'Revisar', color: '#f59e0b' },
+                      { label: 'Oportunidades', status: 'Revisar', color: '#f59e0b' },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-center justify-between py-2 border-b border-white/5">
+                        <span className="text-white/60 text-sm" style={{ fontFamily: 'var(--font-body)' }}>
+                          {item.label}
+                        </span>
+                        <span
+                          className="text-xs px-2 py-1 rounded-full font-medium"
+                          style={{
+                            fontFamily: 'var(--font-mono)',
+                            background: `${item.color}20`,
+                            color: item.color,
+                          }}
+                        >
+                          {item.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-6 pt-4 border-t border-white/10">
+                    <div className="flex items-center justify-between">
+                      <span className="text-white/40 text-xs" style={{ fontFamily: 'var(--font-body)' }}>
+                        Valor estimado
+                      </span>
+                      <span className="text-white line-through text-sm" style={{ fontFamily: 'var(--font-body)' }}>
+                        $150.000 CLP
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-white/40 text-xs" style={{ fontFamily: 'var(--font-body)' }}>
+                        Hoy
+                      </span>
+                      <span className="text-[#22c55e] font-bold text-lg" style={{ fontFamily: 'var(--font-heading)' }}>
+                        GRATIS
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ===== BENEFICIOS ===== */}
         <section className="reveal-section" style={{ padding: '80px 0', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
           <div className="mx-auto" style={{ maxWidth: '1200px', padding: '0 4vw' }}>
