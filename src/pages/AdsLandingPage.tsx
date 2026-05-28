@@ -52,7 +52,7 @@ const STEPS = [
 const FAQS = [
   {
     q: '¿Cuánto cuesta una página web profesional?',
-    a: 'El valor depende del alcance: una landing page puede partir desde $800.000 CLP, mientras que un sitio corporativo completo o e-commerce Shopify puede ir desde $2.500.000 CLP. La mejor forma de saber es conversar tu proyecto.',
+    a: 'Landing page simple: desde $250.000 CLP. Landing page con diseño avanzado y animaciones: desde $450.000 CLP. Sitio corporativo completo (5-10 páginas): desde $1.200.000 CLP. E-commerce Shopify: desde $2.500.000 CLP. Cada proyecto es distinto, así que la mejor forma de saber es conversar directamente.',
   },
   {
     q: '¿Incluyen dominio y hosting?',
