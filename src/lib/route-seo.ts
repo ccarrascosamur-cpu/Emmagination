@@ -306,9 +306,9 @@ const SECTION_SEO: Record<string, RouteSeoData> = {
     robots: 'index, follow',
   },
   'ads/landing': {
-    title: 'Diseño Web Profesional en Chile | Cotización Gratuita | EMMAGINATION',
-    description: 'Agencia de diseño web en Chile. Landing pages, sitios corporativos y e-commerce Shopify. Entrega en 2-4 semanas. Cotiza gratis hoy.',
-    keywords: 'diseño web chile, cotizar página web, agencia diseño web, landing page chile',
+    title: 'Diseño Web y Branding en Chile | Cotización Gratuita | EMMAGINATION',
+    description: 'Agencia de diseño web y branding en Chile. Creamos marcas visuales, landing pages, sitios corporativos y e-commerce Shopify. Cotiza gratis hoy.',
+    keywords: 'diseño web chile, branding chile, agencia diseño web, identidad visual chile, landing page chile',
     canonicalPath: '/ads/landing',
     image: '/images/og-default.jpg',
     type: 'website',

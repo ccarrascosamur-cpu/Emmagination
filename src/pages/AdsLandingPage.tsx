@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Link } from 'react-router';
-import { ArrowRight, CheckCircle2, Zap, Target, TrendingUp, Clock, Shield, MessageCircle, Star, Search, BarChart3, FileSearch, ArrowUpRight } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Zap, Target, TrendingUp, Clock, Shield, MessageCircle, Star, Sparkles, Eye, Palette } from 'lucide-react';
 import SEO from '../components/SEO';
 import { useSiteData } from '../lib/site-data-client';
 import { trackCTAClick, trackGenerateLead, trackContact } from '../lib/ga4';
@@ -13,7 +13,7 @@ const BENEFITS = [
   {
     icon: Zap,
     title: 'Sitios que cargan en menos de 2 segundos',
-    desc: 'Optimización técnica completa para Core Web Vitals y mejor posicionamiento en Google.',
+    desc: 'Performance y código limpio para una experiencia de usuario excepcional.',
   },
   {
     icon: Target,
@@ -21,9 +21,9 @@ const BENEFITS = [
     desc: 'Cada elemento visual tiene un propósito: guiar al visitante hacia la acción que tú defines.',
   },
   {
-    icon: TrendingUp,
-    title: 'Base SEO incluida desde el día 1',
-    desc: 'Estructura semántica, metadata, schema.org y velocidad optimizada para indexación.',
+    icon: Palette,
+    title: 'Branding integrado desde el primer diseño',
+    desc: 'Colores, tipografía, voz de marca y diseño consistente en cada página.',
   },
   {
     icon: Clock,
@@ -117,9 +117,9 @@ export default function AdsLandingPage() {
   return (
     <main className="relative min-h-screen overflow-hidden" style={{ background: '#050208' }}>
       <SEO
-        title="Diseño Web Profesional en Chile | Cotización Gratuita | EMMAGINATION"
-        description="Agencia de diseño web en Chile. Landing pages, sitios corporativos y e-commerce Shopify. Entrega en 2-4 semanas. Cotiza gratis hoy."
-        keywords="diseño web chile, cotizar página web, agencia diseño web, landing page chile, desarrollo web profesional"
+        title="Diseño Web y Branding en Chile | Cotización Gratuita | EMMAGINATION"
+        description="Agencia de diseño web y branding en Chile. Creamos marcas visuales, landing pages, sitios corporativos y e-commerce Shopify. Cotiza gratis hoy."
+        keywords="diseño web chile, branding chile, agencia diseño web, identidad visual chile, landing page chile, desarrollo web profesional"
         canonicalPath="/ads/landing"
         image="/images/og-default.jpg"
         type="website"
@@ -127,9 +127,9 @@ export default function AdsLandingPage() {
           {
             '@context': 'https://schema.org',
             '@type': 'WebPage',
-            name: 'Diseño Web Profesional en Chile | Cotización Gratuita | EMMAGINATION',
+            name: 'Diseño Web y Branding en Chile | Cotización Gratuita | EMMAGINATION',
             url: 'https://emmagination.cl/ads/landing',
-            description: 'Agencia de diseño web en Chile. Landing pages, sitios corporativos y e-commerce Shopify.',
+            description: 'Agencia de diseño web y branding en Chile. Creamos marcas visuales, landing pages, sitios corporativos y e-commerce Shopify.',
           },
           {
             '@context': 'https://schema.org',
@@ -185,8 +185,8 @@ export default function AdsLandingPage() {
             className="mt-6 max-w-2xl text-white/60"
             style={{ fontFamily: 'var(--font-body)', fontSize: 'clamp(16px, 1.6vw, 19px)', lineHeight: 1.7 }}
           >
-            Agencia especializada en diseño web, branding y SEO en Chile. Sitios rápidos,
-            profesionales y orientados a resultados. Entrega en 2-4 semanas.
+            Agencia especializada en diseño web y branding en Chile. Creamos marcas visuales
+            y sitios profesionales que conectan con tu audiencia. Entrega en 2-4 semanas.
           </p>
 
           <div className="mt-10 flex flex-wrap gap-4">
@@ -234,14 +234,14 @@ export default function AdsLandingPage() {
       </section>
 
       <div ref={contentRef}>
-        {/* ===== AUDITORÍA SEO GRATIS ===== */}
+        {/* ===== DIAGNÓSTICO DE MARCA GRATIS ===== */}
         <section className="reveal-section" style={{ padding: '80px 0', borderTop: '1px solid rgba(255,255,255,0.05)', background: 'linear-gradient(180deg, rgba(124,58,237,0.08) 0%, transparent 100%)' }}>
           <div className="mx-auto" style={{ maxWidth: '1200px', padding: '0 4vw' }}>
             <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr] items-center">
               {/* Left: Text */}
               <div>
-                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 text-[#22c55e] text-xs font-bold uppercase tracking-wider mb-6" style={{ fontFamily: 'var(--font-mono)' }}>
-                  <Search size={14} />
+                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#A855F7]/30 bg-[#A855F7]/10 text-[#A855F7] text-xs font-bold uppercase tracking-wider mb-6" style={{ fontFamily: 'var(--font-mono)' }}>
+                  <Sparkles size={14} />
                   100% Gratis
                 </span>
                 <h2
@@ -254,18 +254,18 @@ export default function AdsLandingPage() {
                     lineHeight: 1.1,
                   }}
                 >
-                  Descubre por qué tu sitio no aparece en Google
+                  Descubre si tu marca transmite lo que vendes
                 </h2>
                 <p className="mt-5 text-white/60" style={{ fontFamily: 'var(--font-body)', fontSize: '1.05rem', lineHeight: 1.7 }}>
-                  Auditoría SEO gratuita de tu sitio web. Analizamos velocidad, errores técnicos, 
-                  oportunidades de palabras clave y lo que tus competidores están haciendo mejor.
+                  Revisión gratuita de tu identidad visual y presencia digital. Analizamos coherencia de marca, 
+                  percepción visual, mensaje y lo que tus competidores están haciendo mejor.
                 </p>
 
                 <div className="mt-8 space-y-4">
                   {[
-                    { icon: FileSearch, text: 'Análisis técnico completo (velocidad, móvil, indexación)' },
-                    { icon: BarChart3, text: 'Reporte de palabras clave y competencia' },
-                    { icon: ArrowUpRight, text: 'Lista priorizada de acciones para mejorar' },
+                    { icon: Eye, text: 'Análisis visual completo (logo, colores, tipografía)' },
+                    { icon: Target, text: 'Diagnóstico de mensaje y posicionamiento' },
+                    { icon: TrendingUp, text: 'Lista priorizada de mejoras para tu marca' },
                   ].map((item) => (
                     <div key={item.text} className="flex items-start gap-3">
                       <item.icon size={20} className="text-[#A855F7] mt-0.5 flex-shrink-0" />
@@ -277,21 +277,21 @@ export default function AdsLandingPage() {
                 </div>
 
                 <a
-                  href={`https://wa.me/${whatsappNumber}?text=Hola%2C%20vi%20su%20anuncio%20y%20quiero%20solicitar%20la%20auditor%C3%ADa%20SEO%20gratuita%20de%20mi%20sitio%20web`}
+                  href={`https://wa.me/${whatsappNumber}?text=Hola%2C%20vi%20su%20anuncio%20y%20quiero%20solicitar%20la%20revisi%C3%B3n%20gratuita%20de%20mi%20marca`}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => {
-                    trackCTAClick('Auditoria SEO Gratis', 'ads_landing');
-                    trackGenerateLead(undefined, 'CLP', 'auditoria_seo_gratis');
+                    trackCTAClick('Diagnostico Marca Gratis', 'ads_landing');
+                    trackGenerateLead(undefined, 'CLP', 'diagnostico_marca_gratis');
                   }}
-                  className="mt-8 inline-flex items-center gap-2 px-8 py-4 rounded-full text-white text-sm font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-[#22c55e]/20 hover:scale-[1.02]"
+                  className="mt-8 inline-flex items-center gap-2 px-8 py-4 rounded-full text-white text-sm font-semibold transition-all duration-300 hover:shadow-xl hover:shadow-[#7C3AED]/20 hover:scale-[1.02]"
                   style={{
                     fontFamily: 'var(--font-body)',
-                    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 50%, #15803d 100%)',
+                    background: 'linear-gradient(135deg, #7C3AED 0%, #9333EA 50%, #EC4899 100%)',
                   }}
                 >
                   <MessageCircle size={18} />
-                  Solicitar auditoría gratis
+                  Solicitar revisión gratis
                   <ArrowRight size={16} />
                 </a>
 
@@ -310,25 +310,25 @@ export default function AdsLandingPage() {
                   }}
                 >
                   <div className="flex items-center gap-3 mb-6">
-                    <div className="w-10 h-10 rounded-xl bg-[#22c55e]/20 flex items-center justify-center">
-                      <Search size={20} className="text-[#22c55e]" />
+                    <div className="w-10 h-10 rounded-xl bg-[#A855F7]/20 flex items-center justify-center">
+                      <Palette size={20} className="text-[#A855F7]" />
                     </div>
                     <div>
                       <div className="text-white font-semibold text-sm" style={{ fontFamily: 'var(--font-heading)' }}>
-                        Auditoría SEO
+                        Diagnóstico de Marca
                       </div>
                       <div className="text-white/40 text-xs" style={{ fontFamily: 'var(--font-body)' }}>
-                        Reporte completo
+                        Reporte visual
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-3">
                     {[
-                      { label: 'Velocidad de carga', status: 'Revisar', color: '#f59e0b' },
-                      { label: 'Optimización móvil', status: 'Revisar', color: '#f59e0b' },
-                      { label: 'Palabras clave', status: 'Revisar', color: '#f59e0b' },
-                      { label: 'Errores técnicos', status: 'Revisar', color: '#f59e0b' },
+                      { label: 'Identidad visual', status: 'Revisar', color: '#f59e0b' },
+                      { label: 'Consistencia de marca', status: 'Revisar', color: '#f59e0b' },
+                      { label: 'Mensaje claro', status: 'Revisar', color: '#f59e0b' },
+                      { label: 'Presencia digital', status: 'Revisar', color: '#f59e0b' },
                       { label: 'Competencia', status: 'Revisar', color: '#f59e0b' },
                       { label: 'Oportunidades', status: 'Revisar', color: '#f59e0b' },
                     ].map((item) => (
@@ -363,7 +363,7 @@ export default function AdsLandingPage() {
                       <span className="text-white/40 text-xs" style={{ fontFamily: 'var(--font-body)' }}>
                         Hoy
                       </span>
-                      <span className="text-[#22c55e] font-bold text-lg" style={{ fontFamily: 'var(--font-heading)' }}>
+                      <span className="text-[#A855F7] font-bold text-lg" style={{ fontFamily: 'var(--font-heading)' }}>
                         GRATIS
                       </span>
                     </div>
@@ -604,7 +604,7 @@ export default function AdsLandingPage() {
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.05)', padding: '24px 0' }}>
         <div className="mx-auto text-center" style={{ maxWidth: '1200px', padding: '0 4vw' }}>
           <p className="text-white/30 text-xs" style={{ fontFamily: 'var(--font-body)' }}>
-            © 2026 EMMAGINATION. Agencia de diseño web, branding y SEO en Chile.
+            © 2026 EMMAGINATION. Agencia de diseño web y branding en Chile.
           </p>
         </div>
       </footer>
