@@ -9,26 +9,32 @@
       "year": "2024",
       "image": "/images/project-portalzen.jpg",
       "pdf": "/proyectos/portalzen.pdf",
-      "description": "Tienda online de productos esotéricos, aromaterapia y bienestar. Diseño minimalista con experiencia de compra fluida.",
-      "excerpt": "Rediseño e-commerce con foco en catálogo, claridad comercial y una experiencia de compra más limpia.",
+      "description": "Tienda online de productos esotÃ©ricos, aromaterapia y bienestar. DiseÃ±o minimalista con experiencia de compra fluida.",
+      "excerpt": "RediseÃ±o e-commerce con foco en catÃ¡logo, claridad comercial y una experiencia de compra mÃ¡s limpia.",
       "url": "https://www.portalzen.cl",
-      "services": ["Shopify", "E-commerce", "Branding"],
-      "tags": "ECOMMERCE · SHOPIFY PLUS",
-      "metric": "+65% tráfico orgánico",
-      "metricLabel": "+45% conversión",
+      "services": [
+        "Shopify",
+        "E-commerce",
+        "Branding"
+      ],
+      "tags": "ECOMMERCE Â· SHOPIFY PLUS",
+      "metric": "+65% trÃ¡fico orgÃ¡nico",
+      "metricLabel": "+45% conversiÃ³n",
       "color": "#1a2e1a",
       "offset": 0,
       "featured": true,
       "seoTitle": "Caso Portal Zen | E-commerce Shopify y Branding",
-      "seoDescription": "Caso de Portal Zen: rediseño e-commerce, branding y optimización de experiencia de compra para una tienda Shopify.",
-      "challenge": "La marca necesitaba una tienda más ordenada, coherente y capaz de presentar un catálogo amplio sin perder claridad visual ni intención comercial.",
-      "solution": "Se trabajó una experiencia Shopify más limpia, categorías más legibles y una propuesta visual alineada con el universo de la marca.",
+      "seoDescription": "Caso de Portal Zen: rediseÃ±o e-commerce, branding y optimizaciÃ³n de experiencia de compra para una tienda Shopify.",
+      "challenge": "La marca necesitaba una tienda mÃ¡s ordenada, coherente y capaz de presentar un catÃ¡logo amplio sin perder claridad visual ni intenciÃ³n comercial.",
+      "solution": "Se trabajÃ³ una experiencia Shopify mÃ¡s limpia, categorÃ­as mÃ¡s legibles y una propuesta visual alineada con el universo de la marca.",
       "results": [
-        "Catálogo más entendible para nuevas visitas.",
-        "Jerarquía visual pensada para acompañar la compra.",
-        "Base sólida para seguir creciendo con campañas y SEO."
+        "CatÃ¡logo mÃ¡s entendible para nuevas visitas.",
+        "JerarquÃ­a visual pensada para acompaÃ±ar la compra.",
+        "Base sÃ³lida para seguir creciendo con campaÃ±as y SEO."
       ],
-      "gallery": ["/images/project-portalzen.jpg"],
+      "gallery": [
+        "/images/project-portalzen.jpg"
+      ],
       "portfolioScrollImage": ""
     },
     {
@@ -40,26 +46,32 @@
       "year": "2024",
       "image": "/images/project-sagradamadre.jpg",
       "pdf": "/proyectos/sagradamadre.pdf",
-      "description": "E-commerce de productos naturales con identidad visual orgánica",
-      "excerpt": "Proyecto e-commerce orientado a identidad de marca, legibilidad de producto y una experiencia de compra más natural.",
+      "description": "E-commerce de productos naturales con identidad visual orgÃ¡nica",
+      "excerpt": "Proyecto e-commerce orientado a identidad de marca, legibilidad de producto y una experiencia de compra mÃ¡s natural.",
       "url": "https://www.sagradamadre.cl",
-      "services": ["Diseño web", "Shopify", "Branding"],
-      "tags": "BRANDING · WEB · CRO",
+      "services": [
+        "DiseÃ±o web",
+        "Shopify",
+        "Branding"
+      ],
+      "tags": "BRANDING Â· WEB Â· CRO",
       "metric": "+40% tiempo en sitio",
       "metricLabel": "+28% CVR",
       "color": "#2a1a1a",
       "offset": 60,
       "featured": true,
-      "seoTitle": "Caso Sagrada Madre | Diseño Web y Branding E-commerce",
-      "seoDescription": "Caso de Sagrada Madre: trabajo de diseño web, branding y e-commerce para una marca de productos naturales.",
-      "challenge": "El sitio debía transmitir una identidad orgánica y al mismo tiempo sostener una estructura comercial clara para venta online.",
-      "solution": "Se articuló una propuesta visual más cálida, navegación más simple y una presentación de productos enfocada en comprensión rápida.",
+      "seoTitle": "Caso Sagrada Madre | DiseÃ±o Web y Branding E-commerce",
+      "seoDescription": "Caso de Sagrada Madre: trabajo de diseÃ±o web, branding y e-commerce para una marca de productos naturales.",
+      "challenge": "El sitio debÃ­a transmitir una identidad orgÃ¡nica y al mismo tiempo sostener una estructura comercial clara para venta online.",
+      "solution": "Se articulÃ³ una propuesta visual mÃ¡s cÃ¡lida, navegaciÃ³n mÃ¡s simple y una presentaciÃ³n de productos enfocada en comprensiÃ³n rÃ¡pida.",
       "results": [
-        "Identidad visual más coherente con el producto.",
-        "Mejor lectura de categorías y fichas.",
-        "Experiencia de compra más directa y consistente."
+        "Identidad visual mÃ¡s coherente con el producto.",
+        "Mejor lectura de categorÃ­as y fichas.",
+        "Experiencia de compra mÃ¡s directa y consistente."
       ],
-      "gallery": ["/images/project-sagradamadre.jpg"],
+      "gallery": [
+        "/images/project-sagradamadre.jpg"
+      ],
       "portfolioScrollImage": ""
     },
     {
@@ -72,152 +84,202 @@
       "image": "/images/project-fegar.jpg",
       "pdf": "/proyectos/fegar.pdf",
       "description": "Landing page corporativa con branding completo",
-      "excerpt": "Landing page corporativa construida para comunicar con más claridad y reforzar una imagen de marca más sólida.",
+      "excerpt": "Landing page corporativa construida para comunicar con mÃ¡s claridad y reforzar una imagen de marca mÃ¡s sÃ³lida.",
       "url": "https://www.fegar.cl",
-      "services": ["Landing page", "Branding", "Logo"],
-      "tags": "CORPORATIVO · WEB",
-      "metric": "Leads calificados desde día 1",
+      "services": [
+        "Landing page",
+        "Branding",
+        "Logo"
+      ],
+      "tags": "CORPORATIVO Â· WEB",
+      "metric": "Leads calificados desde dÃ­a 1",
       "metricLabel": "Presencia B2B",
       "color": "#1a1a2e",
       "offset": 0,
       "featured": true,
       "seoTitle": "Caso Fegar | Landing Page Corporativa y Branding",
       "seoDescription": "Caso Fegar: landing page corporativa con trabajo de branding y estructura enfocada en claridad comercial.",
-      "challenge": "La empresa necesitaba una presencia digital más clara para presentar sus servicios con una percepción más profesional.",
-      "solution": "Se desarrolló una landing de alto contraste, mensaje directo y estructura comercial más ordenada junto con una identidad renovada.",
+      "challenge": "La empresa necesitaba una presencia digital mÃ¡s clara para presentar sus servicios con una percepciÃ³n mÃ¡s profesional.",
+      "solution": "Se desarrollÃ³ una landing de alto contraste, mensaje directo y estructura comercial mÃ¡s ordenada junto con una identidad renovada.",
       "results": [
-        "Narrativa comercial más clara.",
-        "Mejor percepción corporativa.",
-        "Base adecuada para campañas y presentación comercial."
+        "Narrativa comercial mÃ¡s clara.",
+        "Mejor percepciÃ³n corporativa.",
+        "Base adecuada para campaÃ±as y presentaciÃ³n comercial."
       ],
-      "gallery": ["/images/project-fegar.jpg"],
+      "gallery": [
+        "/images/project-fegar.jpg"
+      ],
       "portfolioScrollImage": ""
     },
     {
       "id": 4,
       "slug": "ingles-rugby-club",
-      "title": "Inglés Rugby Club",
-      "client": "Inglés Rugby Club",
+      "title": "InglÃ©s Rugby Club",
+      "client": "InglÃ©s Rugby Club",
       "category": "Landing Page",
       "year": "2024",
       "image": "/images/project-irc.jpg",
       "pdf": "/proyectos/irc.pdf",
       "description": "Sitio web institucional para club de rugby con panel autoadministrable de contenidos y noticias.",
-      "excerpt": "Sitio institucional con gestión de contenidos para noticias, comunicaciones y presencia del club.",
+      "excerpt": "Sitio institucional con gestiÃ³n de contenidos para noticias, comunicaciones y presencia del club.",
       "url": "https://www.inglesrugbyclub.cl",
-      "services": ["Web institucional", "Panel admin", "Noticias"],
-      "tags": "IDENTIDAD · WEB INSTITUCIONAL",
+      "services": [
+        "Web institucional",
+        "Panel admin",
+        "Noticias"
+      ],
+      "tags": "IDENTIDAD Â· WEB INSTITUCIONAL",
       "metric": "Sitio autoadministrable 100%",
-      "metricLabel": "Gestión interna",
+      "metricLabel": "GestiÃ³n interna",
       "color": "#1a2a2a",
       "offset": 60,
       "featured": true,
-      "seoTitle": "Caso Inglés Rugby Club | Web Institucional con Panel",
-      "seoDescription": "Caso Inglés Rugby Club: desarrollo de sitio institucional con panel autoadministrable para contenidos y noticias.",
+      "seoTitle": "Caso InglÃ©s Rugby Club | Web Institucional con Panel",
+      "seoDescription": "Caso InglÃ©s Rugby Club: desarrollo de sitio institucional con panel autoadministrable para contenidos y noticias.",
       "challenge": "El club necesitaba una web institucional simple de actualizar y clara para comunicar actividades, noticias y vida deportiva.",
-      "solution": "Se diseñó un sitio liviano, con estructura institucional y soporte para autogestión de contenidos clave.",
+      "solution": "Se diseÃ±Ã³ un sitio liviano, con estructura institucional y soporte para autogestiÃ³n de contenidos clave.",
       "results": [
-        "Mayor autonomía para actualizar contenidos.",
-        "Presentación institucional más ordenada.",
-        "Canal digital más claro para la comunidad del club."
+        "Mayor autonomÃ­a para actualizar contenidos.",
+        "PresentaciÃ³n institucional mÃ¡s ordenada.",
+        "Canal digital mÃ¡s claro para la comunidad del club."
       ],
-      "gallery": ["/images/project-irc.jpg"],
+      "gallery": [
+        "/images/project-irc.jpg"
+      ],
       "portfolioScrollImage": ""
     }
   ],
   "services": [
     {
       "slug": "diseno-web",
-      "shortTitle": "Diseño Web",
-      "title": "Diseño Web Profesional en Chile",
-      "heroTitle": "Sitios web pensados para verse bien, cargar rápido y convertir.",
-      "intro": "Diseñamos sitios corporativos, landing pages y webs comerciales con foco en claridad, performance y posicionamiento.",
-      "description": "Servicio de diseño web profesional en Chile para marcas que necesitan una presencia sólida, rápida y orientada a resultados.",
-      "keywords": "diseño web chile, diseño web profesional, landing page chile, paginas web chile, agencia diseño web",
-      "category": "Diseño web",
+      "shortTitle": "DiseÃ±o Web",
+      "title": "DiseÃ±o Web Profesional en Chile",
+      "heroTitle": "Sitios web pensados para verse bien, cargar rÃ¡pido y convertir.",
+      "intro": "DiseÃ±amos sitios corporativos, landing pages y webs comerciales con foco en claridad, performance y posicionamiento.",
+      "description": "Servicio de diseÃ±o web profesional en Chile para marcas que necesitan una presencia sÃ³lida, rÃ¡pida y orientada a resultados.",
+      "keywords": "diseÃ±o web chile, diseÃ±o web profesional, landing page chile, paginas web chile, agencia diseÃ±o web",
+      "category": "DiseÃ±o web",
       "benefits": [
         "Arquitectura clara para que Google y tus clientes entiendan tu propuesta.",
-        "Diseño responsive con jerarquía visual orientada a conversión.",
-        "Base técnica optimizada para velocidad, indexación y mantenimiento."
+        "DiseÃ±o responsive con jerarquÃ­a visual orientada a conversiÃ³n.",
+        "Base tÃ©cnica optimizada para velocidad, indexaciÃ³n y mantenimiento."
       ],
       "deliverables": [
-        "UX/UI para home, páginas clave y secciones comerciales.",
+        "UX/UI para home, pÃ¡ginas clave y secciones comerciales.",
         "Sistema visual coherente con tu marca y tus objetivos.",
-        "Implementación optimizada en frontend moderno."
+        "ImplementaciÃ³n optimizada en frontend moderno."
       ],
       "process": [
-        "Auditoría de negocio, competencia y estructura de contenidos.",
-        "Wireframes y propuesta visual con foco en mensaje y conversión.",
-        "Desarrollo, QA técnico, lanzamiento y medición inicial."
+        "AuditorÃ­a de negocio, competencia y estructura de contenidos.",
+        "Wireframes y propuesta visual con foco en mensaje y conversiÃ³n.",
+        "Desarrollo, QA tÃ©cnico, lanzamiento y mediciÃ³n inicial."
       ],
       "faqs": [
-        { "question": "¿Qué tipo de sitios diseñan?", "answer": "Trabajamos sitios corporativos, landing pages, portfolios y webs comerciales con foco en captación y posicionamiento." },
-        { "question": "¿Incluyen SEO técnico en el desarrollo?", "answer": "Sí. Definimos metadata, estructura semántica, enlazado interno, performance y base técnica para indexación." },
-        { "question": "¿Pueden rediseñar un sitio existente?", "answer": "Sí. Podemos rediseñar una web actual sin perder foco comercial y corrigiendo problemas de UX, velocidad y rastreo." }
+        {
+          "question": "Â¿QuÃ© tipo de sitios diseÃ±an?",
+          "answer": "Trabajamos sitios corporativos, landing pages, portfolios y webs comerciales con foco en captaciÃ³n y posicionamiento."
+        },
+        {
+          "question": "Â¿Incluyen SEO tÃ©cnico en el desarrollo?",
+          "answer": "SÃ­. Definimos metadata, estructura semÃ¡ntica, enlazado interno, performance y base tÃ©cnica para indexaciÃ³n."
+        },
+        {
+          "question": "Â¿Pueden rediseÃ±ar un sitio existente?",
+          "answer": "SÃ­. Podemos rediseÃ±ar una web actual sin perder foco comercial y corrigiendo problemas de UX, velocidad y rastreo."
+        }
       ],
-      "relatedProjectIds": [3, 4]
+      "relatedProjectIds": [
+        3,
+        4
+      ]
     },
     {
       "slug": "branding",
       "shortTitle": "Branding",
       "title": "Branding e Identidad Visual en Chile",
       "heroTitle": "Construimos marcas que se reconocen, se recuerdan y se entienden.",
-      "intro": "Desarrollamos identidades visuales con criterio estratégico para que tu marca gane coherencia y presencia.",
+      "intro": "Desarrollamos identidades visuales con criterio estratÃ©gico para que tu marca gane coherencia y presencia.",
       "description": "Servicio de branding e identidad visual en Chile para empresas que necesitan diferenciarse con claridad y consistencia.",
-      "keywords": "branding chile, identidad visual chile, diseño de marca, logo profesional chile, agencia branding",
+      "keywords": "branding chile, identidad visual chile, diseÃ±o de marca, logo profesional chile, agencia branding",
       "category": "Branding",
       "benefits": [
-        "Una marca más clara y consistente en web, redes y piezas comerciales.",
+        "Una marca mÃ¡s clara y consistente en web, redes y piezas comerciales.",
         "Lenguaje visual alineado con el posicionamiento del negocio.",
-        "Activos de marca listos para crecer sin improvisación."
+        "Activos de marca listos para crecer sin improvisaciÃ³n."
       ],
       "deliverables": [
-        "Concepto visual, logotipo y sistema gráfico base.",
-        "Paleta, tipografías, criterios de composición y aplicaciones.",
-        "Guía de uso para mantener consistencia en el tiempo."
+        "Concepto visual, logotipo y sistema grÃ¡fico base.",
+        "Paleta, tipografÃ­as, criterios de composiciÃ³n y aplicaciones.",
+        "GuÃ­a de uso para mantener consistencia en el tiempo."
       ],
       "process": [
-        "Diagnóstico de posicionamiento, audiencia y tono de marca.",
-        "Exploración visual y definición del sistema de identidad.",
+        "DiagnÃ³stico de posicionamiento, audiencia y tono de marca.",
+        "ExploraciÃ³n visual y definiciÃ³n del sistema de identidad.",
         "Entrega de lineamientos y aplicaciones prioritarias."
       ],
       "faqs": [
-        { "question": "¿El branding es solo el logo?", "answer": "No. El logo es una parte. El branding incluye sistema visual, tono, consistencia y percepción de marca." },
-        { "question": "¿Sirve para marcas nuevas y existentes?", "answer": "Sí. Podemos construir una identidad desde cero o reorganizar una marca que ya existe pero perdió coherencia." },
-        { "question": "¿Entregan archivos y lineamientos?", "answer": "Sí. Entregamos archivos base y una guía para aplicar la identidad de forma consistente." }
+        {
+          "question": "Â¿El branding es solo el logo?",
+          "answer": "No. El logo es una parte. El branding incluye sistema visual, tono, consistencia y percepciÃ³n de marca."
+        },
+        {
+          "question": "Â¿Sirve para marcas nuevas y existentes?",
+          "answer": "SÃ­. Podemos construir una identidad desde cero o reorganizar una marca que ya existe pero perdiÃ³ coherencia."
+        },
+        {
+          "question": "Â¿Entregan archivos y lineamientos?",
+          "answer": "SÃ­. Entregamos archivos base y una guÃ­a para aplicar la identidad de forma consistente."
+        }
       ],
-      "relatedProjectIds": [1, 2, 3]
+      "relatedProjectIds": [
+        1,
+        2,
+        3
+      ]
     },
     {
       "slug": "seo",
       "shortTitle": "SEO",
       "title": "SEO Profesional en Chile",
-      "heroTitle": "Posicionamiento orgánico pensado para atraer búsquedas correctas y convertir mejor.",
-      "intro": "Trabajamos SEO técnico, local, on-page y estratégico para sitios corporativos, servicios y e-commerce.",
-      "description": "Servicio de SEO profesional en Chile para marcas que necesitan más visibilidad orgánica, mejor estructura técnica y crecimiento sostenible.",
+      "heroTitle": "Posicionamiento orgÃ¡nico pensado para atraer bÃºsquedas correctas y convertir mejor.",
+      "intro": "Trabajamos SEO tÃ©cnico, local, on-page y estratÃ©gico para sitios corporativos, servicios y e-commerce.",
+      "description": "Servicio de SEO profesional en Chile para marcas que necesitan mÃ¡s visibilidad orgÃ¡nica, mejor estructura tÃ©cnica y crecimiento sostenible.",
       "keywords": "seo chile, posicionamiento web chile, seo tecnico chile, seo local chile, agencia seo chile",
       "category": "SEO",
       "benefits": [
-        "Más claridad para Google sobre qué ofrece tu negocio y para qué búsquedas eres relevante.",
-        "Correcciones técnicas que mejoran rastreo, indexación, velocidad y experiencia.",
-        "Enfoque combinado de posicionamiento y conversión para atraer tráfico con intención real."
+        "MÃ¡s claridad para Google sobre quÃ© ofrece tu negocio y para quÃ© bÃºsquedas eres relevante.",
+        "Correcciones tÃ©cnicas que mejoran rastreo, indexaciÃ³n, velocidad y experiencia.",
+        "Enfoque combinado de posicionamiento y conversiÃ³n para atraer trÃ¡fico con intenciÃ³n real."
       ],
       "deliverables": [
-        "Auditoría SEO técnica, semántica y de competencia.",
+        "AuditorÃ­a SEO tÃ©cnica, semÃ¡ntica y de competencia.",
         "Mejoras en metadata, enlazado interno, arquitectura y contenido clave.",
-        "Roadmap priorizado para SEO local, técnico y comercial."
+        "Roadmap priorizado para SEO local, tÃ©cnico y comercial."
       ],
       "process": [
-        "Auditoría del sitio, búsquedas objetivo, competencia y estado técnico.",
-        "Priorización de quick wins y oportunidades de crecimiento orgánico.",
-        "Implementación, validación y mejora continua según datos y resultados."
+        "AuditorÃ­a del sitio, bÃºsquedas objetivo, competencia y estado tÃ©cnico.",
+        "PriorizaciÃ³n de quick wins y oportunidades de crecimiento orgÃ¡nico.",
+        "ImplementaciÃ³n, validaciÃ³n y mejora continua segÃºn datos y resultados."
       ],
       "faqs": [
-        { "question": "¿Solo trabajan SEO para Shopify?", "answer": "No. Trabajamos SEO para sitios corporativos, servicios, landings y e-commerce. Shopify es solo una de las plataformas que podemos optimizar." },
-        { "question": "¿Qué incluye su servicio de SEO?", "answer": "Incluye auditoría técnica, arquitectura, enlazado interno, metadata, contenido, SEO local y prioridades de implementación." },
-        { "question": "¿Sirve para negocios locales y empresas de servicios?", "answer": "Sí. De hecho, en negocios locales y de servicios el SEO bien estructurado suele generar oportunidades comerciales de alta intención." }
+        {
+          "question": "Â¿Solo trabajan SEO para Shopify?",
+          "answer": "No. Trabajamos SEO para sitios corporativos, servicios, landings y e-commerce. Shopify es solo una de las plataformas que podemos optimizar."
+        },
+        {
+          "question": "Â¿QuÃ© incluye su servicio de SEO?",
+          "answer": "Incluye auditorÃ­a tÃ©cnica, arquitectura, enlazado interno, metadata, contenido, SEO local y prioridades de implementaciÃ³n."
+        },
+        {
+          "question": "Â¿Sirve para negocios locales y empresas de servicios?",
+          "answer": "SÃ­. De hecho, en negocios locales y de servicios el SEO bien estructurado suele generar oportunidades comerciales de alta intenciÃ³n."
+        }
       ],
-      "relatedProjectIds": [1, 2, 3]
+      "relatedProjectIds": [
+        1,
+        2,
+        3
+      ]
     }
   ],
   "config": {
@@ -228,27 +290,39 @@
     "googleBusinessUrl": "https://share.google/SI0GjDkMkZa63cVnL"
   },
   "hero": {
-    "badge": "Agencia de diseño web, branding y SEO en Chile",
-    "titleLine1": "Diseño web que",
+    "badge": "Agencia de diseÃ±o web, branding y SEO en Chile",
+    "titleLine1": "DiseÃ±o web que",
     "titleLine2": "convierte visitas",
     "titleLine3": "en clientes.",
     "taglineLine1": "Deja de ser un logo.",
     "taglineLine2": "Pasa a ser una marca.",
-    "subtitle": "Diseñamos identidades y posicionamos marcas en Google. Hacemos que tu negocio se vea, se entienda y se compre.",
+    "subtitle": "DiseÃ±amos identidades y posicionamos marcas en Google. Hacemos que tu negocio se vea, se entienda y se compre.",
     "ctaPrimary": "Iniciar proyecto",
     "ctaSecondary": "Cotizar gratis"
   },
   "seo": {
-    "siteTitle": "EMMAGINATION | Diseño Web, Branding y Experiencias Digitales en Chile",
-    "siteDescription": "EMMAGINATION - Agencia de diseño web, branding, desarrollo Shopify y producción de contenido en Chile. Creamos experiencias digitales que transforman marcas.",
-    "siteKeywords": "diseño web, branding, shopify, desarrollo web, seo chile, agencia digital, e-commerce, producción de video",
+    "siteTitle": "EMMAGINATION | DiseÃ±o Web, Branding y Experiencias Digitales en Chile",
+    "siteDescription": "EMMAGINATION - Agencia de diseÃ±o web, branding, desarrollo Shopify y producciÃ³n de contenido en Chile. Creamos experiencias digitales que transforman marcas.",
+    "siteKeywords": "diseÃ±o web, branding, shopify, desarrollo web, seo chile, agencia digital, e-commerce, producciÃ³n de video",
     "ogImage": "/images/isotipo.png",
     "twitterHandle": "@emmagination"
   },
   "stats": [
-    { "value": "50+", "label": "Proyectos" },
-    { "value": "30+", "label": "Clientes" },
-    { "value": "5+", "label": "Años" },
-    { "value": "100%", "label": "Satisfacción" }
+    {
+      "value": "16+",
+      "label": "Proyectos"
+    },
+    {
+      "value": "14+",
+      "label": "Clientes"
+    },
+    {
+      "value": "5+",
+      "label": "AÃ±os"
+    },
+    {
+      "value": "100%",
+      "label": "SatisfacciÃ³n"
+    }
   ]
 }
