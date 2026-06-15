@@ -25,13 +25,9 @@ jobs:
       - name: Build
         run: npm run build:hostinger
 
-      - name: Deploy via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
         with:
-          server: ${{ secrets.FTP_HOST }}
-          username: ${{ secrets.FTP_USER }}
-          password: ${{ secrets.FTP_PASS }}
-          port: 22
-          local_path: ./dist/*
-          remote_path: /home/u705216097/domains/emmagination.cl/public_html
-          sftp_only: true
+          name: dist-${{ github.sha }}
+          path: dist/
+          retention-days: 1
