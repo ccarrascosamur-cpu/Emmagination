@@ -32,7 +32,7 @@ jobs:
       - name: Create ZIP
         run: |
           cd dist
-          zip -r ../deploy.zip .
+          zip -r ../deploy.zip . --exclude "*.pdf"
           cd ..
           echo "ZIP size: $(du -sh deploy.zip | cut -f1)"
 
