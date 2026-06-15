@@ -4,6 +4,9 @@
  * Recibe un ZIP desde GitHub Actions y lo extrae en public_html
  */
 
+set_time_limit(300);
+ini_set('max_execution_time', 300);
+
 // Token secreto — debe coincidir con WEBHOOK_SECRET en GitHub
 $secret = '__WEBHOOK_SECRET__';
 

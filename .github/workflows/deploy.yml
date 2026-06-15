@@ -40,6 +40,7 @@ jobs:
         run: |
           HTTP_CODE=$(curl -s -o /tmp/deploy_response.txt -w "%{http_code}" \
             -X POST \
+            --max-time 300 \
             -H "X-Deploy-Token: ${{ secrets.WEBHOOK_SECRET }}" \
             -F "zip=@deploy.zip" \
             "https://emmagination.cl/deploy-webhook.php")
