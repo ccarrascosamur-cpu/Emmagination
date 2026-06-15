@@ -159,27 +159,53 @@ async function copyContentJson() {
   }
 }
 
-// Inject WEBHOOK_SECRET into dist/deploy-webhook.php
+// Inject WEBHOOK_SECRET into dist/deploy-webhook.php and dist/admin/ai-extract.php
 async function injectWebhookSecret() {
   const secret = process.env.WEBHOOK_SECRET || '';
   if (!secret) {
     console.warn('⚠️  WEBHOOK_SECRET not set — deploy webhook will reject all requests');
     return;
   }
-  const webhookPath = path.join(distDir, 'deploy-webhook.php');
-  try {
-    let src = await readFile(webhookPath, 'utf8');
-    src = src.replace('__WEBHOOK_SECRET__', secret);
-    await writeFile(webhookPath, src, 'utf8');
-    console.log('✅ Injected WEBHOOK_SECRET into dist/deploy-webhook.php');
-  } catch (e) {
-    console.warn('⚠️  Could not inject WEBHOOK_SECRET:', e.message);
+
+  const files = [
+    path.join(distDir, 'deploy-webhook.php'),
+    path.join(distDir, 'admin', 'ai-extract.php'),
+  ];
+
+  for (const filePath of files) {
+    try {
+      let src = await readFile(filePath, 'utf8');
+      src = src.replaceAll('__WEBHOOK_SECRET__', secret);
+      await writeFile(filePath, src, 'utf8');
+      console.log(`✅ Injected WEBHOOK_SECRET into ${path.basename(filePath)}`);
+    } catch (e) {
+      console.warn(`⚠️  Could not inject WEBHOOK_SECRET into ${path.basename(filePath)}:`, e.message);
+    }
   }
 }
 
-// Inject GITHUB_TOKEN into dist/admin/panel.js
+// Inject ANTHROPIC_API_KEY into dist/admin/ai-extract.php
+async function injectAnthropicKey() {
+  const apiKey = process.env.ANTHROPIC_API_KEY || '';
+  if (!apiKey) {
+    console.warn('⚠️  ANTHROPIC_API_KEY not set — AI extract will not work');
+    return;
+  }
+  const extractPath = path.join(distDir, 'admin', 'ai-extract.php');
+  try {
+    let src = await readFile(extractPath, 'utf8');
+    src = src.replace('__ANTHROPIC_API_KEY__', apiKey);
+    await writeFile(extractPath, src, 'utf8');
+    console.log('✅ Injected ANTHROPIC_API_KEY into dist/admin/ai-extract.php');
+  } catch (e) {
+    console.warn('⚠️  Could not inject ANTHROPIC_API_KEY:', e.message);
+  }
+}
+
+// Inject GITHUB_TOKEN and WEBHOOK_SECRET into dist/admin/panel.js
 async function injectGithubToken() {
   const token = process.env.GITHUB_TOKEN || '';
+  const secret = process.env.WEBHOOK_SECRET || '';
   if (!token) {
     console.warn('⚠️  GITHUB_TOKEN not set — admin panel will not be able to save changes');
     return;
@@ -188,8 +214,9 @@ async function injectGithubToken() {
   try {
     let src = await readFile(panelPath, 'utf8');
     src = src.replace('__GITHUB_TOKEN__', token);
+    src = src.replace('__WEBHOOK_SECRET__', secret);
     await writeFile(panelPath, src, 'utf8');
-    console.log('✅ Injected GITHUB_TOKEN into dist/admin/panel.js');
+    console.log('✅ Injected GITHUB_TOKEN + WEBHOOK_SECRET into dist/admin/panel.js');
   } catch (e) {
     console.warn('⚠️  Could not inject GITHUB_TOKEN:', e.message);
   }
@@ -203,6 +230,7 @@ async function main() {
   await copyContentJson();
   await injectGithubToken();
   await injectWebhookSecret();
+  await injectAnthropicKey();
   await fixAssetPaths();
   const ok = await verifyRoutes();
   

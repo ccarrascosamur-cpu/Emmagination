@@ -8,6 +8,8 @@ const ADMIN_USER = 'emmagination';
 const ADMIN_PASS = 'emma2024';
 // GitHub token — se usa internamente para commits, no lo ve el cliente
 const GITHUB_TOKEN = '__GITHUB_TOKEN__';
+// Webhook secret — también protege el endpoint AI extract
+const WEBHOOK_SECRET = '__WEBHOOK_SECRET__';
 
 // ── STATE ──
 let state = null;
@@ -379,41 +381,25 @@ function initProjectForm() {
     $('#extract-submit-row').style.display = 'none';
 
     try {
-      // Extracción básica via metadata pública (sin backend)
-      const screenshotUrl = `https://image.thum.io/get/width/1200/crop/675/allowJPG/noanimate/wait/3/${url}`;
-      const domain = new URL(url).hostname.replace('www.', '');
-      const slug = domain.split('.')[0];
+      const res = await fetch('/admin/ai-extract.php', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Deploy-Token': WEBHOOK_SECRET,
+        },
+        body: JSON.stringify({ url }),
+      });
 
-      const p = {
-        id: Date.now(),
-        slug,
-        title: domain,
-        client: domain,
-        category: 'Web',
-        year: String(new Date().getFullYear()),
-        image: screenshotUrl,
-        url,
-        description: '',
-        excerpt: '',
-        services: ['Diseño web'],
-        featured: false,
-        offset: 0,
-        challenge: '',
-        solution: '',
-        results: [],
-        gallery: [screenshotUrl],
-        seoTitle: '',
-        seoDescription: '',
-        tags: '',
-        metric: '',
-        metricLabel: '',
-        color: '#1a1a2e',
-      };
+      const data = await res.json();
 
-      renderExtractResult(p, false);
+      if (!res.ok || !data.ok) {
+        throw new Error(data.error || `Error ${res.status}`);
+      }
+
+      renderExtractResult(data.project, true);
       $('#extract-loading').style.display = 'none';
     } catch (err) {
-      showStatus('Error: ' + err.message, 'error');
+      showStatus('Error al analizar sitio: ' + err.message, 'error');
       $('#extract-loading').style.display = 'none';
       $('#extract-submit-row').style.display = 'flex';
     }
@@ -528,19 +514,29 @@ function renderExtractResult(p, aiUsed) {
   resultEl.innerHTML = `
     <div style="margin-bottom:16px;">
       <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
-        <span style="font-size:13px; font-weight:600;">Vista previa</span>
-        <span style="font-size:11px; background:rgba(255,255,255,0.05); border:1px solid var(--line); color:var(--muted); padding:3px 10px; border-radius:999px;">Screenshot automático</span>
+        <span style="font-size:13px; font-weight:600;">Vista previa extraída</span>
+        ${aiUsed
+          ? '<span style="font-size:11px; background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.15)); border:1px solid rgba(124,58,237,0.3); color:#c4b5fd; padding:3px 10px; border-radius:999px;">✨ Analizado con IA</span>'
+          : '<span style="font-size:11px; background:rgba(255,255,255,0.05); border:1px solid var(--line); color:var(--muted); padding:3px 10px; border-radius:999px;">Screenshot automático</span>'
+        }
       </div>
       <div style="border-radius:14px; overflow:hidden; margin-bottom:16px; background:rgba(255,255,255,0.03); border:1px solid var(--line);">
         <img src="${escapeHtml(p.image || '')}" alt="" style="width:100%; height:200px; object-fit:cover; display:block;" onerror="this.parentElement.style.display='none'" />
       </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
-        <div class="extract-preview-item"><div class="extract-label">URL</div><div class="extract-value">${escapeHtml(p.url || '—')}</div></div>
-        <div class="extract-preview-item"><div class="extract-label">Slug sugerido</div><div class="extract-value">${escapeHtml(p.slug || '—')}</div></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-bottom:12px;">
+        <div class="extract-preview-item"><div class="extract-label">Título</div><div class="extract-value">${escapeHtml(p.title || '—')}</div></div>
+        <div class="extract-preview-item"><div class="extract-label">Cliente</div><div class="extract-value">${escapeHtml(p.client || '—')}</div></div>
+        <div class="extract-preview-item"><div class="extract-label">Categoría</div><div class="extract-value">${escapeHtml(p.category || '—')}</div></div>
+        <div class="extract-preview-item"><div class="extract-label">Servicios</div><div class="extract-value">${escapeHtml(services || '—')}</div></div>
+        <div class="extract-preview-item" style="grid-column:1/-1;"><div class="extract-label">Descripción</div><div class="extract-value">${escapeHtml(p.description || '—')}</div></div>
+        ${p.challenge ? `<div class="extract-preview-item" style="grid-column:1/-1;"><div class="extract-label">Desafío</div><div class="extract-value">${escapeHtml(p.challenge)}</div></div>` : ''}
+        ${p.solution ? `<div class="extract-preview-item" style="grid-column:1/-1;"><div class="extract-label">Solución</div><div class="extract-value">${escapeHtml(p.solution)}</div></div>` : ''}
+        <div class="extract-preview-item"><div class="extract-label">Tags</div><div class="extract-value">${escapeHtml(p.tags || '—')}</div></div>
+        <div class="extract-preview-item"><div class="extract-label">Color</div><div class="extract-value" style="display:flex;align-items:center;gap:8px;"><span style="width:16px;height:16px;border-radius:4px;background:${escapeHtml(p.color||'#1a1a2e')};display:inline-block;border:1px solid var(--line);"></span>${escapeHtml(p.color || '—')}</div></div>
       </div>
-      <p style="color:var(--muted); font-size:13px; margin-top:12px;">Completa los campos manualmente en el formulario.</p>
+      <p style="color:var(--muted); font-size:13px; margin-top:4px;">Puedes revisar y editar los campos antes de guardar.</p>
       <div style="display:flex; gap:10px; margin-top:16px;">
-        <button type="button" class="btn btn-success" style="flex:1;" id="btn-extract-edit-add">✏️ Abrir formulario</button>
+        <button type="button" class="btn btn-success" style="flex:1;" id="btn-extract-edit-add">✏️ Editar y agregar</button>
         <button type="button" class="btn btn-secondary" onclick="resetExtractModal()">↩ Analizar otro</button>
       </div>
     </div>
