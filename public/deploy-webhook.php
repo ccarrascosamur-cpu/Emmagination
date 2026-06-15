@@ -33,7 +33,7 @@ if (!isset($_FILES['zip']) || $_FILES['zip']['error'] !== UPLOAD_ERR_OK) {
 }
 
 $zipPath = $_FILES['zip']['tmp_name'];
-$publicHtml = dirname(__DIR__); // un nivel arriba de este archivo = public_html
+$publicHtml = __DIR__; // este archivo vive en la raíz de public_html
 
 // Extraer ZIP
 $zip = new ZipArchive();
@@ -47,12 +47,13 @@ if ($zip->open($zipPath) !== true) {
 $extracted = 0;
 for ($i = 0; $i < $zip->numFiles; $i++) {
     $name = $zip->getNameIndex($i);
-    // No sobreescribir el webhook ni el .env
-    if ($name === 'deploy-webhook.php' || str_starts_with($name, '.env')) {
+    // No sobreescribir el webhook ni el .env (compatible con PHP 7.x)
+    if ($name === 'deploy-webhook.php' || strpos($name, '.env') === 0) {
         continue;
     }
-    $zip->extractTo($publicHtml, $name);
-    $extracted++;
+    if ($zip->extractTo($publicHtml, $name)) {
+        $extracted++;
+    }
 }
 $zip->close();
 
