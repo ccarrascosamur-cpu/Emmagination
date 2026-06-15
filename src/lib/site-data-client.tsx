@@ -8,7 +8,7 @@ import {
 } from 'react';
 import { defaultSiteData, normalizeSiteData, type SiteData } from './site-data';
 
-const SITE_DATA_API_URL = '/api/data';
+const SITE_DATA_API_URL = '/content/site-data.json';
 
 interface SiteDataContextValue {
   data: SiteData;
@@ -53,11 +53,7 @@ export function SiteDataProvider({ children }: { children: ReactNode }) {
         const url = `${SITE_DATA_API_URL}?_t=${Date.now()}`;
         const response = await fetch(url, {
           method: 'GET',
-          headers: {
-            Accept: 'application/json',
-            'Cache-Control': 'no-store, no-cache, must-revalidate',
-            Pragma: 'no-cache',
-          },
+          headers: { Accept: 'application/json' },
         });
 
         if (!response.ok) {

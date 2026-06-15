@@ -1,5 +1,6 @@
-const API_URL = '/api/data';
-const LOGIN_URL = '/api/login';
+// ── CONFIG ──
+const GITHUB_REPO = 'ccarrascosamur-cpu/Emmagination';
+const CONTENT_FILE = 'content/site-data.json';
 const AUTH_KEY = 'emmagination-admin-token';
 
 // ── STATE ──
@@ -8,6 +9,7 @@ let editingProjectId = null;
 let editingServiceSlug = null;
 let isProjectScrollImageUploading = false;
 let draggedProjectId = null;
+let fileSha = null; // SHA del archivo en GitHub (necesario para actualizarlo)
 
 // ── UTILS ──
 const $ = (sel) => document.querySelector(sel);
@@ -27,42 +29,8 @@ function parseFaqs(v) {
 }
 function formatFaqs(faqs) { return Array.isArray(faqs) ? faqs.map(f => `${f.question} | ${f.answer}`).join('\n') : ''; }
 
-function getAuthHeader() {
-  const token = localStorage.getItem(AUTH_KEY);
-  return token ? `Bearer ${token}` : '';
-}
-
-async function uploadImage(file) {
-  const form = new FormData();
-  form.append('image', file);
-  const res = await fetch('/api/upload-image', {
-    method: 'POST',
-    headers: { Authorization: getAuthHeader() },
-    body: form,
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Error al subir imagen');
-  return data.url;
-}
-
-function triggerImageUpload(onStart, onUrl, onError, onComplete) {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/jpeg,image/png,image/webp,image/gif';
-  input.onchange = async () => {
-    const file = input.files[0];
-    if (!file) return;
-    onStart?.(file);
-    try {
-      const url = await uploadImage(file);
-      onUrl(url);
-    } catch (error) {
-      onError?.(error instanceof Error ? error : new Error('Error al subir imagen'));
-    } finally {
-      onComplete?.();
-    }
-  };
-  input.click();
+function getToken() {
+  return localStorage.getItem(AUTH_KEY);
 }
 
 function showStatus(msg, type = '') {
@@ -86,35 +54,162 @@ function setProjectScrollImageUploading(uploading) {
   }
 }
 
+// ── GITHUB API ──
+async function githubRequest(path, options = {}) {
+  const token = getToken();
+  const res = await fetch(`https://api.github.com${path}`, {
+    ...options,
+    headers: {
+      Authorization: `token ${token}`,
+      Accept: 'application/vnd.github+json',
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+  if (res.status === 401) {
+    logout();
+    throw new Error('Token inválido o expirado');
+  }
+  return res;
+}
+
+async function fetchData() {
+  const res = await githubRequest(`/repos/${GITHUB_REPO}/contents/${CONTENT_FILE}`);
+  if (!res.ok) throw new Error(`Error al leer datos: ${res.status}`);
+  const file = await res.json();
+  fileSha = file.sha;
+  const content = JSON.parse(atob(file.content.replace(/\n/g, '')));
+  return content;
+}
+
+async function saveData(payload) {
+  const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+  const body = {
+    message: 'admin: actualizar contenido del sitio',
+    content,
+    sha: fileSha,
+  };
+  const res = await githubRequest(`/repos/${GITHUB_REPO}/contents/${CONTENT_FILE}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || `Error al guardar: ${res.status}`);
+  }
+  const result = await res.json();
+  fileSha = result.content.sha;
+  return payload;
+}
+
+// Subida de imagen: convierte a base64 y la sube como archivo al repo
+async function uploadImage(file) {
+  const reader = new FileReader();
+  const base64 = await new Promise((resolve, reject) => {
+    reader.onload = () => resolve(reader.result.split(',')[1]);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2,7)}.${ext}`;
+  const path = `public/images/uploads/${filename}`;
+
+  // Verificar si ya existe (para obtener SHA)
+  let existingSha;
+  const check = await githubRequest(`/repos/${GITHUB_REPO}/contents/${path}`);
+  if (check.ok) {
+    const existing = await check.json();
+    existingSha = existing.sha;
+  }
+
+  const body = {
+    message: `admin: subir imagen ${filename}`,
+    content: base64,
+    ...(existingSha ? { sha: existingSha } : {}),
+  };
+
+  const res = await githubRequest(`/repos/${GITHUB_REPO}/contents/${path}`, {
+    method: 'PUT',
+    body: JSON.stringify(body),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.message || 'Error al subir imagen');
+  }
+
+  return `/images/uploads/${filename}`;
+}
+
+function triggerImageUpload(onStart, onUrl, onError, onComplete) {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'image/jpeg,image/png,image/webp,image/gif';
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) return;
+    onStart?.(file);
+    try {
+      const url = await uploadImage(file);
+      onUrl(url);
+    } catch (error) {
+      onError?.(error instanceof Error ? error : new Error('Error al subir imagen'));
+    } finally {
+      onComplete?.();
+    }
+  };
+  input.click();
+}
+
 // ── LOGIN ──
 function initLogin() {
   const saved = localStorage.getItem(AUTH_KEY);
-  if (saved) { showApp(); return; }
+  if (saved) { verifyTokenAndShowApp(saved); return; }
 
   $('#login-btn').addEventListener('click', doLogin);
   $('#login-pass').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
 }
 
+async function verifyTokenAndShowApp(token) {
+  try {
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' },
+    });
+    if (!res.ok) { localStorage.removeItem(AUTH_KEY); showLoginScreen(); return; }
+    showApp();
+  } catch {
+    showLoginScreen();
+  }
+}
+
+function showLoginScreen() {
+  $('#login-screen').style.display = 'flex';
+  $('#app').style.display = 'none';
+}
+
 async function doLogin() {
-  const user = $('#login-user').value.trim();
-  const pass = $('#login-pass').value;
-  if (!user || !pass) { $('#login-error').textContent = 'Ingresa usuario y contraseña'; return; }
+  const token = $('#login-pass').value.trim();
+  if (!token) { $('#login-error').textContent = 'Ingresa tu GitHub Token'; return; }
+
+  $('#login-btn').textContent = 'Verificando...';
+  $('#login-btn').disabled = true;
 
   try {
-    const res = await fetch(`${LOGIN_URL}?_t=${Date.now()}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ user, password: pass }),
+    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' },
     });
-    const data = await res.json();
-    if (!res.ok || data.error) {
-      $('#login-error').textContent = data.error || 'Usuario o contraseña incorrectos';
+    if (!res.ok) {
+      $('#login-error').textContent = 'Token inválido o sin acceso al repositorio';
       return;
     }
-    localStorage.setItem(AUTH_KEY, data.token);
+    localStorage.setItem(AUTH_KEY, token);
     showApp();
-  } catch (e) {
+  } catch {
     $('#login-error').textContent = 'Error de conexión';
+  } finally {
+    $('#login-btn').textContent = 'Entrar';
+    $('#login-btn').disabled = false;
   }
 }
 
@@ -127,31 +222,6 @@ function showApp() {
 function logout() {
   localStorage.removeItem(AUTH_KEY);
   location.reload();
-}
-
-// ── API ──
-async function fetchData() {
-  const auth = getAuthHeader();
-  if (!auth) throw new Error('No autenticado');
-  const res = await fetch(`${API_URL}?_t=${Date.now()}`, {
-    headers: { Accept: 'application/json', 'Cache-Control': 'no-store', Authorization: auth },
-  });
-  if (res.status === 401) { logout(); throw new Error('Sesión expirada'); }
-  if (!res.ok) throw new Error(`GET ${res.status}`);
-  return res.json();
-}
-
-async function saveData(payload) {
-  const auth = getAuthHeader();
-  if (!auth) throw new Error('No autenticado');
-  const res = await fetch(`${API_URL}?_t=${Date.now()}`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json', Authorization: auth },
-    body: JSON.stringify(payload),
-  });
-  if (res.status === 401) { logout(); throw new Error('Sesión expirada'); }
-  if (!res.ok) throw new Error(await res.text() || `POST ${res.status}`);
-  return res.json();
 }
 
 // ── TABS ──
@@ -225,14 +295,10 @@ function initProjectSorting() {
       event.preventDefault();
       if (!draggedProjectId || draggedProjectId === Number(card.dataset.id)) return;
       card.classList.add('drag-over');
-      if (event.dataTransfer) {
-        event.dataTransfer.dropEffect = 'move';
-      }
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
     });
 
-    card.addEventListener('dragleave', () => {
-      card.classList.remove('drag-over');
-    });
+    card.addEventListener('dragleave', () => card.classList.remove('drag-over'));
 
     card.addEventListener('drop', (event) => {
       event.preventDefault();
@@ -250,9 +316,7 @@ function initProjectSorting() {
 
     card.addEventListener('dragend', () => {
       draggedProjectId = null;
-      cards.forEach((item) => {
-        item.classList.remove('dragging', 'drag-over');
-      });
+      cards.forEach((item) => item.classList.remove('dragging', 'drag-over'));
     });
   });
 }
@@ -309,7 +373,7 @@ function fillProjectForm(p) {
   f.color.value = p.color || '';
 }
 
-// ── EXTRACT FROM URL (modal mejorado) ──
+// ── EXTRACT FROM URL ──
 function initProjectForm() {
   $('#btn-extract-project').addEventListener('click', () => {
     $('#extract-form').reset();
@@ -329,25 +393,39 @@ function initProjectForm() {
     $('#extract-submit-row').style.display = 'none';
 
     try {
-      const auth = getAuthHeader();
-      const res = await fetch(`/api/extract?_t=${Date.now()}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: auth },
-        body: JSON.stringify({ url }),
-      });
+      // Extracción básica via metadata pública (sin backend)
+      const screenshotUrl = `https://image.thum.io/get/width/1200/crop/675/allowJPG/noanimate/wait/3/${url}`;
+      const domain = new URL(url).hostname.replace('www.', '');
+      const slug = domain.split('.')[0];
 
-      const data = await res.json();
-      if (!res.ok) {
-        showStatus('Error: ' + (data.error || 'Falló la extracción'), 'error');
-        $('#extract-loading').style.display = 'none';
-        $('#extract-submit-row').style.display = 'flex';
-        return;
-      }
+      const p = {
+        id: Date.now(),
+        slug,
+        title: domain,
+        client: domain,
+        category: 'Web',
+        year: String(new Date().getFullYear()),
+        image: screenshotUrl,
+        url,
+        description: '',
+        excerpt: '',
+        services: ['Diseño web'],
+        featured: false,
+        offset: 0,
+        challenge: '',
+        solution: '',
+        results: [],
+        gallery: [screenshotUrl],
+        seoTitle: '',
+        seoDescription: '',
+        tags: '',
+        metric: '',
+        metricLabel: '',
+        color: '#1a1a2e',
+      };
 
-      const p = data.project;
-      renderExtractResult(p, data.aiUsed);
+      renderExtractResult(p, false);
       $('#extract-loading').style.display = 'none';
-
     } catch (err) {
       showStatus('Error: ' + err.message, 'error');
       $('#extract-loading').style.display = 'none';
@@ -366,7 +444,7 @@ function initProjectForm() {
   $('#project-form').addEventListener('submit', async (e) => {
     e.preventDefault();
     if (isProjectScrollImageUploading) {
-      showStatus('Espera a que termine la subida de la imagen WebP.', 'error');
+      showStatus('Espera a que termine la subida de la imagen.', 'error');
       return;
     }
     const f = e.target;
@@ -408,11 +486,11 @@ function initProjectForm() {
     }
     closeModal('modal-project');
     renderProjects();
-    showStatus('Guardando...', '');
+    showStatus('Guardando en GitHub...', '');
     try {
       updateStateFromForms();
       state = await saveData(state);
-      showStatus('✅ Proyecto guardado.', 'ok');
+      showStatus('✅ Proyecto guardado. Deploy en curso...', 'ok');
     } catch (e) {
       showStatus('⚠️ Error al guardar: ' + e.message, 'error');
     }
@@ -426,11 +504,11 @@ function initProjectForm() {
     editingProjectId = null;
     closeModal('modal-project');
     renderProjects();
-    showStatus('Guardando...', '');
+    showStatus('Guardando en GitHub...', '');
     try {
       updateStateFromForms();
       state = await saveData(state);
-      showStatus('✅ Proyecto eliminado.', 'ok');
+      showStatus('✅ Proyecto eliminado. Deploy en curso...', 'ok');
     } catch (e) {
       showStatus('⚠️ Error al guardar: ' + e.message, 'error');
     }
@@ -438,24 +516,16 @@ function initProjectForm() {
 
   $('#btn-upload-project-scroll-image').addEventListener('click', () => {
     triggerImageUpload(
-      (file) => {
-        setProjectScrollImageUploading(true);
-        showStatus(`Subiendo ${file.name}...`, '');
-      },
+      (file) => { setProjectScrollImageUploading(true); showStatus(`Subiendo ${file.name} a GitHub...`, ''); },
       (url) => {
         $('#project-form').elements.namedItem('portfolioScrollImage').value = url;
-        showStatus('✅ Imagen WebP cargada. Ahora puedes guardar el proyecto.', 'ok');
+        showStatus('✅ Imagen cargada. Puedes guardar el proyecto.', 'ok');
       },
-      (error) => {
-        showStatus('⚠️ Error al subir imagen: ' + error.message, 'error');
-      },
-      () => {
-        setProjectScrollImageUploading(false);
-      },
+      (error) => showStatus('⚠️ Error al subir imagen: ' + error.message, 'error'),
+      () => setProjectScrollImageUploading(false),
     );
   });
 
-  // Auto-generate slug from title
   $('#project-form').elements.namedItem('title').addEventListener('input', function() {
     const slugEl = $('#project-form').elements.namedItem('slug');
     if (!slugEl.dataset.touched) slugEl.value = slugify(this.value);
@@ -467,133 +537,39 @@ function initProjectForm() {
 
 function renderExtractResult(p, aiUsed) {
   const resultEl = $('#extract-result');
-
   const services = Array.isArray(p.services) ? p.services.join(', ') : '';
-  const results = Array.isArray(p.results) ? p.results : [];
 
   resultEl.innerHTML = `
     <div style="margin-bottom:16px;">
-      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
-        <span style="font-size:13px; font-weight:600; color:var(--text);">Vista previa del proyecto</span>
-        ${aiUsed
-          ? '<span style="font-size:11px; background:linear-gradient(135deg,rgba(124,58,237,0.2),rgba(168,85,247,0.1)); border:1px solid rgba(124,58,237,0.3); color:#c4b5fd; padding:3px 10px; border-radius:999px; font-weight:600;">✨ Generado con IA</span>'
-          : '<span style="font-size:11px; background:rgba(255,255,255,0.05); border:1px solid var(--line); color:var(--muted); padding:3px 10px; border-radius:999px;">Extracción básica</span>'
-        }
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+        <span style="font-size:13px; font-weight:600;">Vista previa</span>
+        <span style="font-size:11px; background:rgba(255,255,255,0.05); border:1px solid var(--line); color:var(--muted); padding:3px 10px; border-radius:999px;">Screenshot automático</span>
       </div>
-
-      <div style="position:relative; border-radius:14px; overflow:hidden; margin-bottom:16px; background:rgba(255,255,255,0.03); border:1px solid var(--line);">
-        <img id="extract-screenshot"
-          src="${escapeHtml(p.image || '')}"
-          alt="Screenshot del sitio"
-          style="width:100%; height:200px; object-fit:cover; display:block;"
-          onerror="this.parentElement.style.display='none'"
-        />
-        <div style="position:absolute; bottom:0; left:0; right:0; padding:10px 14px; background:linear-gradient(to top, rgba(10,12,20,0.9), transparent);">
-          <span style="font-size:12px; color:rgba(255,255,255,0.7);">📸 Screenshot automático via thum.io</span>
-        </div>
+      <div style="border-radius:14px; overflow:hidden; margin-bottom:16px; background:rgba(255,255,255,0.03); border:1px solid var(--line);">
+        <img src="${escapeHtml(p.image || '')}" alt="" style="width:100%; height:200px; object-fit:cover; display:block;" onerror="this.parentElement.style.display='none'" />
       </div>
-
       <div style="display:grid; grid-template-columns:1fr 1fr; gap:0;">
-        <div class="extract-preview-item">
-          <div class="extract-label">Título / Marca</div>
-          <div class="extract-value" style="font-weight:600;">${escapeHtml(p.title || '—')}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Categoría</div>
-          <div class="extract-value">${escapeHtml(p.category || '—')}</div>
-        </div>
-        <div class="extract-preview-item" style="grid-column:1/-1;">
-          <div class="extract-label">Descripción</div>
-          <div class="extract-value">${escapeHtml(p.description || '—')}</div>
-        </div>
-        <div class="extract-preview-item" style="grid-column:1/-1;">
-          <div class="extract-label">Excerpt (grilla)</div>
-          <div class="extract-value" style="color:var(--muted);">${escapeHtml(p.excerpt || '—')}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Servicios</div>
-          <div class="extract-value">${escapeHtml(services || '—')}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Tags (card)</div>
-          <div class="extract-value" style="font-family:monospace; font-size:12px; color:#a78bfa;">${escapeHtml(p.tags || '—')}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Métrica principal</div>
-          <div class="extract-value" style="color:#4ade80; font-weight:600;">${escapeHtml(p.metric || '—')}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Métrica secundaria</div>
-          <div class="extract-value" style="color:#4ade80;">${escapeHtml(p.metricLabel || '—')}</div>
-        </div>
-        <div class="extract-preview-item" style="grid-column:1/-1;">
-          <div class="extract-label">Desafío</div>
-          <div class="extract-value">${escapeHtml(p.challenge || '—')}</div>
-        </div>
-        <div class="extract-preview-item" style="grid-column:1/-1;">
-          <div class="extract-label">Solución</div>
-          <div class="extract-value">${escapeHtml(p.solution || '—')}</div>
-        </div>
-        <div class="extract-preview-item" style="grid-column:1/-1;">
-          <div class="extract-label">Resultados</div>
-          <div class="extract-value">${results.length ? results.map(r => '• ' + escapeHtml(r)).join('<br>') : '—'}</div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Color del card</div>
-          <div class="extract-value" style="display:flex; align-items:center; gap:8px;">
-            <span style="display:inline-block; width:16px; height:16px; border-radius:4px; background:${escapeHtml(p.color || '#1a1a2e')}; border:1px solid rgba(255,255,255,0.2);"></span>
-            ${escapeHtml(p.color || '—')}
-          </div>
-        </div>
-        <div class="extract-preview-item">
-          <div class="extract-label">Año</div>
-          <div class="extract-value">${escapeHtml(p.year || '—')}</div>
-        </div>
+        <div class="extract-preview-item"><div class="extract-label">URL</div><div class="extract-value">${escapeHtml(p.url || '—')}</div></div>
+        <div class="extract-preview-item"><div class="extract-label">Slug sugerido</div><div class="extract-value">${escapeHtml(p.slug || '—')}</div></div>
       </div>
-
-      <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
-        <button type="button" class="btn btn-success" style="flex:1; min-width:180px;" id="btn-extract-edit-add">
-          ✏️ Revisar y agregar
-        </button>
-        <button type="button" class="btn btn-primary" style="flex:1; min-width:140px;" id="btn-extract-quick-add">
-          ⚡ Agregar directo
-        </button>
-        <button type="button" class="btn btn-secondary" onclick="resetExtractModal()">
-          ↩ Analizar otro
-        </button>
+      <p style="color:var(--muted); font-size:13px; margin-top:12px;">Completa los campos manualmente en el formulario.</p>
+      <div style="display:flex; gap:10px; margin-top:16px;">
+        <button type="button" class="btn btn-success" style="flex:1;" id="btn-extract-edit-add">✏️ Abrir formulario</button>
+        <button type="button" class="btn btn-secondary" onclick="resetExtractModal()">↩ Analizar otro</button>
       </div>
     </div>
   `;
 
   resultEl.style.display = 'block';
 
-  // "Revisar y agregar" → cierra modal, abre form pre-llenado
   document.getElementById('btn-extract-edit-add').onclick = () => {
     editingProjectId = null;
-    $('#modal-project-title').textContent = 'Agregar proyecto (revisar campos)';
+    $('#modal-project-title').textContent = 'Agregar proyecto';
     fillProjectForm(p);
-    // mark slug as touched so it doesn't get auto-overwritten
     $('#project-form').elements.namedItem('slug').dataset.touched = 'true';
     $('#btn-delete-project').style.display = 'none';
     closeModal('modal-extract');
     openModal('modal-project');
-  };
-
-  // "Agregar directo" → agrega y guarda inmediatamente en KV
-  document.getElementById('btn-extract-quick-add').onclick = async () => {
-    const newId = Math.max(0, ...state.projects.map(pr => pr.id || 0)) + 1;
-    const project = { ...p, id: newId };
-    state.projects.unshift(project);
-    renderProjects();
-    closeModal('modal-extract');
-    showStatus('Guardando proyecto...', '');
-    try {
-      updateStateFromForms();
-      state = await saveData(state);
-      showStatus('✅ Proyecto guardado correctamente.', 'ok');
-    } catch (e) {
-      showStatus('⚠️ Proyecto en memoria pero falló el guardado: ' + e.message, 'error');
-    }
   };
 }
 
@@ -679,11 +655,11 @@ function initServiceForm() {
     }
     closeModal('modal-service');
     renderServices();
-    showStatus('Guardando...', '');
+    showStatus('Guardando en GitHub...', '');
     try {
       updateStateFromForms();
       state = await saveData(state);
-      showStatus('✅ Servicio guardado.', 'ok');
+      showStatus('✅ Servicio guardado. Deploy en curso...', 'ok');
     } catch (e) {
       showStatus('⚠️ Error al guardar: ' + e.message, 'error');
     }
@@ -697,11 +673,11 @@ function initServiceForm() {
     editingServiceSlug = null;
     closeModal('modal-service');
     renderServices();
-    showStatus('Guardando...', '');
+    showStatus('Guardando en GitHub...', '');
     try {
       updateStateFromForms();
       state = await saveData(state);
-      showStatus('✅ Servicio eliminado.', 'ok');
+      showStatus('✅ Servicio eliminado. Deploy en curso...', 'ok');
     } catch (e) {
       showStatus('⚠️ Error al guardar: ' + e.message, 'error');
     }
@@ -711,21 +687,21 @@ function initServiceForm() {
 // ── DEFAULTS ──
 const DEFAULT_HERO = {
   badge: 'Agencia de diseño web, branding y SEO en Chile',
-  titleLine1: 'Diseño Web,',
-  titleLine2: 'Branding y SEO',
-  titleLine3: 'en Chile',
+  titleLine1: 'Diseño web que',
+  titleLine2: 'convierte visitas',
+  titleLine3: 'en clientes.',
   taglineLine1: 'Deja de ser un logo.',
   taglineLine2: 'Pasa a ser una marca.',
-  subtitle: 'Diseñamos identidades y posicionamos marcas en Google. Hacemos que tu negocio se vea, se entienda y se compre.',
-  ctaPrimary: 'Trabajemos juntos',
-  ctaSecondary: 'Ver proyectos',
+  subtitle: 'Diseñamos identidades y posicionamos marcas en Google.',
+  ctaPrimary: 'Iniciar proyecto',
+  ctaSecondary: 'Cotizar gratis',
 };
 
 const DEFAULT_CONFIG = {
   contactEmail: 'hola@emmagination.cl',
   contactPhone: '+56 9 8829 0618',
-  instagramUrl: 'https://instagram.com/emmagination',
-  linkedinUrl: 'https://linkedin.com/company/emmagination',
+  instagramUrl: 'https://instagram.com/emmagination.cl',
+  linkedinUrl: '',
   googleBusinessUrl: 'https://share.google/SI0GjDkMkZa63cVnL',
 };
 
@@ -744,56 +720,32 @@ const DEFAULT_STATS = [
   { value: '100%', label: 'Satisfacción' },
 ];
 
-// ── HERO / CONFIG / SEO / STATS ──
+// ── FORMS ──
 function fillForms() {
   const hero = { ...DEFAULT_HERO, ...state.hero };
   const config = { ...DEFAULT_CONFIG, ...state.config };
   const seo = { ...DEFAULT_SEO, ...state.seo };
-  const stats = Array.isArray(state.stats) && state.stats.length === 4
-    ? state.stats
-    : DEFAULT_STATS;
+  const stats = Array.isArray(state.stats) && state.stats.length === 4 ? state.stats : DEFAULT_STATS;
 
-  // Hero
   const hf = $('#hero-form');
-  if (hf) {
-    Object.entries(hero).forEach(([k, v]) => {
-      const el = hf.elements.namedItem(k);
-      if (el) el.value = v || '';
-    });
-  }
+  if (hf) Object.entries(hero).forEach(([k, v]) => { const el = hf.elements.namedItem(k); if (el) el.value = v || ''; });
 
-  // Config
   const cf = $('#config-form');
-  if (cf) {
-    Object.entries(config).forEach(([k, v]) => {
-      const el = cf.elements.namedItem(k);
-      if (el) el.value = v || '';
-    });
-  }
+  if (cf) Object.entries(config).forEach(([k, v]) => { const el = cf.elements.namedItem(k); if (el) el.value = v || ''; });
 
-  // SEO
   const sf = $('#seo-form');
-  if (sf) {
-    Object.entries(seo).forEach(([k, v]) => {
-      const el = sf.elements.namedItem(k);
-      if (el) el.value = v || '';
-    });
-  }
+  if (sf) Object.entries(seo).forEach(([k, v]) => { const el = sf.elements.namedItem(k); if (el) el.value = v || ''; });
 
-  // Stats
   const stf = $('#stats-form');
-  if (stf) {
-    stats.forEach((s, i) => {
-      const valEl = stf.elements.namedItem(`stat${i + 1}Value`);
-      const labelEl = stf.elements.namedItem(`stat${i + 1}Label`);
-      if (valEl) valEl.value = s.value || '';
-      if (labelEl) labelEl.value = s.label || '';
-    });
-  }
+  if (stf) stats.forEach((s, i) => {
+    const valEl = stf.elements.namedItem(`stat${i + 1}Value`);
+    const labelEl = stf.elements.namedItem(`stat${i + 1}Label`);
+    if (valEl) valEl.value = s.value || '';
+    if (labelEl) labelEl.value = s.label || '';
+  });
 }
 
 function updateStateFromForms() {
-  // Hero
   const hf = $('#hero-form');
   if (hf) {
     state.hero = {
@@ -808,7 +760,6 @@ function updateStateFromForms() {
       ctaSecondary: hf.ctaSecondary?.value?.trim() || '',
     };
   }
-  // Config
   const cf = $('#config-form');
   if (cf) {
     state.config = {
@@ -819,7 +770,6 @@ function updateStateFromForms() {
       googleBusinessUrl: cf.googleBusinessUrl?.value?.trim() || '',
     };
   }
-  // SEO
   const sf = $('#seo-form');
   if (sf) {
     state.seo = {
@@ -830,7 +780,6 @@ function updateStateFromForms() {
       twitterHandle: state.seo?.twitterHandle || '@emmagination',
     };
   }
-  // Stats
   const stf = $('#stats-form');
   if (stf) {
     state.stats = [
@@ -846,10 +795,10 @@ function updateStateFromForms() {
 async function saveAll() {
   try {
     updateStateFromForms();
-    $('#save-status').textContent = 'Guardando...';
+    $('#save-status').textContent = 'Guardando en GitHub...';
     state = await saveData(state);
     $('#save-status').textContent = '';
-    showStatus('✅ Cambios guardados correctamente', 'ok');
+    showStatus('✅ Guardado. GitHub Actions desplegará los cambios en ~2 min.', 'ok');
   } catch (e) {
     $('#save-status').textContent = '';
     showStatus('❌ ' + (e.message || 'Error al guardar'), 'error');
@@ -878,7 +827,7 @@ function importJson(file) {
       renderProjects();
       renderServices();
       fillForms();
-      showStatus('JSON importado. Guarda para persistir.', 'ok');
+      showStatus('JSON importado. Guarda para persistir en GitHub.', 'ok');
     } catch (err) {
       showStatus('Error al importar: ' + err.message, 'error');
     }
@@ -890,12 +839,10 @@ function importJson(file) {
 window.openModal = function(id) { $(`#${id}`).classList.add('open'); };
 window.closeModal = function(id) { $(`#${id}`).classList.remove('open'); };
 
-// Close on overlay click
 $$('.modal-overlay').forEach(el => {
   el.addEventListener('click', (e) => { if (e.target === el) el.classList.remove('open'); });
 });
 
-// ── ESCAPE HTML ──
 function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
@@ -905,6 +852,7 @@ function escapeHtml(text) {
 // ── LOAD ALL ──
 async function loadAll() {
   try {
+    showStatus('Cargando datos desde GitHub...', '');
     state = await fetchData();
     if (!state.projects) state.projects = [];
     if (!state.services) state.services = [];
@@ -916,7 +864,7 @@ async function loadAll() {
     renderProjects();
     renderServices();
     fillForms();
-    showStatus('Datos cargados', 'ok');
+    showStatus('✅ Datos cargados', 'ok');
   } catch (e) {
     showStatus('Error al cargar: ' + e.message, 'error');
   }
