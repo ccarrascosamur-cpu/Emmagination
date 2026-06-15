@@ -1,4 +1,4 @@
-// ── CONFIG ──
+﻿// ── CONFIG ──
 const GITHUB_REPO = 'ccarrascosamur-cpu/Emmagination';
 const CONTENT_FILE = 'content/site-data.json';
 const AUTH_KEY = 'emmagination-admin-token';
@@ -91,7 +91,8 @@ async function fetchData() {
 }
 
 async function saveData(payload) {
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+  const json = JSON.stringify(payload, null, 2);
+  const content = btoa(String.fromCharCode(...new TextEncoder().encode(json)));
   const body = {
     message: 'admin: actualizar contenido del sitio',
     content,
