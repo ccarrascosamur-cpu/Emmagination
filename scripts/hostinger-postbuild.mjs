@@ -159,6 +159,24 @@ async function copyContentJson() {
   }
 }
 
+// Inject WEBHOOK_SECRET into dist/deploy-webhook.php
+async function injectWebhookSecret() {
+  const secret = process.env.WEBHOOK_SECRET || '';
+  if (!secret) {
+    console.warn('⚠️  WEBHOOK_SECRET not set — deploy webhook will reject all requests');
+    return;
+  }
+  const webhookPath = path.join(distDir, 'deploy-webhook.php');
+  try {
+    let src = await readFile(webhookPath, 'utf8');
+    src = src.replace('__WEBHOOK_SECRET__', secret);
+    await writeFile(webhookPath, src, 'utf8');
+    console.log('✅ Injected WEBHOOK_SECRET into dist/deploy-webhook.php');
+  } catch (e) {
+    console.warn('⚠️  Could not inject WEBHOOK_SECRET:', e.message);
+  }
+}
+
 // Inject GITHUB_TOKEN into dist/admin/panel.js
 async function injectGithubToken() {
   const token = process.env.GITHUB_TOKEN || '';
@@ -184,6 +202,7 @@ async function main() {
   await createHtaccess();
   await copyContentJson();
   await injectGithubToken();
+  await injectWebhookSecret();
   await fixAssetPaths();
   const ok = await verifyRoutes();
   
