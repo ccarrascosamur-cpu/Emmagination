@@ -3,6 +3,12 @@ const GITHUB_REPO = 'ccarrascosamur-cpu/Emmagination';
 const CONTENT_FILE = 'content/site-data.json';
 const AUTH_KEY = 'emmagination-admin-token';
 
+// Credenciales del panel (usuario/contraseña para el cliente)
+const ADMIN_USER = 'emmagination';
+const ADMIN_PASS = 'emma2024';
+// GitHub token — se usa internamente para commits, no lo ve el cliente
+const GITHUB_TOKEN = '__GITHUB_TOKEN__';
+
 // ── STATE ──
 let state = null;
 let editingProjectId = null;
@@ -30,7 +36,7 @@ function parseFaqs(v) {
 function formatFaqs(faqs) { return Array.isArray(faqs) ? faqs.map(f => `${f.question} | ${f.answer}`).join('\n') : ''; }
 
 function getToken() {
-  return localStorage.getItem(AUTH_KEY);
+  return GITHUB_TOKEN;
 }
 
 function showStatus(msg, type = '') {
@@ -165,21 +171,12 @@ function triggerImageUpload(onStart, onUrl, onError, onComplete) {
 // ── LOGIN ──
 function initLogin() {
   const saved = localStorage.getItem(AUTH_KEY);
-  if (saved) { verifyTokenAndShowApp(saved); return; }
+  if (saved === 'authenticated') { showApp(); return; }
 
   $('#login-btn').addEventListener('click', doLogin);
   $('#login-pass').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
-}
-
-async function verifyTokenAndShowApp(token) {
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
-      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' },
-    });
-    if (!res.ok) { localStorage.removeItem(AUTH_KEY); showLoginScreen(); return; }
-    showApp();
-  } catch {
-    showLoginScreen();
+  if ($('#login-user')) {
+    $('#login-user').addEventListener('keypress', (e) => { if (e.key === 'Enter') doLogin(); });
   }
 }
 
@@ -189,27 +186,16 @@ function showLoginScreen() {
 }
 
 async function doLogin() {
-  const token = $('#login-pass').value.trim();
-  if (!token) { $('#login-error').textContent = 'Ingresa tu GitHub Token'; return; }
+  const user = $('#login-user') ? $('#login-user').value.trim() : ADMIN_USER;
+  const pass = $('#login-pass').value.trim();
 
-  $('#login-btn').textContent = 'Verificando...';
-  $('#login-btn').disabled = true;
+  if (!pass) { $('#login-error').textContent = 'Ingresa la contraseña'; return; }
 
-  try {
-    const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}`, {
-      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github+json' },
-    });
-    if (!res.ok) {
-      $('#login-error').textContent = 'Token inválido o sin acceso al repositorio';
-      return;
-    }
-    localStorage.setItem(AUTH_KEY, token);
+  if (user === ADMIN_USER && pass === ADMIN_PASS) {
+    localStorage.setItem(AUTH_KEY, 'authenticated');
     showApp();
-  } catch {
-    $('#login-error').textContent = 'Error de conexión';
-  } finally {
-    $('#login-btn').textContent = 'Entrar';
-    $('#login-btn').disabled = false;
+  } else {
+    $('#login-error').textContent = 'Usuario o contraseña incorrectos';
   }
 }
 

@@ -159,12 +159,31 @@ async function copyContentJson() {
   }
 }
 
+// Inject GITHUB_TOKEN into dist/admin/panel.js
+async function injectGithubToken() {
+  const token = process.env.GITHUB_TOKEN || '';
+  if (!token) {
+    console.warn('⚠️  GITHUB_TOKEN not set — admin panel will not be able to save changes');
+    return;
+  }
+  const panelPath = path.join(distDir, 'admin', 'panel.js');
+  try {
+    let src = await readFile(panelPath, 'utf8');
+    src = src.replace('__GITHUB_TOKEN__', token);
+    await writeFile(panelPath, src, 'utf8');
+    console.log('✅ Injected GITHUB_TOKEN into dist/admin/panel.js');
+  } catch (e) {
+    console.warn('⚠️  Could not inject GITHUB_TOKEN:', e.message);
+  }
+}
+
 // Main
 async function main() {
   console.log('🔧 Post-build for Hostinger...\n');
 
   await createHtaccess();
   await copyContentJson();
+  await injectGithubToken();
   await fixAssetPaths();
   const ok = await verifyRoutes();
   
